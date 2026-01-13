@@ -108,17 +108,17 @@ input:checked + .slider:before {
 
                                 <!-- Nama Perusahaan -->
                                 <div class="form-group mb-3">
-                                    <label for="nama_perusahaan" class="form-label">Nama Perusahaan</label>
+                                    <label for="nama_perusahaan" class="form-label">Nama Perusahaan (Opsional)</label>
                                     <input type="text" 
                                            class="form-control @error('nama_perusahaan') is-invalid @enderror" 
                                            id="nama_perusahaan" 
                                            name="nama_perusahaan" 
-                                           value="{{ old('nama_perusahaan', $logoAdmin->nama_perusahaan ?? 'JASA IBNU') }}"
-                                           placeholder="e.g., JASA IBNU">
+                                           value="{{ old('nama_perusahaan', $logoAdmin->nama_perusahaan) }}"
+                                           placeholder="Kosongkan jika logo sudah ada nama">
                                     @error('nama_perusahaan')
                                         <div class="text-danger text-xs mt-1">{{ $message }}</div>
                                     @enderror
-                                    <small class="text-muted">Nama perusahaan yang akan ditampilkan di sidebar</small>
+                                    <small class="text-muted">Nama perusahaan yang akan ditampilkan di sidebar. Kosongkan jika logo sudah memuat nama.</small>
                                 </div>
 
                                 <!-- Tagline -->

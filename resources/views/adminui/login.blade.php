@@ -1,78 +1,96 @@
 @extends('adminui.layouts.guest')
 
-@section('title', 'Login - Admin UI')
+@php
+    $logoAdminForTitle = \App\Models\LogoAdmin::where('status', true)->first();
+    $systemTagline = $logoAdminForTitle && $logoAdminForTitle->tagline && trim($logoAdminForTitle->tagline) !== '' ? $logoAdminForTitle->tagline : null;
+@endphp
+@section('title', 'Sign In' . ($systemTagline ? ' - ' . $systemTagline : ''))
 
 @section('content')
 <main class="main-content mt-0">
-    <section>
-        <div class="page-header min-vh-75">
-            <div class="container">
-                <div class="row">
-                    <div class="col-xl-4 col-lg-5 col-md-6 d-flex flex-column mx-auto">
-                        <div class="card card-plain">
-                            <div class="card-header pb-0 text-start">
-                                <h3 class="font-weight-bolder text-primary text-gradient">Welcome back</h3>
-                                <p class="mb-0">Enter your email and password to sign in</p>
-                            </div>
-                            <div class="card-body">
-                                @if ($errors->any())
-                                    <div class="alert alert-danger alert-dismissible fade show text-white" role="alert">
-                                        <span class="alert-icon"><i class="fas fa-exclamation-circle"></i></span>
-                                        <span class="alert-text">
-                                            <strong>Login Gagal!</strong><br>
-                                            Email atau password yang Anda masukkan salah. Silakan coba lagi.
-                                        </span>
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
+    <div class="page-header align-items-start min-vh-100" style="background-image: url('https://images.unsplash.com/photo-1497294815431-9365093b7331?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1950&q=80');">
+        <span class="mask bg-gradient-dark opacity-6"></span>
+        <div class="container my-auto">
+            <div class="row signin-margin">
+                <div class="col-lg-4 col-md-8 col-12 mx-auto">
+                    <div class="card z-index-0 fadeIn3 fadeInBottom">
+                        <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                            <div class="bg-gradient-primary shadow-primary border-radius-lg py-3 pe-1">
+                                <h4 class="text-white font-weight-bolder text-center mt-2 mb-0">Sign in</h4>
+                                <div class="row mt-3">
+                                    <div class="col-2 text-center ms-auto">
+                                        <a class="btn btn-link px-3" href="javascript:;">
+                                            <i class="fab fa-facebook text-white text-lg"></i>
+                                        </a>
                                     </div>
-                                @endif
-
-                                @if (session('status'))
-                                    <div class="alert alert-success alert-dismissible fade show text-white" role="alert">
-                                        <span class="alert-icon"><i class="fas fa-check-circle"></i></span>
-                                        <span class="alert-text">{{ session('status') }}</span>
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
+                                    <div class="col-2 text-center px-1">
+                                        <a class="btn btn-link px-3" href="javascript:;">
+                                            <i class="fab fa-github text-white text-lg"></i>
+                                        </a>
                                     </div>
-                                @endif
-
-                                <form role="form" method="POST" action="{{ route('adminui.authenticate') }}">
-                                    @csrf
-                                    <label>Email</label>
-                                    <div class="mb-3">
-                                        <input type="email" name="email" class="form-control" placeholder="Email" aria-label="Email" value="{{ old('email') }}" required>
+                                    <div class="col-2 text-center me-auto">
+                                        <a class="btn btn-link px-3" href="javascript:;">
+                                            <i class="fab fa-google text-white text-lg"></i>
+                                        </a>
                                     </div>
-                                    <label>Password</label>
-                                    <div class="mb-3">
-                                        <input type="password" name="password" class="form-control" placeholder="Password" aria-label="Password" required>
-                                    </div>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" id="rememberMe" name="remember">
-                                        <label class="form-check-label" for="rememberMe">Remember me</label>
-                                    </div>
-                                    <div class="text-center">
-                                        <button type="submit" class="btn bg-gradient-primary w-100 mt-4 mb-0">Sign in</button>
-                                    </div>
-                                </form>
-                            </div>
-                            <div class="card-footer text-center pt-0 px-lg-2 px-1">
-                                <p class="mb-4 text-sm mx-auto">
-                                    Don't have an account?
-                                    <a href="#" class="text-primary text-gradient font-weight-bold">Sign up</a>
-                                </p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="oblique position-absolute top-0 h-100 d-md-block d-none me-n8">
-                            <div class="oblique-image bg-cover position-absolute fixed-top ms-auto h-100 z-index-0 ms-n6" style="background-image:url('{{ asset('assets/img/curved-images/curved6.jpg') }}')"></div>
+                        <div class="card-body">
+                            @if ($errors->any())
+                                <div class="alert alert-danger alert-dismissible text-white" role="alert">
+                                    <span class="text-sm">Email or password is incorrect. Please try again.</span>
+                                    <button type="button" class="btn-close text-lg py-3 opacity-10" data-bs-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                            @endif
+
+                            @if (session('status'))
+                                <div class="alert alert-success alert-dismissible text-white" role="alert">
+                                    <span class="text-sm">{{ session('status') }}</span>
+                                    <button type="button" class="btn-close text-lg py-3 opacity-10" data-bs-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                            @endif
+
+                            <form role="form" method="POST" action="{{ route('authenticate') }}" class="text-start">
+                                @csrf
+                                <div class="input-group-outline">
+                                    <input type="email" class="form-control" name="email" value="{{ old('email') }}" required>
+                                    <label class="form-label">Email</label>
+                                </div>
+                                @error('email')
+                                    <p class='text-danger inputerror'>{{ $message }}</p>
+                                @enderror
+                                
+                                <div class="input-group-outline">
+                                    <input type="password" class="form-control" name="password" required>
+                                    <label class="form-label">Password</label>
+                                </div>
+                                @error('password')
+                                    <p class='text-danger inputerror'>{{ $message }}</p>
+                                @enderror
+                                
+                                <div class="form-check form-switch d-flex align-items-center my-3">
+                                    <input class="form-check-input" type="checkbox" id="rememberMe" name="remember">
+                                    <label class="form-check-label mb-0 ms-2" for="rememberMe">Remember me</label>
+                                </div>
+                                
+                                <div class="text-center">
+                                    <button type="submit" class="btn bg-gradient-primary w-100 my-4 mb-2">Sign in</button>
+                                </div>
+                                
+                                <p class="text-sm text-center mb-0">
+                                    <a href="{{ route('password.request') }}" class="text-primary text-gradient font-weight-bold">Lupa Password?</a>
+                                </p>
+                            </form>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
 </main>
 @endsection

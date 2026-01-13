@@ -98,7 +98,7 @@ class DatabaseRecoveryCommand extends Command
         // Basic About data
         if (!AboutHeroSection::exists()) {
             AboutHeroSection::create([
-                'tagline' => 'Tentang Jasa Ibnu',
+                'tagline' => 'Tentang CertiPro',
                 'projects_completed' => 50,
                 'satisfied_customers' => 25, 
                 'awards_received' => 10,

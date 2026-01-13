@@ -1,6 +1,7 @@
 @extends('frontend.layouts.app')
 
-@section('title', 'Blog - Jasa Ibnu Digital Marketing')
+@php $systemName = systemCompanyName(); @endphp
+@section('title', 'Blog' . ($systemName ? ' - ' . $systemName . ' Sertifikasi' : ' - Sertifikasi'))
 
 @section('content')
     <section class="hero-wrap hero-wrap-2" style="background-image: url('{{ asset('website/images/bg_1.jpg') }}');">

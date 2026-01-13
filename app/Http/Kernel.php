@@ -64,6 +64,11 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        
+        // RBAC Middleware - ISO 17024 Compliant
         'check.permission' => \App\Http\Middleware\CheckPermission::class,
+        'permission' => \App\Http\Middleware\CheckPermission::class, // Alias for cleaner routes
+        'check.role' => \App\Http\Middleware\CheckRole::class,
+        'role' => \App\Http\Middleware\CheckRole::class, // Alias for cleaner routes
     ];
 }

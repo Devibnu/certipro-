@@ -1,0 +1,298 @@
+================================================================================
+                        LAMPIRAN MATRIKS HAK AKSES
+                           SISTEM CERTIPRO LSP
+
+                   Dokumen Pendukung Audit ISO 17024 & BNSP
+================================================================================
+
+Nomor Dokumen    : LAM-SOP-IT-001-A
+Revisi           : 01
+Tanggal          : 13 Januari 2026
+Referensi        : SOP-IT-001 Rev 01
+
+================================================================================
+MATRIKS IZIN AKSES PER MODUL
+================================================================================
+
+Keterangan Simbol:
+  ✓  = Akses penuh (lihat, buat, edit, hapus sesuai konteks)
+  R  = Hanya baca (read-only)
+  ✗  = Tidak ada akses
+  *  = Dengan kondisi khusus (lihat catatan)
+
+================================================================================
+A. MODUL ADMINISTRASI & SISTEM
+================================================================================
+
+┌────────────────────────────────┬───────────┬───────┬────────┬──────────────┐
+│ FUNGSI                         │ SUPER     │ ADMIN │ ASESOR │ KOMITE       │
+│                                │ ADMIN     │ LSP   │        │ TEKNIS       │
+├────────────────────────────────┼───────────┼───────┼────────┼──────────────┤
+│ Dashboard                      │     ✓     │   ✓   │   ✓    │      ✓       │
+├────────────────────────────────┼───────────┼───────┼────────┼──────────────┤
+│ MANAJEMEN PENGGUNA             │           │       │        │              │
+│ • Lihat daftar pengguna        │     ✓     │   ✓   │   ✗    │      ✗       │
+│ • Tambah pengguna baru         │     ✓     │   ✓   │   ✗    │      ✗       │
+│ • Edit data pengguna           │     ✓     │  ✓*1  │   ✗    │      ✗       │
+│ • Hapus/nonaktifkan pengguna   │     ✓     │  ✓*1  │   ✗    │      ✗       │
+│ • Reset password               │     ✓     │   ✓   │   ✗    │      ✗       │
+│ • Ubah peran pengguna          │     ✓     │   ✗   │   ✗    │      ✗       │
+├────────────────────────────────┼───────────┼───────┼────────┼──────────────┤
+│ AUDIT LOG                      │           │       │        │              │
+│ • Lihat log aktivitas          │     ✓     │   ✓   │   ✗    │      ✗       │
+│ • Filter dan pencarian         │     ✓     │   ✓   │   ✗    │      ✗       │
+│ • Export data log              │     ✓     │   ✗   │   ✗    │      ✗       │
+├────────────────────────────────┼───────────┼───────┼────────┼──────────────┤
+│ PENGATURAN SISTEM              │           │       │        │              │
+│ • Lihat pengaturan             │     ✓     │   ✗   │   ✗    │      ✗       │
+│ • Ubah pengaturan              │     ✓     │   ✗   │   ✗    │      ✗       │
+├────────────────────────────────┼───────────┼───────┼────────┼──────────────┤
+│ CMS LANDING PAGE               │           │       │        │              │
+│ • Lihat konten                 │     ✓     │   ✓   │   ✗    │      ✗       │
+│ • Kelola konten                │     ✓     │   ✓   │   ✗    │      ✗       │
+└────────────────────────────────┴───────────┴───────┴────────┴──────────────┘
+
+Catatan:
+*1 = Admin LSP tidak dapat mengedit atau menghapus akun Super Admin
+
+================================================================================
+B. MODUL PROSES SERTIFIKASI
+================================================================================
+
+┌────────────────────────────────┬───────────┬───────┬────────┬──────────────┐
+│ FUNGSI                         │ SUPER     │ ADMIN │ ASESOR │ KOMITE       │
+│                                │ ADMIN     │ LSP   │        │ TEKNIS       │
+├────────────────────────────────┼───────────┼───────┼────────┼──────────────┤
+│ PRA-PENDAFTARAN                │           │       │        │              │
+│ • Lihat daftar permohonan      │     ✓     │   ✓   │   ✗    │      ✗       │
+│ • Setujui permohonan           │     ✓     │   ✓   │   ✗    │      ✗       │
+│ • Tolak permohonan             │     ✓     │   ✓   │   ✗    │      ✗       │
+├────────────────────────────────┼───────────┼───────┼────────┼──────────────┤
+│ PENDAFTARAN SERTIFIKASI        │           │       │        │              │
+│ • Lihat daftar pendaftaran     │     ✓     │   ✓   │  R*2   │     R*3      │
+│ • Lihat detail pendaftaran     │     ✓     │   ✓   │  R*2   │     R*3      │
+│ • Verifikasi kelengkapan       │     ✓     │   ✓   │   ✗    │      ✗       │
+│ • Assign asesor                │     ✓     │   ✓   │   ✗    │      ✗       │
+│ • Edit data pendaftaran        │     ✓     │   ✓   │   ✗    │      ✗       │
+├────────────────────────────────┼───────────┼───────┼────────┼──────────────┤
+│ ASESMEN                        │           │       │        │              │
+│ • Lihat daftar asesmen         │     ✓     │   R   │  ✓*4   │     R*5      │
+│ • Lihat detail hasil asesmen   │     ✓     │   R   │  ✓*4   │     R*5      │
+│ • Input hasil asesmen per KUK  │    ✓*6    │   ✗   │   ✓    │      ✗       │
+│ • Kunci hasil asesmen          │    ✓*6    │   ✗   │   ✓    │      ✗       │
+│ • Edit hasil (sebelum dikunci) │    ✓*6    │   ✗   │   ✓    │      ✗       │
+├────────────────────────────────┼───────────┼───────┼────────┼──────────────┤
+│ KEPUTUSAN SERTIFIKASI          │           │       │        │              │
+│ • Lihat daftar perlu keputusan │     ✓     │   ✗   │   ✗    │      ✓       │
+│ • Lihat detail rekomendasi     │     ✓     │   ✗   │   ✗    │      ✓       │
+│ • Approve (Kompeten)           │    ✓*6    │   ✗   │   ✗    │      ✓       │
+│ • Reject (Belum Kompeten)      │    ✓*6    │   ✗   │   ✗    │      ✓       │
+├────────────────────────────────┼───────────┼───────┼────────┼──────────────┤
+│ SERTIFIKAT                     │           │       │        │              │
+│ • Lihat daftar sertifikat      │     ✓     │   ✗   │   ✗    │      ✓       │
+│ • Terbitkan sertifikat         │    ✓*6    │   ✗   │   ✗    │      ✓       │
+│ • Download sertifikat          │     ✓     │   ✗   │   ✗    │      ✓       │
+│ • Cabut sertifikat             │     ✓     │   ✗   │   ✗    │      ✗       │
+└────────────────────────────────┴───────────┴───────┴────────┴──────────────┘
+
+Catatan:
+*2 = Asesor hanya dapat melihat pendaftaran yang terkait dengan penugasannya
+*3 = Komite Teknis dapat melihat pendaftaran untuk konteks review keputusan
+*4 = Asesor hanya dapat melihat/input asesmen yang ditugaskan kepadanya
+*5 = Komite Teknis melihat hasil asesmen untuk review sebelum keputusan
+*6 = Super Admin jarang menggunakan akses ini, hanya untuk situasi darurat
+
+================================================================================
+C. MODUL DATA MASTER
+================================================================================
+
+┌────────────────────────────────┬───────────┬───────┬────────┬──────────────┐
+│ FUNGSI                         │ SUPER     │ ADMIN │ ASESOR │ KOMITE       │
+│                                │ ADMIN     │ LSP   │        │ TEKNIS       │
+├────────────────────────────────┼───────────┼───────┼────────┼──────────────┤
+│ SKEMA SERTIFIKASI              │           │       │        │              │
+│ • Lihat daftar skema           │     ✓     │   ✓   │   R    │      R       │
+│ • Tambah skema baru            │     ✓     │   ✓   │   ✗    │      ✗       │
+│ • Edit skema                   │     ✓     │   ✓   │   ✗    │      ✗       │
+│ • Hapus/nonaktifkan skema      │     ✓     │   ✓   │   ✗    │      ✗       │
+├────────────────────────────────┼───────────┼───────┼────────┼──────────────┤
+│ UNIT KOMPETENSI                │           │       │        │              │
+│ • Lihat daftar unit            │     ✓     │   ✓   │   R    │      ✗       │
+│ • Tambah unit baru             │     ✓     │   ✓   │   ✗    │      ✗       │
+│ • Edit unit                    │     ✓     │   ✓   │   ✗    │      ✗       │
+│ • Hapus unit                   │     ✓     │   ✓   │   ✗    │      ✗       │
+├────────────────────────────────┼───────────┼───────┼────────┼──────────────┤
+│ KRITERIA UNJUK KERJA (KUK)     │           │       │        │              │
+│ • Lihat daftar KUK             │     ✓     │   ✓   │   R    │      ✗       │
+│ • Tambah KUK baru              │     ✓     │   ✓   │   ✗    │      ✗       │
+│ • Edit KUK                     │     ✓     │   ✓   │   ✗    │      ✗       │
+│ • Hapus KUK                    │     ✓     │   ✓   │   ✗    │      ✗       │
+├────────────────────────────────┼───────────┼───────┼────────┼──────────────┤
+│ TEMPAT UJI KOMPETENSI (TUK)    │           │       │        │              │
+│ • Lihat daftar TUK             │     ✓     │   ✓   │   R    │      R       │
+│ • Kelola TUK                   │     ✓     │   ✓   │   ✗    │      ✗       │
+└────────────────────────────────┴───────────┴───────┴────────┴──────────────┘
+
+================================================================================
+PEMETAAN PEMISAHAN TUGAS (SEGREGATION OF DUTIES)
+================================================================================
+
+Diagram berikut menunjukkan bahwa tidak ada satu peran yang memiliki
+akses lengkap ke seluruh tahapan proses sertifikasi:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        ALUR PROSES SERTIFIKASI                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌───────────────┐   ┌───────────────┐   ┌───────────────┐   ┌───────────┐  │
+│  │ Pendaftaran   │──►│   Asesmen     │──►│  Keputusan    │──►│Sertifikat │  │
+│  │ & Verifikasi  │   │   Teknis      │   │  Sertifikasi  │   │           │  │
+│  └───────┬───────┘   └───────┬───────┘   └───────┬───────┘   └─────┬─────┘  │
+│          │                   │                   │                 │        │
+│          ▼                   ▼                   ▼                 ▼        │
+│  ┌───────────────┐   ┌───────────────┐   ┌───────────────┐   ┌───────────┐  │
+│  │   ADMIN LSP   │   │    ASESOR     │   │KOMITE TEKNIS  │   │ KOMITE    │  │
+│  │               │   │               │   │               │   │ TEKNIS    │  │
+│  └───────────────┘   └───────────────┘   └───────────────┘   └───────────┘  │
+│          │                   │                   │                 │        │
+│          ▼                   ▼                   ▼                 ▼        │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │                         TIDAK ADA OVERLAP                             │  │
+│  │  • Admin tidak dapat melakukan asesmen atau keputusan                 │  │
+│  │  • Asesor tidak dapat memverifikasi pendaftaran atau keputusan       │  │
+│  │  • Komite Teknis tidak dapat mengubah hasil asesmen                  │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+================================================================================
+STRUKTUR DATABASE RBAC (ONE USER = ONE ROLE)
+================================================================================
+
+Desain database menerapkan prinsip "Satu Pengguna = Satu Peran":
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│  ┌────────────────────────────────────────┐                                 │
+│  │              USERS                      │                                 │
+│  │  ┌──────────────────────────────────┐  │                                 │
+│  │  │ id          │ INT PK             │  │                                 │
+│  │  │ name        │ VARCHAR            │  │                                 │
+│  │  │ email       │ VARCHAR UNIQUE     │  │                                 │
+│  │  │ role_id     │ INT FK ─────────────┼──┼──┐                             │
+│  │  │ password    │ VARCHAR            │  │  │                             │
+│  │  │ created_at  │ TIMESTAMP          │  │  │                             │
+│  │  └──────────────────────────────────┘  │  │                             │
+│  └────────────────────────────────────────┘  │                             │
+│                                              │                             │
+│  ┌────────────────────────────────────────┐  │                             │
+│  │              ROLES                      │◄─┘                             │
+│  │  ┌──────────────────────────────────┐  │                                 │
+│  │  │ id          │ INT PK             │  │                                 │
+│  │  │ name        │ VARCHAR            │  │  ← super_admin, admin, dll     │
+│  │  │ display_name│ VARCHAR            │  │                                 │
+│  │  │ description │ TEXT               │  │                                 │
+│  │  └──────────────────────────────────┘  │                                 │
+│  └───────────────────┬────────────────────┘                                 │
+│                      │                                                      │
+│                      ▼                                                      │
+│  ┌────────────────────────────────────────┐                                 │
+│  │          ROLE_PERMISSION (Pivot)       │                                 │
+│  │  ┌──────────────────────────────────┐  │                                 │
+│  │  │ id            │ INT PK           │  │                                 │
+│  │  │ role_id       │ INT FK ──────────┼──┼── ke ROLES                      │
+│  │  │ permission_id │ INT FK ──────────┼──┼── ke PERMISSIONS                │
+│  │  └──────────────────────────────────┘  │                                 │
+│  └────────────────────────────────────────┘                                 │
+│                      │                                                      │
+│                      ▼                                                      │
+│  ┌────────────────────────────────────────┐                                 │
+│  │           PERMISSIONS                   │                                 │
+│  │  ┌──────────────────────────────────┐  │                                 │
+│  │  │ id          │ INT PK             │  │                                 │
+│  │  │ name        │ VARCHAR            │  │  ← asesmen.view, dll            │
+│  │  │ display_name│ VARCHAR            │  │                                 │
+│  │  │ module      │ VARCHAR            │  │                                 │
+│  │  │ action      │ VARCHAR            │  │  ← view, create, update, delete│
+│  │  └──────────────────────────────────┘  │                                 │
+│  └────────────────────────────────────────┘                                 │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+KETERANGAN:
+• Kolom role_id pada tabel USERS adalah Foreign Key ke tabel ROLES
+• Setiap user hanya memiliki satu nilai role_id (One-to-One)
+• Izin ditentukan oleh relasi role → role_permission → permission
+• Tidak ada relasi langsung user → permission
+
+================================================================================
+DAFTAR PERMISSION YANG TERDAFTAR DI SISTEM
+================================================================================
+
+Berikut adalah daftar permission yang telah dikonfigurasi:
+
+┌─────┬───────────────────────────────┬────────────┬─────────┬────────────────┐
+│ No  │ Permission Name               │ Module     │ Action  │ Display Name   │
+├─────┼───────────────────────────────┼────────────┼─────────┼────────────────┤
+│  1  │ dashboard.view                │ dashboard  │ view    │ Lihat Dashboard│
+├─────┼───────────────────────────────┼────────────┼─────────┼────────────────┤
+│  2  │ pra_pendaftaran.view          │ pra_...    │ view    │ Lihat Pra-...  │
+│  3  │ pra_pendaftaran.approve       │ pra_...    │ approve │ Setujui Pra-...│
+│  4  │ pra_pendaftaran.reject        │ pra_...    │ reject  │ Tolak Pra-...  │
+├─────┼───────────────────────────────┼────────────┼─────────┼────────────────┤
+│  5  │ pendaftaran_sertifikasi.view  │ pend...    │ view    │ Lihat Pend...  │
+│  6  │ pendaftaran_sertifikasi.verify│ pend...    │ verify  │ Verifikasi...  │
+│  7  │ pendaftaran_sertifikasi.assign│ pend...    │ assign  │ Assign Asesor  │
+├─────┼───────────────────────────────┼────────────┼─────────┼────────────────┤
+│  8  │ asesmen.view                  │ asesmen    │ view    │ Lihat Asesmen  │
+│  9  │ asesmen.create                │ asesmen    │ create  │ Buat Asesmen   │
+│ 10  │ asesmen.update                │ asesmen    │ update  │ Update Asesmen │
+│ 11  │ asesmen.submit                │ asesmen    │ submit  │ Submit Hasil   │
+│ 12  │ asesmen.lock                  │ asesmen    │ lock    │ Kunci Hasil    │
+├─────┼───────────────────────────────┼────────────┼─────────┼────────────────┤
+│ 13  │ keputusan_sertifikasi.view    │ keput...   │ view    │ Lihat Keputusan│
+│ 14  │ keputusan_sertifikasi.approve │ keput...   │ approve │ Approve        │
+│ 15  │ keputusan_sertifikasi.reject  │ keput...   │ reject  │ Reject         │
+├─────┼───────────────────────────────┼────────────┼─────────┼────────────────┤
+│ 16  │ sertifikat.view               │ sertifikat │ view    │ Lihat Sertif...│
+│ 17  │ sertifikat.issue              │ sertifikat │ issue   │ Terbitkan...   │
+│ 18  │ sertifikat.download           │ sertifikat │ download│ Download...    │
+│ 19  │ sertifikat.revoke             │ sertifikat │ revoke  │ Cabut Sertif...│
+├─────┼───────────────────────────────┼────────────┼─────────┼────────────────┤
+│ 20  │ skema.view                    │ skema      │ view    │ Lihat Skema    │
+│ 21  │ skema.create                  │ skema      │ create  │ Tambah Skema   │
+│ 22  │ skema.update                  │ skema      │ update  │ Edit Skema     │
+│ 23  │ skema.delete                  │ skema      │ delete  │ Hapus Skema    │
+├─────┼───────────────────────────────┼────────────┼─────────┼────────────────┤
+│ ... │ (dan seterusnya)              │            │         │                │
+├─────┼───────────────────────────────┼────────────┼─────────┼────────────────┤
+│     │ Total: 48 permissions         │            │         │                │
+└─────┴───────────────────────────────┴────────────┴─────────┴────────────────┘
+
+================================================================================
+RINGKASAN PERMISSION PER ROLE
+================================================================================
+
+┌──────────────────┬──────────────────────────────────────────────────────────┐
+│ ROLE             │ JUMLAH PERMISSION                                        │
+├──────────────────┼──────────────────────────────────────────────────────────┤
+│ Super Admin      │ BYPASS (akses penuh tanpa pengecekan permission)         │
+│ Admin LSP        │ 24 permissions (administrasi & data master)              │
+│ Asesor           │ 8 permissions (asesmen & read-only terbatas)             │
+│ Komite Teknis    │ 10 permissions (keputusan & sertifikat)                  │
+└──────────────────┴──────────────────────────────────────────────────────────┘
+
+================================================================================
+                              AKHIR LAMPIRAN
+================================================================================
+
+Dokumen ini merupakan lampiran dari SOP-IT-001 dan wajib dibaca
+bersama dengan dokumen utama.
+
+Untuk keperluan audit, lampirkan dokumen ini bersama:
+1. SOP Pengendalian Akses Sistem (SOP-IT-001)
+2. Screenshot bukti konfigurasi dari database
+3. Sample audit log dari sistem
+
+================================================================================
+

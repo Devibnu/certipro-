@@ -7,18 +7,19 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <link rel="apple-touch-icon" sizes="76x76" href="{{ asset('assets/img/apple-icon.png') }}">
   @php
-    $activeFavicon = \App\Models\FaviconWebsite::where('status', 1)->first();
-    $activeLogo = \App\Models\LogoWebsite::where('status', 1)->first();
+    // Get logo from branding system (LogoAdmin)
+    $logoAdmin = \App\Models\LogoAdmin::where('status', true)->first();
+    $faviconUrl = $logoAdmin && $logoAdmin->gambar ? asset('storage/' . $logoAdmin->gambar) : null;
+    $faviconTimestamp = $logoAdmin && $logoAdmin->updated_at ? $logoAdmin->updated_at->timestamp : time();
+    $systemTagline = $logoAdmin && $logoAdmin->tagline && trim($logoAdmin->tagline) !== '' ? $logoAdmin->tagline : null;
   @endphp
-  @if($activeFavicon && $activeFavicon->favicon)
-    <link rel="icon" type="image/png" href="{{ asset('storage/' . $activeFavicon->favicon) }}?v={{ $activeFavicon->updated_at->timestamp }}">
-  @elseif($activeLogo && $activeLogo->gambar)
-    <link rel="icon" type="image/png" href="{{ asset('storage/' . $activeLogo->gambar) }}?v={{ $activeLogo->updated_at->timestamp }}">
+  @if($faviconUrl)
+    <link rel="icon" type="image/png" href="{{ $faviconUrl }}?v={{ $faviconTimestamp }}">
   @else
     <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon.png') }}">
   @endif
   <title>
-    {{ config('app.name', 'Jasa Ibnu') }} - Admin Dashboard
+    @if($systemTagline){{ $systemTagline }} - @endif Admin Dashboard
   </title>
   <!--     Fonts and icons     -->
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
@@ -118,6 +119,62 @@
 
   @include('adminui.layouts.fixed-plugin')
   @include('adminui.layouts.scripts')
+  
+  <!-- Logout Confirmation Script -->
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+      const btnLogout = document.getElementById('btn-logout');
+      const formLogout = document.getElementById('nav-logout-form');
+      
+      if (btnLogout && formLogout) {
+          btnLogout.addEventListener('click', function(e) {
+              e.preventDefault();
+              
+              Swal.fire({
+                  title: 'Konfirmasi Keluar',
+                  html: `
+                      <div class="text-center">
+                          <div class="mb-3">
+                              <i class="fas fa-sign-out-alt fa-3x text-danger"></i>
+                          </div>
+                          <p class="mb-0">Apakah Anda yakin ingin keluar dari sistem?</p>
+                      </div>
+                  `,
+                  icon: null,
+                  showCancelButton: true,
+                  confirmButtonColor: '#f5365c',
+                  cancelButtonColor: '#6c757d',
+                  confirmButtonText: '<i class="fas fa-sign-out-alt me-1"></i> Ya, Keluar',
+                  cancelButtonText: '<i class="fas fa-times me-1"></i> Batal',
+                  reverseButtons: true,
+                  customClass: {
+                      popup: 'swal-logout-popup'
+                  }
+              }).then((result) => {
+                  if (result.isConfirmed) {
+                      Swal.fire({
+                          title: 'Logging out...',
+                          text: 'Mohon tunggu sebentar',
+                          allowOutsideClick: false,
+                          allowEscapeKey: false,
+                          showConfirmButton: false,
+                          didOpen: () => {
+                              Swal.showLoading();
+                          }
+                      });
+                      formLogout.submit();
+                  }
+              });
+          });
+      }
+  });
+  </script>
+  <style>
+  .swal-logout-popup {
+      max-width: 380px !important;
+  }
+  </style>
+  
   @stack('scripts')
 </body>
 

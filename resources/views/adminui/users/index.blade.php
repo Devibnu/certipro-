@@ -74,10 +74,14 @@
                                     </td>
                                     <td class="text-center">
                                         <a href="{{ route('adminui.users.edit', $user->id) }}" class="btn btn-sm btn-dark me-2"><i class="fas fa-edit"></i> EDIT</a>
-                                        <form action="{{ route('adminui.users.destroy', $user->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus user ini?');">
+                                        <button type="button" class="btn btn-sm btn-danger btn-delete-user" 
+                                                data-user-id="{{ $user->id }}" 
+                                                data-user-name="{{ $user->name }}">
+                                            <i class="fas fa-trash"></i> HAPUS
+                                        </button>
+                                        <form id="delete-form-{{ $user->id }}" action="{{ route('adminui.users.destroy', $user->id) }}" method="POST" class="d-none">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i> HAPUS</button>
                                         </form>
                                     </td>
                                 </tr>
@@ -94,4 +98,62 @@
         </div>
     </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-gradient-danger">
+                <h5 class="modal-title text-white" id="deleteUserModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Konfirmasi Hapus
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <div class="mb-3">
+                    <i class="fas fa-user-times text-danger" style="font-size: 4rem;"></i>
+                </div>
+                <h5 class="mb-2">Yakin ingin menghapus user ini?</h5>
+                <p class="text-muted mb-0">User <strong id="delete-user-name"></strong> akan dihapus secara permanen.</p>
+                <p class="text-danger small mt-2"><i class="fas fa-info-circle me-1"></i>Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+            <div class="modal-footer justify-content-center border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Batal
+                </button>
+                <button type="button" class="btn bg-gradient-danger px-4" id="confirmDeleteBtn">
+                    <i class="fas fa-trash me-1"></i>Ya, Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
+
+@push('js')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteUserModal'));
+    const deleteUserName = document.getElementById('delete-user-name');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    let currentUserId = null;
+
+    // Handle delete button clicks
+    document.querySelectorAll('.btn-delete-user').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            currentUserId = this.getAttribute('data-user-id');
+            const userName = this.getAttribute('data-user-name');
+            deleteUserName.textContent = userName;
+            deleteModal.show();
+        });
+    });
+
+    // Handle confirm delete
+    confirmDeleteBtn.addEventListener('click', function() {
+        if (currentUserId) {
+            document.getElementById('delete-form-' + currentUserId).submit();
+        }
+    });
+});
+</script>
+@endpush

@@ -1,0 +1,584 @@
+================================================================================
+                        STANDAR OPERASIONAL PROSEDUR
+                     PENGENDALIAN AKSES SISTEM CERTIPRO
+
+                           LEMBAGA SERTIFIKASI PROFESI
+================================================================================
+
+Nomor Dokumen    : SOP-IT-001
+Revisi           : 00
+Tanggal Berlaku  : 13 Januari 2026
+Halaman          : 1 dari 12
+
+================================================================================
+LEMBAR PENGESAHAN
+================================================================================
+
+Disusun oleh     : _________________________ Tanggal: _______________
+                   (Manajer Teknologi Informasi)
+
+Diperiksa oleh   : _________________________ Tanggal: _______________
+                   (Perwakilan Manajemen Mutu)
+
+Disahkan oleh    : _________________________ Tanggal: _______________
+                   (Direktur LSP)
+
+================================================================================
+RIWAYAT PERUBAHAN DOKUMEN
+================================================================================
+
+| Rev | Tanggal      | Uraian Perubahan                    | Oleh      |
+|-----|--------------|-------------------------------------|-----------|
+| 00  | 13/01/2026   | Dokumen awal                        | IT Team   |
+
+================================================================================
+1. TUJUAN
+================================================================================
+
+Prosedur ini bertujuan untuk:
+
+1.1 Menetapkan mekanisme pengendalian akses terhadap Sistem Informasi 
+    Sertifikasi Profesi CertiPro sesuai dengan prinsip kerahasiaan dan 
+    integritas data.
+
+1.2 Memastikan pemisahan tugas (segregation of duties) antara personel 
+    yang berbeda dalam proses sertifikasi sesuai ISO 17024:2012.
+
+1.3 Menyediakan jejak audit (audit trail) untuk setiap akses sistem 
+    yang dapat diverifikasi oleh auditor internal maupun eksternal.
+
+1.4 Memenuhi persyaratan BNSP terkait keamanan data dan sistem informasi 
+    pada Lembaga Sertifikasi Profesi.
+
+================================================================================
+2. RUANG LINGKUP
+================================================================================
+
+Prosedur ini berlaku untuk:
+
+2.1 Seluruh pengguna Sistem Informasi CertiPro termasuk:
+    - Administrator Sistem (Super Admin & Admin)
+    - Asesor
+    - Anggota Komite Teknis
+    - Staf Sekretariat
+
+2.2 Seluruh modul dalam sistem:
+    - Pra-Pendaftaran
+    - Pendaftaran Sertifikasi
+    - Asesmen
+    - Keputusan Sertifikasi
+    - Penerbitan Sertifikat
+    - Manajemen Data Master
+    - Audit Log
+
+================================================================================
+3. REFERENSI
+================================================================================
+
+3.1 ISO/IEC 17024:2012 - Conformity assessment — General requirements for 
+    bodies operating certification of persons
+
+3.2 Peraturan BNSP tentang Pedoman Lembaga Sertifikasi Profesi (Pedoman 201)
+
+3.3 ISO/IEC 27001:2022 - Information security, cybersecurity and privacy 
+    protection — Information security management systems
+
+3.4 Kebijakan Keamanan Informasi LSP (jika ada)
+
+================================================================================
+4. DEFINISI
+================================================================================
+
+4.1 AKSES SISTEM
+    Kemampuan pengguna untuk masuk dan menggunakan fungsi tertentu dalam 
+    Sistem Informasi CertiPro berdasarkan kredensial yang diberikan.
+
+4.2 ROLE (PERAN)
+    Kategori pengguna yang menentukan tanggung jawab dan batasan akses 
+    dalam sistem. Setiap pengguna memiliki satu peran utama.
+
+4.3 PERMISSION (IZIN)
+    Hak spesifik untuk melakukan tindakan tertentu dalam sistem. Setiap 
+    peran memiliki kumpulan izin yang telah ditetapkan.
+
+4.4 MIDDLEWARE
+    Komponen teknis pada lapisan backend yang memvalidasi setiap 
+    permintaan akses sebelum diteruskan ke fungsi sistem. Middleware 
+    adalah satu-satunya penentu keputusan akses yang sah.
+
+4.5 AUDIT LOG
+    Catatan sistematis dari setiap aktivitas dalam sistem termasuk 
+    percobaan akses yang ditolak, perubahan data, dan tindakan pengguna.
+
+4.6 SUPER ADMIN
+    Peran dengan akses penuh ke seluruh fungsi sistem untuk keperluan 
+    administrasi dan pemeliharaan.
+
+4.7 SEGREGATION OF DUTIES
+    Prinsip pemisahan tugas yang memastikan tidak ada satu individu 
+    yang memiliki kendali penuh atas seluruh proses sertifikasi.
+
+================================================================================
+5. PERAN DAN TANGGUNG JAWAB
+================================================================================
+
+5.1 SUPER ADMIN
+    ┌─────────────────────────────────────────────────────────────────────┐
+    │ Referensi ISO 17024: Clause 5.1 (Management Representative)        │
+    ├─────────────────────────────────────────────────────────────────────┤
+    │ Tanggung Jawab:                                                     │
+    │ • Mengelola seluruh konfigurasi sistem                              │
+    │ • Mengelola akun pengguna dan penetapan peran                       │
+    │ • Memantau dan mengekspor jejak audit                               │
+    │ • Memastikan kepatuhan teknis terhadap kebijakan keamanan           │
+    │                                                                     │
+    │ Akses:                                                              │
+    │ • Seluruh modul dan fungsi sistem tanpa pengecualian                │
+    │                                                                     │
+    │ Pembatasan:                                                         │
+    │ • TIDAK BOLEH berperan sebagai Asesor atau Komite Teknis            │
+    │   dalam proses sertifikasi untuk menghindari konflik kepentingan    │
+    └─────────────────────────────────────────────────────────────────────┘
+
+5.2 ADMIN (SEKRETARIAT)
+    ┌─────────────────────────────────────────────────────────────────────┐
+    │ Referensi ISO 17024: Clause 6.1 (Certification Body Personnel)     │
+    ├─────────────────────────────────────────────────────────────────────┤
+    │ Tanggung Jawab:                                                     │
+    │ • Memproses pra-pendaftaran dan pendaftaran sertifikasi             │
+    │ • Melakukan verifikasi kelengkapan dokumen                          │
+    │ • Mengelola data master (skema, unit kompetensi, KUK)               │
+    │ • Menugaskan asesor ke pendaftaran                                  │
+    │                                                                     │
+    │ Akses:                                                              │
+    │ • Pra-Pendaftaran (lihat, kelola)                                   │
+    │ • Pendaftaran Sertifikasi (lihat, verifikasi, assign)               │
+    │ • Data Master (lihat, kelola)                                       │
+    │ • Audit Log (lihat)                                                 │
+    │ • CMS Landing Page (lihat, kelola)                                  │
+    │                                                                     │
+    │ Pembatasan:                                                         │
+    │ • TIDAK DAPAT melakukan asesmen                                     │
+    │ • TIDAK DAPAT membuat keputusan sertifikasi                         │
+    │ • TIDAK DAPAT menerbitkan sertifikat                                │
+    └─────────────────────────────────────────────────────────────────────┘
+
+5.3 ASESOR
+    ┌─────────────────────────────────────────────────────────────────────┐
+    │ Referensi ISO 17024: Clause 9.2 (Assessor Requirements)            │
+    ├─────────────────────────────────────────────────────────────────────┤
+    │ Tanggung Jawab:                                                     │
+    │ • Melaksanakan asesmen sesuai skema yang ditetapkan                 │
+    │ • Menginput hasil asesmen per Kriteria Unjuk Kerja (KUK)            │
+    │ • Mendokumentasikan bukti asesmen                                   │
+    │                                                                     │
+    │ Akses:                                                              │
+    │ • Dashboard                                                         │
+    │ • Asesmen (lihat, submit hasil)                                     │
+    │ • Pendaftaran (lihat - read only)                                   │
+    │ • Data Master (lihat - read only)                                   │
+    │                                                                     │
+    │ Pembatasan:                                                         │
+    │ • TIDAK DAPAT memverifikasi pendaftaran                             │
+    │ • TIDAK DAPAT membuat keputusan sertifikasi                         │
+    │ • TIDAK DAPAT menerbitkan sertifikat                                │
+    │ • TIDAK DAPAT mengakses modul manajemen pengguna                    │
+    │                                                                     │
+    │ Catatan Kepatuhan:                                                  │
+    │ Asesor wajib terdaftar di BNSP sesuai Pedoman 201                   │
+    └─────────────────────────────────────────────────────────────────────┘
+
+5.4 KOMITE TEKNIS
+    ┌─────────────────────────────────────────────────────────────────────┐
+    │ Referensi ISO 17024: Clause 9.5 (Certification Decision)           │
+    ├─────────────────────────────────────────────────────────────────────┤
+    │ Tanggung Jawab:                                                     │
+    │ • Meninjau hasil asesmen dari asesor                                │
+    │ • Membuat keputusan sertifikasi (Kompeten/Belum Kompeten)           │
+    │ • Menerbitkan sertifikat bagi asesi yang dinyatakan kompeten        │
+    │                                                                     │
+    │ Akses:                                                              │
+    │ • Dashboard                                                         │
+    │ • Keputusan Sertifikasi (lihat, approve/reject)                     │
+    │ • Sertifikat (lihat, terbitkan, download)                           │
+    │ • Pendaftaran (lihat - read only)                                   │
+    │ • Asesmen (lihat - read only untuk review)                          │
+    │                                                                     │
+    │ Pembatasan:                                                         │
+    │ • TIDAK DAPAT mengubah hasil asesmen                                │
+    │ • TIDAK DAPAT memverifikasi pendaftaran                             │
+    │ • TIDAK DAPAT mengelola data master                                 │
+    │ • TIDAK DAPAT mengakses manajemen pengguna                          │
+    │                                                                     │
+    │ Catatan Kepatuhan:                                                  │
+    │ Keputusan sertifikasi harus berdasarkan bukti objektif dari         │
+    │ hasil asesmen tanpa intervensi terhadap proses asesmen.             │
+    └─────────────────────────────────────────────────────────────────────┘
+
+================================================================================
+6. MEKANISME PENGENDALIAN AKSES
+================================================================================
+
+6.1 PRINSIP DASAR
+
+    Sistem CertiPro menerapkan prinsip pengendalian akses berlapis:
+
+    ┌──────────────────────────────────────────────────────────────────┐
+    │                         ALUR VALIDASI AKSES                      │
+    ├──────────────────────────────────────────────────────────────────┤
+    │                                                                  │
+    │   [Pengguna] ──► [Login] ──► [Middleware] ──► [Sistem/Tolak]     │
+    │                                   │                              │
+    │                                   ▼                              │
+    │                           [Audit Log]                            │
+    │                                                                  │
+    └──────────────────────────────────────────────────────────────────┘
+
+    a) AUTENTIKASI: Verifikasi identitas pengguna melalui username/email 
+       dan password.
+
+    b) AUTORISASI: Validasi izin akses berdasarkan peran pengguna 
+       dilakukan oleh middleware di sisi backend.
+
+    c) PENCATATAN: Setiap percobaan akses (berhasil maupun ditolak) 
+       dicatat dalam audit log.
+
+6.2 LARANGAN PENGENDALIAN BERBASIS UI
+
+    ┌──────────────────────────────────────────────────────────────────┐
+    │ PERINGATAN PENTING                                               │
+    ├──────────────────────────────────────────────────────────────────┤
+    │                                                                  │
+    │ Penyembunyian menu atau tombol pada antarmuka pengguna (UI)      │
+    │ BUKAN merupakan mekanisme pengendalian akses yang sah.           │
+    │                                                                  │
+    │ Alasan:                                                          │
+    │ • UI dapat dimanipulasi oleh pengguna teknis                     │
+    │ • Tidak menghasilkan jejak audit yang valid                      │
+    │ • Tidak memenuhi persyaratan ISO 17024 untuk keamanan data       │
+    │                                                                  │
+    │ Kebijakan:                                                       │
+    │ SEMUA keputusan akses WAJIB divalidasi oleh middleware backend.  │
+    │ Tampilan UI harus MENGIKUTI logika middleware, bukan sebaliknya. │
+    │                                                                  │
+    └──────────────────────────────────────────────────────────────────┘
+
+6.3 MIDDLEWARE SEBAGAI SUMBER KEBENARAN
+
+    Sistem menggunakan middleware CheckPermission sebagai satu-satunya 
+    penentu apakah pengguna diizinkan mengakses suatu fungsi:
+
+    a) Setiap permintaan (request) ke sistem melewati middleware.
+
+    b) Middleware memeriksa:
+       - Apakah pengguna sudah login (terotentikasi)?
+       - Apakah pengguna memiliki izin yang diperlukan?
+       - Apakah pengguna adalah Super Admin (bypass)?
+
+    c) Jika ditolak:
+       - Sistem mengembalikan HTTP 403 (Forbidden)
+       - Aktivitas dicatat ke audit log dengan detail lengkap
+       - Pengguna diarahkan ke halaman error yang informatif
+
+================================================================================
+7. JEJAK AUDIT (AUDIT TRAIL)
+================================================================================
+
+7.1 JENIS AKTIVITAS YANG DICATAT
+
+    Sistem mencatat seluruh aktivitas berikut:
+
+    ┌─────────────────────────┬────────────────────────────────────────┐
+    │ Kategori                │ Contoh Aktivitas                       │
+    ├─────────────────────────┼────────────────────────────────────────┤
+    │ Akses Ditolak           │ Percobaan akses tanpa izin             │
+    │ Perubahan Peran         │ Penambahan/penghapusan role pengguna   │
+    │ Perubahan Izin          │ Modifikasi permission role             │
+    │ Operasi CRUD            │ Buat, ubah, hapus data                 │
+    │ Keputusan Sertifikasi   │ Approve/reject oleh Komite Teknis      │
+    │ Penerbitan Sertifikat   │ Generate sertifikat                    │
+    │ Login/Logout            │ Sesi pengguna                          │
+    └─────────────────────────┴────────────────────────────────────────┘
+
+7.2 STRUKTUR DATA AUDIT LOG
+
+    Setiap entri audit log mencakup:
+
+    ┌─────────────────────────┬────────────────────────────────────────┐
+    │ Field                   │ Deskripsi                              │
+    ├─────────────────────────┼────────────────────────────────────────┤
+    │ user_id                 │ ID pengguna yang melakukan aksi        │
+    │ user_name               │ Nama pengguna                          │
+    │ user_role               │ Peran pengguna saat aksi               │
+    │ action                  │ Jenis tindakan (create, access_denied) │
+    │ module                  │ Modul yang diakses                     │
+    │ description             │ Deskripsi aktivitas                    │
+    │ ip_address              │ Alamat IP pengguna                     │
+    │ user_agent              │ Browser/perangkat yang digunakan       │
+    │ url                     │ URL yang diakses                       │
+    │ request_id              │ ID unik untuk pelacakan                │
+    │ created_at              │ Waktu kejadian                         │
+    └─────────────────────────┴────────────────────────────────────────┘
+
+7.3 RETENSI DAN AKSES AUDIT LOG
+
+    a) Audit log disimpan minimal 5 (lima) tahun sesuai ketentuan 
+       BNSP untuk dokumen sertifikasi.
+
+    b) Audit log hanya dapat dilihat oleh Super Admin dan Admin.
+
+    c) Audit log dapat diekspor dalam format yang sesuai untuk 
+       keperluan audit BNSP.
+
+    d) Audit log TIDAK DAPAT dihapus atau dimodifikasi oleh siapapun 
+       termasuk Super Admin (immutable).
+
+================================================================================
+8. MATRIKS IZIN AKSES
+================================================================================
+
+Tabel berikut menunjukkan izin akses untuk setiap peran:
+
+Keterangan: ✓ = Diizinkan, ✗ = Tidak Diizinkan, R = Hanya Baca
+
+┌────────────────────────────┬────────────┬───────┬────────┬──────────────┐
+│ FUNGSI                     │ SUPER      │ ADMIN │ ASESOR │ KOMITE       │
+│                            │ ADMIN      │       │        │ TEKNIS       │
+├────────────────────────────┼────────────┼───────┼────────┼──────────────┤
+│ Dashboard                  │     ✓      │   ✓   │   ✓    │      ✓       │
+├────────────────────────────┼────────────┼───────┼────────┼──────────────┤
+│ MANAJEMEN PENGGUNA         │            │       │        │              │
+│ • Lihat daftar pengguna    │     ✓      │   ✓   │   ✗    │      ✗       │
+│ • Tambah/edit pengguna     │     ✓      │   ✓   │   ✗    │      ✗       │
+│ • Reset password           │     ✓      │   ✓   │   ✗    │      ✗       │
+├────────────────────────────┼────────────┼───────┼────────┼──────────────┤
+│ PRA-PENDAFTARAN            │            │       │        │              │
+│ • Lihat                    │     ✓      │   ✓   │   ✗    │      ✗       │
+│ • Kelola (approve/reject)  │     ✓      │   ✓   │   ✗    │      ✗       │
+├────────────────────────────┼────────────┼───────┼────────┼──────────────┤
+│ PENDAFTARAN SERTIFIKASI    │            │       │        │              │
+│ • Lihat                    │     ✓      │   ✓   │   R    │      R       │
+│ • Verifikasi               │     ✓      │   ✓   │   ✗    │      ✗       │
+│ • Assign asesor            │     ✓      │   ✓   │   ✗    │      ✗       │
+├────────────────────────────┼────────────┼───────┼────────┼──────────────┤
+│ ASESMEN                    │            │       │        │              │
+│ • Lihat                    │     ✓      │   R   │   ✓    │      R       │
+│ • Input hasil              │     ✓      │   ✗   │   ✓    │      ✗       │
+│ • Kunci hasil              │     ✓      │   ✗   │   ✓    │      ✗       │
+├────────────────────────────┼────────────┼───────┼────────┼──────────────┤
+│ KEPUTUSAN SERTIFIKASI      │            │       │        │              │
+│ • Lihat                    │     ✓      │   ✗   │   ✗    │      ✓       │
+│ • Approve/Reject           │     ✓      │   ✗   │   ✗    │      ✓       │
+├────────────────────────────┼────────────┼───────┼────────┼──────────────┤
+│ SERTIFIKAT                 │            │       │        │              │
+│ • Lihat                    │     ✓      │   ✗   │   ✗    │      ✓       │
+│ • Terbitkan                │     ✓      │   ✗   │   ✗    │      ✓       │
+│ • Download                 │     ✓      │   ✗   │   ✗    │      ✓       │
+│ • Cabut                    │     ✓      │   ✗   │   ✗    │      ✗       │
+├────────────────────────────┼────────────┼───────┼────────┼──────────────┤
+│ DATA MASTER                │            │       │        │              │
+│ • Skema Sertifikasi        │     ✓      │   ✓   │   R    │      R       │
+│ • Unit Kompetensi          │     ✓      │   ✓   │   R    │      ✗       │
+│ • KUK                      │     ✓      │   ✓   │   R    │      ✗       │
+├────────────────────────────┼────────────┼───────┼────────┼──────────────┤
+│ AUDIT LOG                  │            │       │        │              │
+│ • Lihat                    │     ✓      │   ✓   │   ✗    │      ✗       │
+│ • Export                   │     ✓      │   ✗   │   ✗    │      ✗       │
+├────────────────────────────┼────────────┼───────┼────────┼──────────────┤
+│ PENGATURAN SISTEM          │            │       │        │              │
+│ • Lihat                    │     ✓      │   ✗   │   ✗    │      ✗       │
+│ • Kelola                   │     ✓      │   ✗   │   ✗    │      ✗       │
+└────────────────────────────┴────────────┴───────┴────────┴──────────────┘
+
+================================================================================
+9. PROSEDUR PENGELOLAAN AKSES
+================================================================================
+
+9.1 PEMBUATAN AKUN BARU
+
+    Langkah:
+    1. Admin/Super Admin menerima permintaan akun dari personel baru
+    2. Verifikasi identitas dan kebutuhan akses
+    3. Tentukan peran yang sesuai berdasarkan tugas
+    4. Buat akun dengan peran yang ditetapkan
+    5. Informasikan kredensial melalui saluran aman
+    6. Wajibkan pengguna mengubah password pada login pertama
+    7. Catat pembuatan akun dalam log
+
+9.2 PERUBAHAN PERAN
+
+    Langkah:
+    1. Terima permintaan perubahan peran dengan justifikasi
+    2. Dapatkan persetujuan dari pejabat berwenang
+    3. Lakukan perubahan peran di sistem
+    4. Sistem otomatis mencatat perubahan ke audit log
+    5. Informasikan pengguna tentang perubahan akses
+
+9.3 PENGHAPUSAN AKSES
+
+    Langkah:
+    1. Identifikasi akun yang akan dinonaktifkan
+    2. Nonaktifkan akun (jangan hapus untuk keperluan audit)
+    3. Dokumentasikan alasan penonaktifan
+    4. Pastikan akses telah terputus dari semua perangkat
+
+================================================================================
+10. KEPATUHAN DAN AUDIT
+================================================================================
+
+10.1 KEPATUHAN ISO 17024
+
+    ┌──────────────────────┬────────────────────────────────────────────┐
+    │ Klausul ISO 17024    │ Implementasi dalam Sistem                  │
+    ├──────────────────────┼────────────────────────────────────────────┤
+    │ 5.1.3 Kompetensi     │ Akses dibatasi berdasarkan peran yang      │
+    │       Personel       │ sesuai dengan kualifikasi                  │
+    ├──────────────────────┼────────────────────────────────────────────┤
+    │ 5.2 Kerahasiaan      │ Middleware memblokir akses tidak sah,      │
+    │                      │ semua upaya dicatat untuk audit            │
+    ├──────────────────────┼────────────────────────────────────────────┤
+    │ 9.2.2 Independensi   │ Peran Asesor terpisah dari Admin dan       │
+    │       Asesor         │ Komite Teknis                              │
+    ├──────────────────────┼────────────────────────────────────────────┤
+    │ 9.5 Keputusan        │ Hanya Komite Teknis yang dapat membuat     │
+    │     Sertifikasi      │ keputusan; Asesor tidak dapat approve      │
+    ├──────────────────────┼────────────────────────────────────────────┤
+    │ 10 Catatan           │ Audit log lengkap dengan retensi 5 tahun   │
+    └──────────────────────┴────────────────────────────────────────────┘
+
+10.2 KEPATUHAN BNSP
+
+    a) Sistem memenuhi persyaratan keamanan data Pedoman 201 BNSP 
+       melalui pengendalian akses berbasis peran.
+
+    b) Pemisahan tugas antara Asesor dan Pembuat Keputusan telah 
+       diimplementasikan sesuai ketentuan.
+
+    c) Jejak audit tersedia untuk keperluan surveillance dan audit 
+       BNSP sewaktu-waktu.
+
+10.3 BUKTI AUDIT YANG TERSEDIA
+
+    Untuk keperluan audit, sistem dapat menyediakan:
+
+    a) Daftar pengguna dan peran masing-masing
+    b) Log akses ditolak dengan detail waktu, IP, dan URL
+    c) Riwayat perubahan peran pengguna
+    d) Riwayat semua tindakan pada proses sertifikasi
+    e) Export audit log dalam format yang dapat diverifikasi
+
+================================================================================
+11. LAMPIRAN
+================================================================================
+
+LAMPIRAN A: DIAGRAM ARSITEKTUR PENGENDALIAN AKSES
+
+    ┌─────────────────────────────────────────────────────────────────────┐
+    │                          PENGGUNA                                   │
+    │                             │                                       │
+    │                             ▼                                       │
+    │  ┌───────────────────────────────────────────────────────────────┐  │
+    │  │                      ANTARMUKA (UI)                           │  │
+    │  │   ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐         │  │
+    │  │   │Dashboard│  │Asesmen  │  │Keputusan│  │Sertifkat│         │  │
+    │  │   └────┬────┘  └────┬────┘  └────┬────┘  └────┬────┘         │  │
+    │  └────────┼────────────┼────────────┼────────────┼───────────────┘  │
+    │           │            │            │            │                   │
+    │           ▼            ▼            ▼            ▼                   │
+    │  ┌───────────────────────────────────────────────────────────────┐  │
+    │  │                    MIDDLEWARE LAYER                           │  │
+    │  │  ┌────────────────────────────────────────────────────────┐   │  │
+    │  │  │              CheckPermission Middleware                 │   │  │
+    │  │  │                                                        │   │  │
+    │  │  │  1. Cek Autentikasi                                    │   │  │
+    │  │  │  2. Cek Peran (Super Admin bypass)                     │   │  │
+    │  │  │  3. Cek Izin spesifik                                  │   │  │
+    │  │  │  4. Log ke Audit Trail                                 │   │  │
+    │  │  │  5. Izinkan / Tolak                                    │   │  │
+    │  │  └────────────────────────────────────────────────────────┘   │  │
+    │  └───────────────────────────────────────────────────────────────┘  │
+    │           │                                                         │
+    │           ▼                                                         │
+    │  ┌───────────────────────────────────────────────────────────────┐  │
+    │  │                      DATABASE LAYER                           │  │
+    │  │   ┌───────┐  ┌────────────┐  ┌─────────────────┐              │  │
+    │  │   │ users │──│ user_role  │──│     roles       │              │  │
+    │  │   └───────┘  └────────────┘  └────────┬────────┘              │  │
+    │  │                                       │                        │  │
+    │  │                              ┌────────┴────────┐               │  │
+    │  │                              │ role_permission │               │  │
+    │  │                              └────────┬────────┘               │  │
+    │  │                                       │                        │  │
+    │  │                              ┌────────┴────────┐               │  │
+    │  │                              │   permissions   │               │  │
+    │  │                              └─────────────────┘               │  │
+    │  │                                                                │  │
+    │  │   ┌───────────────────────────────────────────┐               │  │
+    │  │   │              audit_logs                    │               │  │
+    │  │   │  (Immutable - tidak dapat diubah/dihapus) │               │  │
+    │  │   └───────────────────────────────────────────┘               │  │
+    │  └───────────────────────────────────────────────────────────────┘  │
+    └─────────────────────────────────────────────────────────────────────┘
+
+
+LAMPIRAN B: SKEMA DATABASE RBAC
+
+    Table: roles
+    ┌─────────────────┬──────────────┬──────────────────────────────────┐
+    │ Column          │ Type         │ Description                      │
+    ├─────────────────┼──────────────┼──────────────────────────────────┤
+    │ id              │ BIGINT PK    │ Primary key                      │
+    │ name            │ VARCHAR(255) │ Nama teknis (super_admin, dll)   │
+    │ display_name    │ VARCHAR(255) │ Nama tampilan                    │
+    │ description     │ TEXT         │ Deskripsi peran                  │
+    │ created_at      │ TIMESTAMP    │ Waktu dibuat                     │
+    │ updated_at      │ TIMESTAMP    │ Waktu diubah                     │
+    └─────────────────┴──────────────┴──────────────────────────────────┘
+
+    Table: permissions
+    ┌─────────────────┬──────────────┬──────────────────────────────────┐
+    │ Column          │ Type         │ Description                      │
+    ├─────────────────┼──────────────┼──────────────────────────────────┤
+    │ id              │ BIGINT PK    │ Primary key                      │
+    │ name            │ VARCHAR(255) │ Nama izin (pendaftaran.view)     │
+    │ display_name    │ VARCHAR(255) │ Nama tampilan                    │
+    │ module          │ VARCHAR(255) │ Modul terkait                    │
+    │ action          │ VARCHAR(255) │ Jenis aksi (view, create, dll)   │
+    │ description     │ TEXT         │ Deskripsi izin                   │
+    │ created_at      │ TIMESTAMP    │ Waktu dibuat                     │
+    │ updated_at      │ TIMESTAMP    │ Waktu diubah                     │
+    └─────────────────┴──────────────┴──────────────────────────────────┘
+
+    Table: role_permission (Pivot)
+    ┌─────────────────┬──────────────┬──────────────────────────────────┐
+    │ Column          │ Type         │ Description                      │
+    ├─────────────────┼──────────────┼──────────────────────────────────┤
+    │ id              │ BIGINT PK    │ Primary key                      │
+    │ role_id         │ BIGINT FK    │ Foreign key ke roles             │
+    │ permission_id   │ BIGINT FK    │ Foreign key ke permissions       │
+    │ created_at      │ TIMESTAMP    │ Waktu dibuat                     │
+    │ updated_at      │ TIMESTAMP    │ Waktu diubah                     │
+    └─────────────────┴──────────────┴──────────────────────────────────┘
+
+    Table: user_role (Pivot)
+    ┌─────────────────┬──────────────┬──────────────────────────────────┐
+    │ Column          │ Type         │ Description                      │
+    ├─────────────────┼──────────────┼──────────────────────────────────┤
+    │ id              │ BIGINT PK    │ Primary key                      │
+    │ user_id         │ BIGINT FK    │ Foreign key ke users             │
+    │ role_id         │ BIGINT FK    │ Foreign key ke roles             │
+    │ created_at      │ TIMESTAMP    │ Waktu dibuat                     │
+    │ updated_at      │ TIMESTAMP    │ Waktu diubah                     │
+    └─────────────────┴──────────────┴──────────────────────────────────┘
+
+================================================================================
+                              AKHIR DOKUMEN
+================================================================================
+
+Dokumen ini merupakan bagian dari Sistem Manajemen Mutu LSP dan wajib 
+ditinjau secara berkala minimal setahun sekali atau ketika terjadi 
+perubahan signifikan pada sistem.
+
+Untuk pertanyaan atau klarifikasi, hubungi Manajer Teknologi Informasi.
+
+================================================================================

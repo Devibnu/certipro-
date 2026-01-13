@@ -30,4 +30,21 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | WhatsApp Notification Service
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for WhatsApp notification service.
+    | Supports various providers: Fonnte, Wablas, Twilio, etc.
+    |
+    */
+    'whatsapp' => [
+        'enabled' => env('WHATSAPP_ENABLED', false),
+        'provider' => env('WHATSAPP_PROVIDER', 'fonnte'), // fonnte, wablas, twilio
+        'api_url' => env('WHATSAPP_API_URL'),
+        'api_key' => env('WHATSAPP_API_KEY'),
+        'sender' => env('WHATSAPP_SENDER'), // Sender phone number
+    ],
+
 ];

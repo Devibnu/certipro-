@@ -1,18 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>@yield('title', config('app.name', 'JasaIbnu'))</title>
+    @php $systemName = systemCompanyName(); @endphp
+    <title>@yield('title', $systemName ?? 'LSP')</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     
     @php
-        $activeFavicon = \App\Models\FaviconWebsite::where('status', 1)->first();
-        $activeLogo = \App\Models\LogoWebsite::where('status', 1)->first();
+        // Get logo from LogoAdmin (branding system) as primary source
+        $logoAdmin = \App\Models\LogoAdmin::where('status', true)->first();
+        $logoUrl = $logoAdmin && $logoAdmin->gambar ? asset('storage/' . $logoAdmin->gambar) : null;
+        $logoInfo = $logoAdmin ? [
+            'nama' => $logoAdmin->nama_perusahaan ?: null,
+            'tagline' => $logoAdmin->tagline,
+            'timestamp' => $logoAdmin->updated_at->timestamp ?? time(),
+        ] : [
+            'nama' => null,
+            'tagline' => null,
+            'timestamp' => time(),
+        ];
+        
+        // Favicon - use logo as favicon if no dedicated favicon
+        try {
+            $activeFavicon = \App\Models\FaviconWebsite::where('status', 1)->first();
+        } catch (\Exception $e) {
+            $activeFavicon = null;
+        }
     @endphp
     @if($activeFavicon && $activeFavicon->favicon)
         <link rel="icon" type="image/png" href="{{ asset('storage/' . $activeFavicon->favicon) }}?v={{ $activeFavicon->updated_at->timestamp }}">
-    @elseif($activeLogo && $activeLogo->gambar)
-        <link rel="icon" type="image/png" href="{{ asset('storage/' . $activeLogo->gambar) }}?v={{ $activeLogo->updated_at->timestamp }}">
+    @elseif($logoUrl)
+        <link rel="icon" type="image/png" href="{{ $logoUrl }}?v={{ $logoInfo['timestamp'] }}">
     @else
         <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon.png') }}">
     @endif
@@ -38,10 +56,9 @@
 </head>
 <body>
     @php
-        // Get active header info and logo from database - force fresh query
+        // Get active header info from database
         \Illuminate\Support\Facades\DB::connection()->disableQueryLog();
         $headerInfo = \App\Models\HeaderInfo::where('status', true)->orderBy('updated_at', 'desc')->first();
-        $logoWebsite = \App\Models\LogoWebsite::where('status', true)->orderBy('updated_at', 'desc')->first();
     @endphp
     
     <!-- Top Header -->
@@ -50,16 +67,10 @@
             <div class="row no-gutters d-flex align-items-center align-items-stretch">
                 <div class="col-md-4 d-flex align-items-center py-4">
                     <a class="navbar-brand" href="{{ route('home') }}" style="display: flex; align-items: center;">
-                        @if($logoWebsite && $logoWebsite->gambar)
-                            <img src="{{ asset('storage/' . $logoWebsite->gambar) }}?v={{ $logoWebsite->updated_at->timestamp }}&t={{ time() }}" alt="Logo" style="max-height: 50px; margin-right: 10px; object-fit: contain;">
+                        @if($logoUrl)
+                            <img src="{{ $logoUrl }}?v={{ $logoInfo['timestamp'] }}&t={{ time() }}" alt="{{ $logoInfo['nama'] }}" style="max-height: 50px; margin-right: 10px; object-fit: contain;">
                         @endif
-                        <span>
-                            @if($headerInfo)
-                                {{ $headerInfo->nama_website }}
-                            @else
-                                {{ config('app.name', 'JasaIbnu') }}
-                            @endif
-                        </span>
+                        <span>{{ $logoInfo['nama'] }}</span>
                     </a>
                 </div>
                 <div class="col-lg-8 d-block">
@@ -71,7 +82,7 @@
                                 @if($headerInfo)
                                     <span>{{ $headerInfo->email }}</span>
                                 @else
-                                    <span>info@jasaibnu.id</span>
+                                    <span>info@lsp.id</span>
                                 @endif
                             </div>
                         </div>

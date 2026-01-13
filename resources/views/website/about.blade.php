@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>About Us - Jasa Ibnu</title>
+    @php $systemName = systemCompanyName(); $logoUrl = systemLogoUrl(); @endphp
+    <title>About Us{{ $systemName ? ' - ' . $systemName : '' }}</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     
@@ -27,7 +28,13 @@
     	<div class="container">
     		<div class="row no-gutters d-flex align-items-center align-items-stretch">
     			<div class="col-md-4 d-flex align-items-center py-4">
-    				<a class="navbar-brand" href="{{ url('/') }}">Jasa Ibnu</a>
+    				@if($logoUrl)
+    				    <a class="navbar-brand" href="{{ url('/') }}"><img src="{{ $logoUrl }}" alt="Logo" style="max-height: 40px;"></a>
+    				@elseif($systemName)
+    				    <a class="navbar-brand" href="{{ url('/') }}">{{ $systemName }}</a>
+    				@else
+    				    <a class="navbar-brand" href="{{ url('/') }}">LSP</a>
+    				@endif
     			</div>
 	    		<div class="col-lg-8 d-block">
 		    		<div class="row d-flex">
@@ -254,14 +261,14 @@
               <div class="wrap-about-border">
                 <div class="img" style="background-image: url(images/about.jpg);"></div>
                 <div class="text">
-                  <h3>Welcome to Jasa Ibnu</h3>
+                  <h3>Welcome to {{ $systemName ?? 'LSP' }}</h3>
                   <p>Providing quality technology services for your business needs.</p>
                   <p><a href="{{ url('/contact') }}" class="btn btn-primary py-3 px-4">Contact us</a></p>
                 </div>
               </div>
             </div>
             <div class="col-md-7 wrap-about pr-md-4 ftco-animate">
-              <h2 class="mb-4">Welcome to Jasa Ibnu</h2>
+              <h2 class="mb-4">Welcome to {{ $systemName ?? 'LSP' }}</h2>
               <p>We are a technology service provider that focuses on delivering innovative solutions for your business. With years of experience in the industry, we understand your needs and are ready to help you achieve your goals.</p>
               <p>Our services include web development, mobile applications, system integration, and IT consulting. We always prioritize quality and customer satisfaction in every project we handle.</p>
               <p>Let us help you transform your business with the right technology solutions. Contact us today for a free consultation.</p>
@@ -290,7 +297,7 @@
         <div class="row mb-5">
           <div class="col-md">
             <div class="ftco-footer-widget mb-4">
-              <h2 class="ftco-heading-2">Jasa Ibnu</h2>
+              <h2 class="ftco-heading-2">{{ $systemName ?? 'LSP' }}</h2>
               <p>Your trusted technology partner for innovative business solutions.</p>
               <ul class="ftco-footer-social list-unstyled float-md-left float-lft mt-5">
                 <li class="ftco-animate"><a href="#"><span class="icon-twitter"></span></a></li>
@@ -325,7 +332,7 @@
         </div>
         <div class="row">
           <div class="col-md-12 text-center">
-            <p>&copy; <script>document.write(new Date().getFullYear());</script> Jasa Ibnu. All rights reserved.</p>
+            <p>&copy; <script>document.write(new Date().getFullYear());</script> {{ $systemName ?? 'LSP' }}. All rights reserved.</p>
           </div>
         </div>
       </div>

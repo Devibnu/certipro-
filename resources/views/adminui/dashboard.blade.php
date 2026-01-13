@@ -128,8 +128,8 @@
                         <div class="col-lg-7">
                             <div class="d-flex flex-column h-100">
                                 <p class="mb-1 pt-2 text-bold">Selamat Datang di</p>
-                                <h5 class="font-weight-bolder">Admin Dashboard Jasa Ibnu</h5>
-                                <p class="mb-4">Kelola semua konten website Anda dengan mudah. Dari users, projects, blog posts, testimonials hingga messages dari customer.</p>
+                                <h5 class="font-weight-bolder">Admin Dashboard @if(systemCompanyName()){{ systemCompanyName() }}@endif</h5>
+                                <p class="mb-4">Kelola semua konten sistem sertifikasi kompetensi dengan mudah. Dari halaman, users, skema, artikel hingga data sertifikasi.</p>
                                 <div class="mb-3">
                                     <p class="text-sm mb-2">
                                         <i class="fas fa-check text-success me-2"></i> 
@@ -137,15 +137,15 @@
                                     </p>
                                     <p class="text-sm mb-2">
                                         <i class="fas fa-check text-success me-2"></i> 
-                                        <strong>{{ number_format($totalProjects) }}</strong> Projects telah diselesaikan
+                                        <strong>{{ number_format($totalProjects) }}</strong> Skema sertifikasi aktif
                                     </p>
                                     <p class="text-sm mb-2">
                                         <i class="fas fa-check text-success me-2"></i> 
-                                        <strong>{{ number_format($totalPosts) }}</strong> Blog Posts dipublikasikan
+                                        <strong>{{ number_format($totalPosts) }}</strong> Artikel dipublikasikan
                                     </p>
                                     <p class="text-sm mb-0">
                                         <i class="fas fa-check text-success me-2"></i> 
-                                        <strong>{{ number_format($totalTestimonials) }}</strong> Testimonials dari klien
+                                        <strong>{{ number_format($totalTestimonials) }}</strong> Testimonial klien
                                     </p>
                                 </div>
                                 @if($recentUsers > 0 || $recentProjects > 0 || $recentPosts > 0)

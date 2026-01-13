@@ -17,7 +17,7 @@ class AdminUIController extends Controller
         if (Auth::check()) {
             return redirect()->route('adminui.dashboard');
         }
-        return redirect()->route('adminui.login');
+        return redirect()->route('login');
     }
 
     /**
@@ -71,15 +71,46 @@ class AdminUIController extends Controller
 
         // Get dashboard statistics from database
         $totalUsers = \App\Models\User::count();
-        $totalProjects = \App\Models\Proyek::count();
-        $totalPosts = \App\Models\Artikel::count();
-        $totalTestimonials = \App\Models\Testimonial::count();
-        $totalMessages = \App\Models\KontakPerusahaan::count();
+        
+        // Use try-catch for tables that may not exist yet
+        try {
+            $totalProjects = \DB::table('proyek')->count();
+        } catch (\Exception $e) {
+            $totalProjects = 0;
+        }
+        
+        try {
+            $totalPosts = \DB::table('artikel')->count();
+        } catch (\Exception $e) {
+            $totalPosts = 0;
+        }
+        
+        try {
+            $totalTestimonials = \DB::table('testimonial')->count();
+        } catch (\Exception $e) {
+            $totalTestimonials = 0;
+        }
+        
+        try {
+            $totalMessages = \DB::table('kontak_perusahaan')->count();
+        } catch (\Exception $e) {
+            $totalMessages = 0;
+        }
 
         // Get recent data for charts (last 7 days)
         $recentUsers = \App\Models\User::where('created_at', '>=', now()->subDays(7))->count();
-        $recentProjects = \App\Models\Proyek::where('created_at', '>=', now()->subDays(7))->count();
-        $recentPosts = \App\Models\Artikel::where('created_at', '>=', now()->subDays(7))->count();
+        
+        try {
+            $recentProjects = \DB::table('proyek')->where('created_at', '>=', now()->subDays(7))->count();
+        } catch (\Exception $e) {
+            $recentProjects = 0;
+        }
+        
+        try {
+            $recentPosts = \DB::table('artikel')->where('created_at', '>=', now()->subDays(7))->count();
+        } catch (\Exception $e) {
+            $recentPosts = 0;
+        }
 
         return view('adminui.dashboard', compact(
             'totalUsers',
@@ -138,6 +169,6 @@ class AdminUIController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('adminui.login');
+        return redirect()->route('login');
     }
 }

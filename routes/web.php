@@ -11,6 +11,7 @@ Route::middleware(['auth'])->prefix('adminui')->group(function () {
     Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('adminui.users.edit')->middleware('check.permission:Users');
     Route::put('/users/{user}', [UserController::class, 'update'])->name('adminui.users.update')->middleware('check.permission:Users');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('adminui.users.destroy')->middleware('check.permission:Users');
+    Route::post('/users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('adminui.users.reset-password')->middleware('check.permission:Users');
 });
 
 use App\Http\Controllers\AdminUIController;
@@ -35,16 +36,76 @@ use App\Http\Controllers\ServicesPageController;
 use App\Http\Controllers\AdminUI\ServicesAdminController;
 use App\Http\Controllers\Admin\KontakController;
 
-// Global login route for Laravel Auth middleware - redirects to adminui login
-Route::get('/login', function() {
-    return redirect('/adminui/login');
-})->name('login');
+// Global login route - langsung ke halaman login admin
+Route::get('/login', [AdminUIController::class, 'login'])->name('login')->middleware('guest');
+Route::post('/authenticate', [AdminUIController::class, 'authenticate'])->name('authenticate');
 
-// Website Frontend Routes
-// Homepage with dynamic content
-Route::get('/', [HomeController::class, 'index'])->name('home');
+// ============================================
+// CMS LANDING PAGE PUBLIC ROUTES (NEW MODULE)
+// URL tanpa prefix /page, langsung /{slug}
+// ============================================
 
-// Dynamic About Page Routes (New System)
+// Homepage - slug 'home'
+Route::get('/', [App\Http\Controllers\LandingPageController::class, 'home'])->name('home');
+
+// Halaman CMS dinamis lainnya
+Route::get('/tentang', [App\Http\Controllers\LandingPageController::class, 'show'])->defaults('slug', 'tentang')->name('landing.tentang');
+Route::get('/skema', [App\Http\Controllers\LandingPageController::class, 'show'])->defaults('slug', 'skema')->name('landing.skema');
+Route::get('/alur', [App\Http\Controllers\LandingPageController::class, 'show'])->defaults('slug', 'alur')->name('landing.alur');
+Route::get('/persyaratan', [App\Http\Controllers\LandingPageController::class, 'show'])->defaults('slug', 'persyaratan')->name('landing.persyaratan');
+Route::get('/kontak', [App\Http\Controllers\LandingPageController::class, 'show'])->defaults('slug', 'kontak')->name('landing.kontak');
+
+// ============================================
+// PRA-PENDAFTARAN PUBLIC ROUTES
+// Form pendaftaran untuk umum dan kampus
+// ============================================
+Route::get('/daftar', [App\Http\Controllers\PraPendaftaranController::class, 'create'])->name('daftar');
+Route::post('/daftar', [App\Http\Controllers\PraPendaftaranController::class, 'store'])->name('daftar.store');
+Route::get('/pendaftaran/sukses', [App\Http\Controllers\PraPendaftaranController::class, 'sukses'])->name('pendaftaran.sukses');
+
+// ============================================
+// SERTIFIKAT VERIFICATION (PUBLIC)
+// Verifikasi keaslian sertifikat tanpa login
+// ============================================
+Route::get('/sertifikat/verifikasi', [App\Http\Controllers\SertifikatVerifikasiController::class, 'search'])->name('sertifikat.search.public');
+Route::get('/sertifikat/verifikasi/{nomor_sertifikat}', [App\Http\Controllers\SertifikatVerifikasiController::class, 'verifikasi'])->name('sertifikat.verifikasi.public');
+Route::get('/sertifikat/verify/{uuid}', [App\Http\Controllers\SertifikatVerifikasiController::class, 'verifyByUuid'])->name('sertifikat.verify.uuid');
+
+// Alias routes for easier access
+Route::get('/verifikasi', [App\Http\Controllers\SertifikatVerifikasiController::class, 'search'])->name('verifikasi.index');
+Route::get('/verifikasi/{nomor_sertifikat}', [App\Http\Controllers\SertifikatVerifikasiController::class, 'verifikasi'])->name('verifikasi.show');
+
+// ============================================
+// STATUS PENDAFTARAN (PUBLIC)
+// Transparansi status untuk peserta sesuai BNSP
+// ============================================
+
+// Status Pra-Pendaftaran (tahap awal)
+Route::get('/status-pendaftaran', [App\Http\Controllers\StatusPraPendaftaranController::class, 'index'])->name('status-pendaftaran');
+Route::get('/status-pra-pendaftaran', [App\Http\Controllers\StatusPraPendaftaranController::class, 'index'])->name('status-pra-pendaftaran.index');
+Route::get('/status-pra-pendaftaran/cari', [App\Http\Controllers\StatusPraPendaftaranController::class, 'search'])->name('status-pra-pendaftaran.search');
+Route::get('/api/status-pra-pendaftaran', [App\Http\Controllers\StatusPraPendaftaranController::class, 'apiCheck'])->name('status-pra-pendaftaran.api');
+
+// Status Pendaftaran Sertifikasi (tahap lanjutan)
+Route::get('/status-sertifikasi', [App\Http\Controllers\StatusPendaftaranController::class, 'index'])->name('status-pendaftaran.index');
+Route::post('/status-sertifikasi', [App\Http\Controllers\StatusPendaftaranController::class, 'search'])->name('status-pendaftaran.search');
+Route::get('/api/status-sertifikasi', [App\Http\Controllers\StatusPendaftaranController::class, 'apiCheck'])->name('status-pendaftaran.api');
+
+// ============================================
+// PENDAFTARAN SERTIFIKASI (ASESI)
+// Routes untuk user login (asesi)
+// ============================================
+Route::middleware(['auth'])->group(function () {
+    Route::get('/pendaftaran-sertifikasi', [App\Http\Controllers\PendaftaranSertifikasiController::class, 'index'])->name('pendaftaran-sertifikasi.index');
+    Route::post('/pendaftaran-sertifikasi', [App\Http\Controllers\PendaftaranSertifikasiController::class, 'store'])->name('pendaftaran-sertifikasi.store');
+});
+
+// ============================================
+// LEGACY ROUTES (backward compatibility)
+// Routes lama tetap ada untuk kompatibilitas
+// ============================================
+
+// Dynamic About Page Routes (Legacy)
 Route::get('/about', [AboutPageController::class, 'index'])->name('about');
 Route::get('/about-test', [AboutPageController::class, 'index'])->name('about.test');
 // Keep old routes for backward compatibility
@@ -54,7 +115,7 @@ Route::post('/admin/about/upload-image', [DynamicAboutController::class, 'upload
 
 Route::get('/services', [ServicesPageController::class, 'index'])->name('services');
 
-// Dynamic Contact Page Routes (New System)
+// Dynamic Contact Page Routes (Legacy)
 Route::get('/contact', [KontakController::class, 'frontend'])->name('contact');
 Route::post('/contact/submit', [KontakController::class, 'submitContactForm'])->name('contact.submit');
 
@@ -87,14 +148,13 @@ Route::middleware('auth')->group(function () {
 // Admin UI Dashboard Routes with prefix
 Route::prefix('adminui')->name('adminui.')->group(function () {
     
-    // Route utama adminui - redirect ke login jika belum login, ke dashboard jika sudah login
-    Route::get('/', [AdminUIController::class, 'index'])->name('index');
-    
-    // Routes untuk guest (tidak login)
-    Route::group(['middleware' => 'guest'], function () {
-        Route::get('login', [AdminUIController::class, 'login'])->name('login');
-        Route::post('authenticate', [AdminUIController::class, 'authenticate'])->name('authenticate');
-    });
+    // Route utama adminui - redirect ke login untuk single entry point
+    Route::get('/', function() {
+        if (Auth::check()) {
+            return redirect()->route('adminui.dashboard');
+        }
+        return redirect()->route('login');
+    })->name('index');
     
     // Routes untuk authenticated users
     Route::group(['middleware' => 'auth'], function () {
@@ -243,6 +303,117 @@ Route::prefix('adminui')->name('adminui.')->group(function () {
     
     // Favicon Routes
     Route::resource('favicon', App\Http\Controllers\FaviconController::class)->middleware('check.permission:Dashboard');
+    
+    // CMS Landing Page Routes - NEW MODULE
+    Route::resource('halaman', App\Http\Controllers\AdminUI\HalamanController::class)->middleware('check.permission:Dashboard');
+    Route::resource('bagian-halaman', App\Http\Controllers\AdminUI\BagianHalamanController::class)->middleware('check.permission:Dashboard');
+    
+    // Pra-Pendaftaran Admin Routes
+    Route::get('pra-pendaftaran', [App\Http\Controllers\AdminUI\PraPendaftaranAdminController::class, 'index'])->name('pra-pendaftaran.index')->middleware('check.permission:Dashboard');
+    Route::get('pra-pendaftaran/{id}', [App\Http\Controllers\AdminUI\PraPendaftaranAdminController::class, 'show'])->name('pra-pendaftaran.show')->middleware('check.permission:Dashboard');
+    Route::patch('pra-pendaftaran/{id}/status', [App\Http\Controllers\AdminUI\PraPendaftaranAdminController::class, 'updateStatus'])->name('pra-pendaftaran.update-status')->middleware('check.permission:Dashboard');
+    Route::post('pra-pendaftaran/{id}/buat-pendaftaran', [App\Http\Controllers\AdminUI\PraPendaftaranAdminController::class, 'buatPendaftaranSertifikasi'])->name('pra-pendaftaran.buat-pendaftaran')->middleware('check.permission:Dashboard');
+    
+    // Skema Sertifikasi Admin Routes (Master Data)
+    Route::resource('skema-sertifikasi', App\Http\Controllers\AdminUI\SkemaSertifikasiController::class)->middleware('check.permission:Dashboard');
+    
+    // Unit Kompetensi Admin Routes (Master Data)
+    Route::resource('unit-kompetensi', App\Http\Controllers\AdminUI\UnitKompetensiController::class)->middleware('check.permission:Dashboard');
+    
+    // KUK (Kriteria Unjuk Kerja) Admin Routes (Master Data)
+    Route::resource('kuk', App\Http\Controllers\AdminUI\KukController::class)->middleware('check.permission:Dashboard');
+    
+    // API untuk dropdown berantai Unit Kompetensi by Skema
+    Route::get('api/unit-kompetensi-by-skema/{skemaId}', [App\Http\Controllers\AdminUI\KukController::class, 'getUnitBySkema'])->name('api.unit-by-skema')->middleware('check.permission:Dashboard');
+    
+    // Pendaftaran Sertifikasi Admin Routes
+    Route::get('pendaftaran-sertifikasi', [App\Http\Controllers\AdminUI\PendaftaranSertifikasiAdminController::class, 'index'])->name('pendaftaran-sertifikasi.index')->middleware('check.permission:pendaftaran_sertifikasi.view');
+    Route::get('pendaftaran-sertifikasi/{id}', [App\Http\Controllers\AdminUI\PendaftaranSertifikasiAdminController::class, 'show'])->name('pendaftaran-sertifikasi.show')->middleware('check.permission:pendaftaran_sertifikasi.view');
+    Route::get('pendaftaran-sertifikasi/{id}/audit-pdf', [App\Http\Controllers\AdminUI\PendaftaranSertifikasiAdminController::class, 'exportAuditEvidence'])->name('pendaftaran-sertifikasi.audit-pdf')->middleware('check.permission:pendaftaran_sertifikasi.view');
+    Route::post('pendaftaran-sertifikasi/{id}/assign-skema', [App\Http\Controllers\AdminUI\PendaftaranSertifikasiAdminController::class, 'assignSkema'])->name('pendaftaran-sertifikasi.assign-skema')->middleware('check.permission:pendaftaran_sertifikasi.assign_skema');
+    Route::patch('pendaftaran-sertifikasi/{id}/verifikasi', [App\Http\Controllers\AdminUI\PendaftaranSertifikasiAdminController::class, 'verifikasi'])->name('pendaftaran-sertifikasi.verifikasi')->middleware('check.permission:pendaftaran_sertifikasi.verify');
+    Route::patch('pendaftaran-sertifikasi/{id}/tolak', [App\Http\Controllers\AdminUI\PendaftaranSertifikasiAdminController::class, 'tolak'])->name('pendaftaran-sertifikasi.tolak')->middleware('check.permission:pendaftaran_sertifikasi.verify');
+    
+    // Asesmen Routes (Asesor - staff is legacy alias for asesor)
+    Route::prefix('asesmen')->name('asesmen.')->middleware('check.role:asesor|staff')->group(function () {
+        Route::get('/', [App\Http\Controllers\AdminUI\AsesmenController::class, 'index'])->name('index');
+        Route::get('/{pendaftaran}/mulai', [App\Http\Controllers\AdminUI\AsesmenController::class, 'mulaiAsesmen'])->name('mulai');
+        Route::post('/{pendaftaran}/simpan', [App\Http\Controllers\AdminUI\AsesmenController::class, 'simpanAsesmen'])->name('simpan');
+        Route::get('/detail/{id}', [App\Http\Controllers\AdminUI\AsesmenController::class, 'show'])->name('show');
+        Route::get('/detail/{id}/audit-pdf', [App\Http\Controllers\AdminUI\AsesmenController::class, 'exportAuditEvidence'])->name('audit-pdf');
+    });
+    
+    // Keputusan Sertifikasi Routes (Komite Teknis ONLY - Audit BNSP Compliant)
+    Route::prefix('keputusan')->name('keputusan.')->middleware('check.role:komite_teknis')->group(function () {
+        Route::get('/', [App\Http\Controllers\AdminUI\KeputusanSertifikasiController::class, 'index'])->name('index');
+        Route::get('/{pendaftaran}', [App\Http\Controllers\AdminUI\KeputusanSertifikasiController::class, 'show'])->name('show');
+        Route::get('/{pendaftaran}/audit-pdf', [App\Http\Controllers\AdminUI\KeputusanSertifikasiController::class, 'exportAuditEvidence'])->name('audit-pdf');
+        Route::post('/{pendaftaran}/simpan', [App\Http\Controllers\AdminUI\KeputusanSertifikasiController::class, 'simpan'])->name('simpan');
+    });
+    
+    // Sertifikat Routes (Komite Teknis ONLY)
+    Route::prefix('sertifikat')->name('sertifikat.')->middleware('check.role:komite_teknis')->group(function () {
+        Route::get('/', [App\Http\Controllers\AdminUI\SertifikatController::class, 'index'])->name('index');
+        Route::post('/{pendaftaran}/terbit', [App\Http\Controllers\AdminUI\SertifikatController::class, 'terbitkan'])->name('terbit');
+        Route::get('/{id}', [App\Http\Controllers\AdminUI\SertifikatController::class, 'show'])->name('show');
+        Route::get('/{id}/download', [App\Http\Controllers\AdminUI\SertifikatController::class, 'download'])->name('download');
+        Route::get('/{id}/preview', [App\Http\Controllers\AdminUI\SertifikatController::class, 'preview'])->name('preview');
+        Route::post('/{id}/regenerate', [App\Http\Controllers\AdminUI\SertifikatController::class, 'regenerate'])->name('regenerate');
+    });
+    
+    // Audit Log Routes (Super Admin & Admin ONLY - BNSP Compliance)
+    Route::prefix('audit-log')->name('audit-log.')->middleware('check.role:admin')->group(function () {
+        Route::get('/', [App\Http\Controllers\AdminUI\AuditLogController::class, 'index'])->name('index');
+        Route::get('/export', [App\Http\Controllers\AdminUI\AuditLogController::class, 'export'])->name('export');
+        Route::get('/statistics', [App\Http\Controllers\AdminUI\AuditLogController::class, 'statistics'])->name('statistics');
+        Route::get('/{id}', [App\Http\Controllers\AdminUI\AuditLogController::class, 'show'])->name('show');
+    });
+    
+    // Audit Evidence PDF (Super Admin ONLY - BNSP Audit Document)
+    Route::prefix('audit-evidence')->name('audit-evidence.')->middleware('check.role:super admin')->group(function () {
+        Route::get('/pdf', [App\Http\Controllers\AdminUI\AuditEvidenceController::class, 'generatePdf'])->name('pdf');
+        Route::get('/preview', [App\Http\Controllers\AdminUI\AuditEvidenceController::class, 'preview'])->name('preview');
+    });
+    
+    // =====================================================
+    // SYSTEM SETTINGS ROUTES (Super Admin ONLY)
+    // =====================================================
+    Route::prefix('settings')->name('settings.')->group(function () {
+        // Email Settings
+        Route::get('/email', [App\Http\Controllers\AdminUI\EmailSettingController::class, 'index'])->name('email');
+        Route::post('/email', [App\Http\Controllers\AdminUI\EmailSettingController::class, 'store'])->name('email.store');
+        Route::post('/email/test', [App\Http\Controllers\AdminUI\EmailSettingController::class, 'sendTest'])->name('email.test');
+        
+        // Branding & Logo Settings
+        Route::get('/branding', [App\Http\Controllers\AdminUI\BrandingController::class, 'index'])->name('branding');
+        Route::post('/branding', [App\Http\Controllers\AdminUI\BrandingController::class, 'update'])->name('branding.update');
+        Route::delete('/branding', [App\Http\Controllers\AdminUI\BrandingController::class, 'destroy'])->name('branding.destroy');
+    });
+    
+    // =====================================================
+    // EMAIL PREVIEW & RESEND ROUTES (Admin/Super Admin)
+    // =====================================================
+    Route::prefix('email')->name('email.')->group(function () {
+        Route::get('/preview/{type}/{id}', [App\Http\Controllers\AdminUI\EmailPreviewController::class, 'preview'])->name('preview');
+        Route::post('/resend/{type}/{id}', [App\Http\Controllers\AdminUI\EmailPreviewController::class, 'resend'])->name('resend');
+        Route::get('/history/{type}/{id}', [App\Http\Controllers\AdminUI\EmailPreviewController::class, 'history'])->name('history');
+        Route::get('/status/{type}/{id}', [App\Http\Controllers\AdminUI\EmailPreviewController::class, 'status'])->name('status');
+    });
+    
+    // =====================================================
+    // AUDIT EVIDENCE PDF ROUTES (Admin/Super Admin)
+    // Generate PDF bukti audit untuk keperluan BNSP/ISO 17024
+    // =====================================================
+    Route::prefix('audit')->name('audit.')->group(function () {
+        // Email Audit Evidence PDF
+        Route::get('/email/{type}/{id}/pdf', [App\Http\Controllers\AdminUI\EmailAuditEvidenceController::class, 'download'])->name('email.pdf');
+        Route::get('/email/{type}/{id}/preview', [App\Http\Controllers\AdminUI\EmailAuditEvidenceController::class, 'preview'])->name('email.preview');
+        Route::get('/email/types', [App\Http\Controllers\AdminUI\EmailAuditEvidenceController::class, 'types'])->name('email.types');
+        
+        // Final Audit Package PDF
+        Route::get('/final-package/pdf', [App\Http\Controllers\Admin\AuditPackageController::class, 'generateFinalPackage'])->name('final-package.pdf');
+        Route::get('/final-package/preview', [App\Http\Controllers\Admin\AuditPackageController::class, 'preview'])->name('final-package.preview');
+    });
     
     // Request Quote Routes
     Route::prefix('request-quote')->name('request-quote.')->group(function () {

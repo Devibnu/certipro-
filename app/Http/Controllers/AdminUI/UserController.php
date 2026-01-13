@@ -4,10 +4,18 @@ namespace App\Http\Controllers\AdminUI;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Services\PasswordResetService;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
+    protected PasswordResetService $passwordResetService;
+
+    public function __construct(PasswordResetService $passwordResetService)
+    {
+        $this->passwordResetService = $passwordResetService;
+    }
+
     public function index()
     {
         $users = User::orderByDesc('id')->get();
@@ -16,20 +24,19 @@ class UserController extends Controller
 
     public function create()
     {
-        // Daftar menu/module yang bisa diakses user (mudah ditambah)
+        // Daftar menu/module yang bisa diakses user (sesuai sidebar CertiPro)
         $menuList = [
             'Dashboard',
-            'Profile',
             'Users',
-            'About Page',
-            'Services',
-            'Contact Page',
-            'Projects',
-            'Blog',
-            'Tables',
-            'Billing',
-            'Settings',
-            'Logout',
+            'CMS Landing Page',
+            'Pra-Pendaftaran',
+            'Skema Sertifikasi',
+            'Unit Kompetensi',
+            'KUK',
+            'Pendaftaran Sertifikasi',
+            'Asesmen',
+            'Keputusan Sertifikasi',
+            'Sertifikat',
         ];
         return view('adminui.users.create', compact('menuList'));
     }
@@ -73,19 +80,19 @@ class UserController extends Controller
     }
     public function edit(User $user)
     {
+        // Daftar menu/module yang bisa diakses user (sesuai sidebar CertiPro)
         $menuList = [
             'Dashboard',
-            'Profile',
             'Users',
-            'About Page',
-            'Services',
-            'Contact Page',
-            'Projects',
-            'Blog',
-            'Tables',
-            'Billing',
-            'Settings',
-            'Logout',
+            'CMS Landing Page',
+            'Pra-Pendaftaran',
+            'Skema Sertifikasi',
+            'Unit Kompetensi',
+            'KUK',
+            'Pendaftaran Sertifikasi',
+            'Asesmen',
+            'Keputusan Sertifikasi',
+            'Sertifikat',
         ];
         return view('adminui.users.edit', compact('user', 'menuList'));
     }
@@ -126,5 +133,26 @@ class UserController extends Controller
     {
         $user->delete();
         return redirect()->route('adminui.users.index')->with('success', 'User berhasil dihapus!');
+    }
+
+    /**
+     * Reset password for a user by admin
+     * Sends password reset link to user's email
+     * 
+     * Security: Rate limited, audit logged, token expires in 60 minutes
+     * Compliance: ISO 27001, ISO 17024
+     */
+    public function resetPassword(Request $request, User $user)
+    {
+        $result = $this->passwordResetService->sendResetByAdmin(
+            $user,
+            auth()->user(),
+            $request
+        );
+
+        return back()->with(
+            $result['success'] ? 'success' : 'error',
+            $result['message']
+        );
     }
 }

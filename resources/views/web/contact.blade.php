@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>{{ $kontak->judul_halaman ?? 'Contact Us' }} - Jasa Ibnu</title>
+    @php $systemName = systemCompanyName(); @endphp
+    <title>{{ $kontak->judul_halaman ?? 'Contact Us' }}@if($systemName) - {{ $systemName }}@endif</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     
@@ -27,7 +28,14 @@
     	<div class="container">
     		<div class="row no-gutters d-flex align-items-center align-items-stretch">
     			<div class="col-md-4 d-flex align-items-center py-4">
-    				<a class="navbar-brand" href="{{ route('home') }}">Jasa Ibnu</a>
+    				@php $systemName = systemCompanyName(); $logoUrl = systemLogoUrl(); @endphp
+    				@if($logoUrl)
+    				    <a class="navbar-brand" href="{{ route('home') }}"><img src="{{ $logoUrl }}" alt="Logo" style="max-height: 40px;"></a>
+    				@elseif($systemName)
+    				    <a class="navbar-brand" href="{{ route('home') }}">{{ $systemName }}</a>
+    				@else
+    				    <a class="navbar-brand" href="{{ route('home') }}">LSP</a>
+    				@endif
     			</div>
 	    		<div class="col-lg-8 d-block">
 		    		<div class="row d-flex">

@@ -3,8 +3,20 @@
   <div class="sidenav-header">
     <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
     <a class="align-items-center d-flex m-0 navbar-brand text-wrap" href="{{ route('dashboard') }}">
-        <img src="../assets/img/logo-ct.png" class="navbar-brand-img h-100" alt="...">
-        <span class="ms-3 font-weight-bold">Soft UI Dashboard Laravel</span>
+        @php
+            $logoUrl = systemLogoUrl();
+            $companyName = systemCompanyName();
+        @endphp
+        @if($logoUrl)
+            <img src="{{ $logoUrl }}" class="navbar-brand-img h-100" alt="Logo" style="max-height: 40px; object-fit: contain;">
+        @else
+            <div class="icon icon-shape icon-sm bg-gradient-primary text-white rounded-circle shadow d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                <i class="fas fa-certificate"></i>
+            </div>
+        @endif
+        @if($companyName)
+            <span class="ms-3 font-weight-bold">{{ $companyName }}</span>
+        @endif
     </a>
   </div>
   <hr class="horizontal dark mt-0">

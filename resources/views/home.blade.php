@@ -1,745 +1,583 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <title>{{ config('app.name', 'Jasa Ibnu') }} - Your Digital Solution Partner</title>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    
-    @php
-        $activeFavicon = \App\Models\FaviconWebsite::where('status', 1)->first();
-        $activeLogo = \App\Models\LogoWebsite::where('status', 1)->first();
-    @endphp
-    @if($activeFavicon && $activeFavicon->favicon)
-        <link rel="icon" type="image/png" href="{{ asset('storage/' . $activeFavicon->favicon) }}?v={{ $activeFavicon->updated_at->timestamp }}">
-    @elseif($activeLogo && $activeLogo->gambar)
-        <link rel="icon" type="image/png" href="{{ asset('storage/' . $activeLogo->gambar) }}?v={{ $activeLogo->updated_at->timestamp }}">
-    @else
-        <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon.png') }}">
-    @endif
-    
-    <link href="https://fonts.googleapis.com/css?family=Nunito+Sans:300,400,600,700,800,900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('website/css/open-iconic-bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('website/css/animate.css') }}">
-    <link rel="stylesheet" href="{{ asset('website/css/owl.carousel.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('website/css/owl.theme.default.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('website/css/magnific-popup.css') }}">
-    <link rel="stylesheet" href="{{ asset('website/css/aos.css') }}">
-    <link rel="stylesheet" href="{{ asset('website/css/ionicons.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('website/css/flaticon.css') }}">
-    <link rel="stylesheet" href="{{ asset('website/css/icomoon.css') }}">
-    <link rel="stylesheet" href="{{ asset('website/css/style.css') }}">
+    <title>eLEARNING - eLearning HTML Template</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="" name="keywords">
+    <meta content="" name="description">
+
+    <!-- Favicon -->
+    <link href="{{ asset('elearning-img/favicon.ico') }}" rel="icon">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Icon Font Stylesheet -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="{{ asset('elearning-lib/animate/animate.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('elearning-lib/owlcarousel/assets/owl.carousel.min.css') }}" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="{{ asset('elearning-css/bootstrap.min.css') }}" rel="stylesheet">
+
+    <!-- Template Stylesheet -->
+    <link href="{{ asset('elearning-css/style.css') }}" rel="stylesheet">
 </head>
+
 <body>
-    @php
-        // Get active header info and logo from database - force fresh query
-        \Illuminate\Support\Facades\DB::connection()->disableQueryLog();
-        $headerInfo = \App\Models\HeaderInfo::where('status', true)->orderBy('updated_at', 'desc')->first();
-        $logoWebsite = \App\Models\LogoWebsite::where('status', true)->orderBy('updated_at', 'desc')->first();
-    @endphp
-    
-    <!-- Top Bar & Navigation -->
-    <div class="bg-top navbar-light">
-        <div class="container">
-            <div class="row no-gutters d-flex align-items-center align-items-stretch">
-                <div class="col-md-4 d-flex align-items-center py-4">
-                    <a class="navbar-brand" href="{{ route('home') }}" style="display: flex; align-items: center;">
-                        @if($logoWebsite && $logoWebsite->gambar)
-                            <img src="{{ asset('storage/' . $logoWebsite->gambar) }}?v={{ $logoWebsite->updated_at->timestamp }}&t={{ time() }}" alt="Logo" style="max-height: 50px; margin-right: 10px; object-fit: contain;">
-                        @endif
-                        <span>{{ $headerInfo ? $headerInfo->nama_website : config('app.name', 'Jasa Ibnu') }}</span>
-                    </a>
+    <!-- Spinner Start -->
+    <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+    <!-- Spinner End -->
+
+
+    <!-- Navbar Start -->
+    <nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
+        <a href="index.html" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
+            <h2 class="m-0 text-primary"><i class="fa fa-book me-3"></i>eLEARNING</h2>
+        </a>
+        <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <div class="navbar-nav ms-auto p-4 p-lg-0">
+                <a href="index.html" class="nav-item nav-link active">Home</a>
+                <a href="about.html" class="nav-item nav-link">About</a>
+                <a href="courses.html" class="nav-item nav-link">Courses</a>
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Pages</a>
+                    <div class="dropdown-menu fade-down m-0">
+                        <a href="team.html" class="dropdown-item">Our Team</a>
+                        <a href="testimonial.html" class="dropdown-item">Testimonial</a>
+                        <a href="404.html" class="dropdown-item">404 Page</a>
+                    </div>
                 </div>
-                <div class="col-lg-8 d-block">
-                    <div class="row d-flex">
-                        <div class="col-md d-flex topper align-items-center align-items-stretch py-md-4">
-                            <div class="icon d-flex justify-content-center align-items-center"><span class="icon-paper-plane"></span></div>
-                            <div class="text">
-                                <span>Email</span>
-                                <span>{{ $headerInfo ? $headerInfo->email : 'info@jasaibnu.id' }}</span>
+                <a href="contact.html" class="nav-item nav-link">Contact</a>
+            </div>
+            <a href="" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Join Now<i class="fa fa-arrow-right ms-3"></i></a>
+        </div>
+    </nav>
+    <!-- Navbar End -->
+
+
+    <!-- Carousel Start -->
+    <div class="container-fluid p-0 mb-5">
+        <div class="owl-carousel header-carousel position-relative">
+            <div class="owl-carousel-item position-relative">
+                <img class="img-fluid" src="{{ asset('elearning-img/carousel-1.jpg') }}" alt="">
+                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center" style="background: rgba(24, 29, 56, .7);">
+                    <div class="container">
+                        <div class="row justify-content-start">
+                            <div class="col-sm-10 col-lg-8">
+                                <h5 class="text-primary text-uppercase mb-3 animated slideInDown">Best Online Courses</h5>
+                                <h1 class="display-3 text-white animated slideInDown">The Best Online Learning Platform</h1>
+                                <p class="fs-5 text-white mb-4 pb-2">Vero elitr justo clita lorem. Ipsum dolor at sed stet sit diam no. Kasd rebum ipsum et diam justo clita et kasd rebum sea sanctus eirmod elitr.</p>
+                                <a href="" class="btn btn-primary py-md-3 px-md-5 me-3 animated slideInLeft">Read More</a>
+                                <a href="" class="btn btn-light py-md-3 px-md-5 animated slideInRight">Join Now</a>
                             </div>
                         </div>
-                        <div class="col-md d-flex topper align-items-center align-items-stretch py-md-4">
-                            <div class="icon d-flex justify-content-center align-items-center"><span class="icon-phone2"></span></div>
-                            <div class="text">
-                                <span>Call</span>
-                                <span>Call Us: {{ $headerInfo ? $headerInfo->telepon : '+62 xxx xxxx' }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="owl-carousel-item position-relative">
+                <img class="img-fluid" src="{{ asset('elearning-img/carousel-2.jpg') }}" alt="">
+                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center" style="background: rgba(24, 29, 56, .7);">
+                    <div class="container">
+                        <div class="row justify-content-start">
+                            <div class="col-sm-10 col-lg-8">
+                                <h5 class="text-primary text-uppercase mb-3 animated slideInDown">Best Online Courses</h5>
+                                <h1 class="display-3 text-white animated slideInDown">Get Educated Online From Your Home</h1>
+                                <p class="fs-5 text-white mb-4 pb-2">Vero elitr justo clita lorem. Ipsum dolor at sed stet sit diam no. Kasd rebum ipsum et diam justo clita et kasd rebum sea sanctus eirmod elitr.</p>
+                                <a href="" class="btn btn-primary py-md-3 px-md-5 me-3 animated slideInLeft">Read More</a>
+                                <a href="" class="btn btn-light py-md-3 px-md-5 animated slideInRight">Join Now</a>
                             </div>
-                        </div>
-                        <div class="col-md topper d-flex align-items-center justify-content-end">
-                            <p class="mb-0 d-block">
-                                @if($headerInfo)
-                                    <a href="{{ $headerInfo->cta_link }}" class="btn py-2 px-3 btn-primary">
-                                        <span>{{ $headerInfo->cta_text }}</span>
-                                    </a>
-                                @else
-                                    <a href="{{ route('contact') }}" class="btn py-2 px-3 btn-primary">
-                                        <span>Free Consulting</span>
-                                    </a>
-                                @endif
-                            </p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark ftco-navbar-light" id="ftco-navbar">
-        <div class="container d-flex align-items-center">
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="oi oi-menu"></span> Menu
-            </button>
-            <form action="#" class="searchform order-lg-last">
-                <div class="form-group d-flex">
-                    <input type="text" class="form-control pl-3" placeholder="Search">
-                    <button type="submit" placeholder="" class="form-control search"><span class="ion-ios-search"></span></button>
-                </div>
-            </form>
-            <div class="collapse navbar-collapse" id="ftco-nav">
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item active"><a href="{{ route('home') }}" class="nav-link pl-0">Home</a></li>
-                    <li class="nav-item"><a href="{{ route('about') }}" class="nav-link">About</a></li>
-                    <li class="nav-item"><a href="{{ url('/projects') }}" class="nav-link">Projects</a></li>
-                    <li class="nav-item"><a href="{{ route('services') }}" class="nav-link">Services</a></li>
-                    <li class="nav-item"><a href="{{ url('/blog') }}" class="nav-link">Blog</a></li>
-                    <li class="nav-item"><a href="{{ route('contact') }}" class="nav-link">Contact</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-    <!-- END nav -->
-    
-    <!-- Hero Slider Section -->
-    <section class="home-slider owl-carousel">
-        @if($hero)
-            <div class="slider-item" style="background-image:url({{ asset('storage/' . $hero->gambar_background) }});">
-                <div class="overlay" style="background: {{ $hero->warna_overlay ?? 'rgba(0, 0, 0, 0.5)' }};"></div>
-                <div class="container">
-                    <div class="row no-gutters slider-text align-items-center justify-content-start" data-scrollax-parent="true">
-                        <div class="col-md-7 ftco-animate">
-                            @if($hero->subjudul)
-                                <span class="subheading">{{ $hero->subjudul }}</span>
-                            @endif
-                            <h1 class="mb-4">{{ $hero->judul }}</h1>
-                            @if($hero->deskripsi)
-                                <div class="hero-description">{!! $hero->deskripsi !!}</div>
-                            @endif
-                            @if($hero->tombol_text && $hero->tombol_link)
-                                @php
-                                    // Detect external links (with http/https OR domain patterns)
-                                    $link = $hero->tombol_link;
-                                    $hasProtocol = str_starts_with($link, 'http://') || str_starts_with($link, 'https://');
-                                    $isDomain = !str_starts_with($link, '/') && (str_contains($link, '.com') || str_contains($link, '.id') || str_contains($link, '.co') || str_contains($link, '.net') || str_contains($link, '.org'));
-                                    $isExternal = $hasProtocol || $isDomain;
-                                    
-                                    // Add https:// if it's a domain without protocol
-                                    if ($isDomain && !$hasProtocol) {
-                                        $link = 'https://' . $link;
-                                    }
-                                @endphp
-                                <p>
-                                    <a href="{{ $link }}" 
-                                       class="btn btn-primary px-4 py-3 mt-3"
-                                       @if($isExternal) target="_blank" rel="noopener noreferrer" @endif>
-                                        {{ $hero->tombol_text }}
-                                        @if($isExternal) <i class="fas fa-external-link-alt ms-1"></i> @endif
-                                    </a>
-                                </p>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @else
-            <!-- Default Hero if no data -->
-            <div class="slider-item" style="background-image:url({{ asset('website/images/bg_1.jpg') }});">
-                <div class="overlay"></div>
-                <div class="container">
-                    <div class="row no-gutters slider-text align-items-center justify-content-start" data-scrollax-parent="true">
-                        <div class="col-md-7 ftco-animate">
-                            <span class="subheading">Welcome to {{ config('app.name') }}</span>
-                            <h1 class="mb-4">We Are The Best Digital Solution Partner</h1>
-                            <p><a href="{{ route('services') }}" class="btn btn-primary px-4 py-3 mt-3">Our Services</a></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @endif
-    </section>
+    <!-- Carousel End -->
 
-    <!-- About Section with Main Features -->
-    <section class="ftco-section">
+
+    <!-- Service Start -->
+    <div class="container-xxl py-5">
         <div class="container">
-            <div class="row d-flex">
-                <div class="col-md-5 order-md-last wrap-about align-items-stretch">
-                    <div class="wrap-about-border ftco-animate">
-                        @if($headerFiturUtama && $headerFiturUtama->gambar_cta)
-                            <div class="img" style="background-image: url({{ str_replace(' ', '%20', asset('storage/' . $headerFiturUtama->gambar_cta)) }}); border"></div>
-                        @else
-                            <div class="img" style="background-image: url({{ asset('website/images/about.jpg') }}); border"></div>
-                        @endif
-                        <div class="text">
-                            @if($headerFiturUtama)
-                                <h3>{{ $headerFiturUtama->judul_cta }}</h3>
-                                <p>{{ $headerFiturUtama->deskripsi_cta }}</p>
-                                @if($headerFiturUtama->button_text && $headerFiturUtama->button_url)
-                                    <p><a href="{{ $headerFiturUtama->button_url }}" class="btn btn-primary py-3 px-4">{{ $headerFiturUtama->button_text }}</a></p>
-                                @else
-                                    <p><a href="{{ route('contact') }}" class="btn btn-primary py-3 px-4">Contact us</a></p>
-                                @endif
-                            @else
-                                <h3>Read Our Success Story for Inspiration</h3>
-                                <p>We are dedicated to providing the best digital solutions for your business needs.</p>
-                                <p><a href="{{ route('contact') }}" class="btn btn-primary py-3 px-4">Contact us</a></p>
-                            @endif
+            <div class="row g-4">
+                <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.1s">
+                    <div class="service-item text-center pt-3">
+                        <div class="p-4">
+                            <i class="fa fa-3x fa-graduation-cap text-primary mb-4"></i>
+                            <h5 class="mb-3">Skilled Instructors</h5>
+                            <p>Diam elitr kasd sed at elitr sed ipsum justo dolor sed clita amet diam</p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-7 wrap-about pr-md-4 ftco-animate">
-                    <h2 class="mb-4">{{ $headerFiturUtama ? $headerFiturUtama->judul_section : 'Our Main Features' }}</h2>
-                    @if($headerFiturUtama)
-                        <p>{{ $headerFiturUtama->deskripsi_section }}</p>
-                    @else
-                        <p>We provide comprehensive solutions to help your business grow and succeed in the digital world.</p>
-                    @endif
-                    
-                    <div class="row mt-5">
-                        @if($features->count() > 0)
-                            @foreach($features->take(4) as $index => $feature)
-                            <div class="col-lg-6">
-                                <div class="services {{ $index == 0 ? 'active' : '' }} text-center">
-                                    <div class="icon mt-2 d-flex justify-content-center align-items-center">
-                                        @if($feature->ikon_fitur)
-                                            <img src="{{ asset('storage/' . $feature->ikon_fitur) }}" alt="{{ $feature->judul_fitur }}" style="width: 50px; height: 50px; object-fit: contain;">
-                                        @else
-                                            <span class="flaticon-{{ ['collaboration', 'analysis', 'search-engine', 'handshake'][$index % 4] }}"></span>
-                                        @endif
-                                    </div>
-                                    <div class="text media-body">
-                                        <h3>{{ $feature->judul_fitur }}</h3>
-                                        <p>{{ Str::limit($feature->deskripsi_fitur, 80) }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            @endforeach
-                        @else
-                            <div class="col-lg-6">
-                                <div class="services active text-center">
-                                    <div class="icon mt-2 d-flex justify-content-center align-items-center"><span class="flaticon-collaboration"></span></div>
-                                    <div class="text media-body">
-                                        <h3>Organization</h3>
-                                        <p>Professional organization and management solutions.</p>
-                                    </div>
-                                </div>
-                                <div class="services text-center">
-                                    <div class="icon mt-2 d-flex justify-content-center align-items-center"><span class="flaticon-analysis"></span></div>
-                                    <div class="text media-body">
-                                        <h3>Analysis</h3>
-                                        <p>In-depth business and market analysis.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="services text-center">
-                                    <div class="icon mt-2 d-flex justify-content-center align-items-center"><span class="flaticon-search-engine"></span></div>
-                                    <div class="text media-body">
-                                        <h3>Strategy</h3>
-                                        <p>Strategic planning and consulting services.</p>
-                                    </div>
-                                </div>
-                                <div class="services text-center">
-                                    <div class="icon mt-2 d-flex justify-content-center align-items-center"><span class="flaticon-handshake"></span></div>
-                                    <div class="text media-body">
-                                        <h3>Partnership</h3>
-                                        <p>Building strong business partnerships.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
+                <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.3s">
+                    <div class="service-item text-center pt-3">
+                        <div class="p-4">
+                            <i class="fa fa-3x fa-globe text-primary mb-4"></i>
+                            <h5 class="mb-3">Online Classes</h5>
+                            <p>Diam elitr kasd sed at elitr sed ipsum justo dolor sed clita amet diam</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.5s">
+                    <div class="service-item text-center pt-3">
+                        <div class="p-4">
+                            <i class="fa fa-3x fa-home text-primary mb-4"></i>
+                            <h5 class="mb-3">Home Projects</h5>
+                            <p>Diam elitr kasd sed at elitr sed ipsum justo dolor sed clita amet diam</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.7s">
+                    <div class="service-item text-center pt-3">
+                        <div class="p-4">
+                            <i class="fa fa-3x fa-book-open text-primary mb-4"></i>
+                            <h5 class="mb-3">Book Library</h5>
+                            <p>Diam elitr kasd sed at elitr sed ipsum justo dolor sed clita amet diam</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
-    
-    <!-- CTA Banner 1 (uses AboutHeroSection if available) -->
-    @php
-        // Use aboutSection (passed from controller) if available
-        $aboutHeroBg = isset($aboutSection) && !empty($aboutSection->hero_image) ? asset('storage/' . $aboutSection->hero_image) : asset('website/images/bg_3.jpg');
-        $aboutHeroTagline = isset($aboutSection) && !empty($aboutSection->tagline) ? $aboutSection->tagline : 'You Always Get the Best Guidance';
-    @endphp
-    <section class="ftco-intro ftco-no-pb img" style="background-image: url({{ $aboutHeroBg }});">
+    </div>
+    <!-- Service End -->
+
+
+    <!-- About Start -->
+    <div class="container-xxl py-5">
         <div class="container">
-            <div class="row justify-content-center mb-5">
-                <div class="col-md-10 text-center heading-section heading-section-white ftco-animate">
-                    <h2 class="mb-0">{{ $aboutHeroTagline }}</h2>
+            <div class="row g-5">
+                <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s" style="min-height: 400px;">
+                    <div class="position-relative h-100">
+                        <img class="img-fluid position-absolute w-100 h-100" src="{{ asset('elearning-img/about.jpg') }}" alt="" style="object-fit: cover;">
+                    </div>
+                </div>
+                <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.3s">
+                    <h6 class="section-title bg-white text-start text-primary pe-3">About Us</h6>
+                    <h1 class="mb-4">Welcome to eLEARNING</h1>
+                    <p class="mb-4">Tempor erat elitr rebum at clita. Diam dolor diam ipsum sit. Aliqu diam amet diam et eos. Clita erat ipsum et lorem et sit.</p>
+                    <p class="mb-4">Tempor erat elitr rebum at clita. Diam dolor diam ipsum sit. Aliqu diam amet diam et eos. Clita erat ipsum et lorem et sit, sed stet lorem sit clita duo justo magna dolore erat amet</p>
+                    <div class="row gy-2 gx-4 mb-4">
+                        <div class="col-sm-6">
+                            <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Skilled Instructors</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Online Classes</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>International Certificate</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Skilled Instructors</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Online Classes</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>International Certificate</p>
+                        </div>
+                    </div>
+                    <a class="btn btn-primary py-3 px-5 mt-2" href="">Read More</a>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+    <!-- About End -->
 
-    <!-- Counter Section -->
-    <section class="ftco-counter" id="section-counter">
+
+    <!-- Categories Start -->
+    <div class="container-xxl py-5 category">
         <div class="container">
-            <div class="row d-md-flex align-items-center justify-content-center">
-                <div class="wrapper">
-                    <div class="row d-md-flex align-items-center">
-                        <div class="col-md d-flex justify-content-center counter-wrap ftco-animate">
-                            <div class="block-18">
-                                <div class="icon"><span class="flaticon-doctor"></span></div>
-                                <div class="text">
-                                    <strong class="number" data-number="{{ $aboutSection->projects_completed ?? 1 }}">0</strong>
-                                    <span>Projects Completed</span>
+            <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+                <h6 class="section-title bg-white text-center text-primary px-3">Categories</h6>
+                <h1 class="mb-5">Courses Categories</h1>
+            </div>
+            <div class="row g-3">
+                <div class="col-lg-7 col-md-6">
+                    <div class="row g-3">
+                        <div class="col-lg-12 col-md-12 wow zoomIn" data-wow-delay="0.1s">
+                            <a class="position-relative d-block overflow-hidden" href="">
+                                <img class="img-fluid" src="{{ asset('elearning-img/cat-1.jpg') }}" alt="">
+                                <div class="bg-white text-center position-absolute bottom-0 end-0 py-2 px-3" style="margin: 1px;">
+                                    <h5 class="m-0">Web Design</h5>
+                                    <small class="text-primary">49 Courses</small>
                                 </div>
-                            </div>
+                            </a>
                         </div>
-                        <div class="col-md d-flex justify-content-center counter-wrap ftco-animate">
-                            <div class="block-18">
-                                <div class="icon"><span class="flaticon-doctor"></span></div>
-                                <div class="text">
-                                    <strong class="number" data-number="{{ $aboutSection->satisfied_customers ?? 809 }}">0</strong>
-                                    <span>Satisfied Customer</span>
+                        <div class="col-lg-6 col-md-12 wow zoomIn" data-wow-delay="0.3s">
+                            <a class="position-relative d-block overflow-hidden" href="">
+                                <img class="img-fluid" src="{{ asset('elearning-img/cat-2.jpg') }}" alt="">
+                                <div class="bg-white text-center position-absolute bottom-0 end-0 py-2 px-3" style="margin: 1px;">
+                                    <h5 class="m-0">Graphic Design</h5>
+                                    <small class="text-primary">49 Courses</small>
                                 </div>
-                            </div>
+                            </a>
                         </div>
-                        <div class="col-md d-flex justify-content-center counter-wrap ftco-animate">
-                            <div class="block-18">
-                                <div class="icon"><span class="flaticon-doctor"></span></div>
-                                <div class="text">
-                                    <strong class="number" data-number="{{ $aboutSection->awards_received ?? 335 }}">0</strong>
-                                    <span>Awards Received</span>
+                        <div class="col-lg-6 col-md-12 wow zoomIn" data-wow-delay="0.5s">
+                            <a class="position-relative d-block overflow-hidden" href="">
+                                <img class="img-fluid" src="{{ asset('elearning-img/cat-3.jpg') }}" alt="">
+                                <div class="bg-white text-center position-absolute bottom-0 end-0 py-2 px-3" style="margin: 1px;">
+                                    <h5 class="m-0">Video Editing</h5>
+                                    <small class="text-primary">49 Courses</small>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="col-md d-flex justify-content-center counter-wrap ftco-animate">
-                            <div class="block-18">
-                                <div class="icon"><span class="flaticon-doctor"></span></div>
-                                <div class="text">
-                                    <strong class="number" data-number="{{ $aboutSection->years_experience ?? 5 }}">0</strong>
-                                    <span>Years of Experience</span>
-                                </div>
-                            </div>
+                            </a>
                         </div>
                     </div>
                 </div>
+                <div class="col-lg-5 col-md-6 wow zoomIn" data-wow-delay="0.7s" style="min-height: 350px;">
+                    <a class="position-relative d-block h-100 overflow-hidden" href="">
+                        <img class="img-fluid position-absolute w-100 h-100" src="{{ asset('elearning-img/cat-4.jpg') }}" alt="" style="object-fit: cover;">
+                        <div class="bg-white text-center position-absolute bottom-0 end-0 py-2 px-3" style="margin:  1px;">
+                            <h5 class="m-0">Online Marketing</h5>
+                            <small class="text-primary">49 Courses</small>
+                        </div>
+                    </a>
+                </div>
             </div>
         </div>
-    </section>
+    </div>
+    <!-- Categories Start -->
 
-    <!-- Services Section -->
-    <section class="ftco-section">
+
+    <!-- Courses Start -->
+    <div class="container-xxl py-5">
         <div class="container">
-            <div class="row justify-content-center mb-5 pb-2">
-                <div class="col-md-8 text-center heading-section ftco-animate">
-                    <h2 class="mb-4">{{ $headerDaftarLayanan->judul_section ?? 'Our Best Services' }}</h2>
-                    <p>{{ $headerDaftarLayanan->deskripsi_section ?? 'Separated they live in. A small river named Duden flows by their place and supplies it with the necessary regelialia. It is a paradisematic country' }}</p>
-                </div>
+            <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+                <h6 class="section-title bg-white text-center text-primary px-3">Courses</h6>
+                <h1 class="mb-5">Popular Courses</h1>
             </div>
-            <div class="row no-gutters">
-                @php
-                    $allServices = $services->count() > 0 ? $services : collect([
-                        (object)['nama_layanan' => 'Business Analysis', 'deskripsi_layanan' => 'Far far away, behind the word mountains, far from the countries Vokalia.', 'gambar_layanan' => null],
-                        (object)['nama_layanan' => 'Business Consulting', 'deskripsi_layanan' => 'Far far away, behind the word mountains, far from the countries Vokalia.', 'gambar_layanan' => null],
-                        (object)['nama_layanan' => 'Business Insurance', 'deskripsi_layanan' => 'Far far away, behind the word mountains, far from the countries Vokalia.', 'gambar_layanan' => null],
-                        (object)['nama_layanan' => 'Global Investigation', 'deskripsi_layanan' => 'Far far away, behind the word mountains, far from the countries Vokalia.', 'gambar_layanan' => null],
-                        (object)['nama_layanan' => 'Audit & Evaluation', 'deskripsi_layanan' => 'Far far away, behind the word mountains, far from the countries Vokalia.', 'gambar_layanan' => null],
-                        (object)['nama_layanan' => 'Marketing Strategy', 'deskripsi_layanan' => 'Far far away, behind the word mountains, far from the countries Vokalia.', 'gambar_layanan' => null],
-                    ]);
-                @endphp
-                @foreach($allServices->take(6) as $index => $service)
-                <div class="col-lg-4 d-flex">
-                    <div class="services-2 {{ $index == 0 ? 'noborder-left' : '' }} {{ $index >= 3 ? 'noborder-bottom' : '' }} text-center ftco-animate">
-                        @if($service->gambar_layanan)
-                            <div class="icon mt-2 d-flex justify-content-center align-items-center">
-                                <img src="{{ asset('storage/' . $service->gambar_layanan) }}" alt="{{ $service->nama_layanan }}" style="width: 60px; height: 60px; object-fit: contain;">
+            <div class="row g-4 justify-content-center">
+                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                    <div class="course-item bg-light">
+                        <div class="position-relative overflow-hidden">
+                            <img class="img-fluid" src="{{ asset('elearning-img/course-1.jpg') }}" alt="">
+                            <div class="w-100 d-flex justify-content-center position-absolute bottom-0 start-0 mb-4">
+                                <a href="#" class="flex-shrink-0 btn btn-sm btn-primary px-3 border-end" style="border-radius: 30px 0 0 30px;">Read More</a>
+                                <a href="#" class="flex-shrink-0 btn btn-sm btn-primary px-3" style="border-radius: 0 30px 30px 0;">Join Now</a>
                             </div>
-                        @else
-                            <div class="icon mt-2 d-flex justify-content-center align-items-center">
-                                <span class="flaticon-{{ ['analysis', 'business', 'insurance', 'money', 'rating', 'search-engine'][$index % 6] }}"></span>
+                        </div>
+                        <div class="text-center p-4 pb-0">
+                            <h3 class="mb-0">$149.00</h3>
+                            <div class="mb-3">
+                                <small class="fa fa-star text-primary"></small>
+                                <small class="fa fa-star text-primary"></small>
+                                <small class="fa fa-star text-primary"></small>
+                                <small class="fa fa-star text-primary"></small>
+                                <small class="fa fa-star text-primary"></small>
+                                <small>(123)</small>
                             </div>
-                        @endif
-                        <div class="text media-body">
-                            <h3>{{ $service->nama_layanan }}</h3>
-                            <p>{{ Str::limit($service->deskripsi_layanan, 100) }}</p>
+                            <h5 class="mb-4">Web Design & Development Course for Beginners</h5>
+                        </div>
+                        <div class="d-flex border-top">
+                            <small class="flex-fill text-center border-end py-2"><i class="fa fa-user-tie text-primary me-2"></i>John Doe</small>
+                            <small class="flex-fill text-center border-end py-2"><i class="fa fa-clock text-primary me-2"></i>1.49 Hrs</small>
+                            <small class="flex-fill text-center py-2"><i class="fa fa-user text-primary me-2"></i>30 Students</small>
                         </div>
                     </div>
                 </div>
-                @endforeach
+                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                    <div class="course-item bg-light">
+                        <div class="position-relative overflow-hidden">
+                            <img class="img-fluid" src="{{ asset('elearning-img/course-2.jpg') }}" alt="">
+                            <div class="w-100 d-flex justify-content-center position-absolute bottom-0 start-0 mb-4">
+                                <a href="#" class="flex-shrink-0 btn btn-sm btn-primary px-3 border-end" style="border-radius: 30px 0 0 30px;">Read More</a>
+                                <a href="#" class="flex-shrink-0 btn btn-sm btn-primary px-3" style="border-radius: 0 30px 30px 0;">Join Now</a>
+                            </div>
+                        </div>
+                        <div class="text-center p-4 pb-0">
+                            <h3 class="mb-0">$149.00</h3>
+                            <div class="mb-3">
+                                <small class="fa fa-star text-primary"></small>
+                                <small class="fa fa-star text-primary"></small>
+                                <small class="fa fa-star text-primary"></small>
+                                <small class="fa fa-star text-primary"></small>
+                                <small class="fa fa-star text-primary"></small>
+                                <small>(123)</small>
+                            </div>
+                            <h5 class="mb-4">Web Design & Development Course for Beginners</h5>
+                        </div>
+                        <div class="d-flex border-top">
+                            <small class="flex-fill text-center border-end py-2"><i class="fa fa-user-tie text-primary me-2"></i>John Doe</small>
+                            <small class="flex-fill text-center border-end py-2"><i class="fa fa-clock text-primary me-2"></i>1.49 Hrs</small>
+                            <small class="flex-fill text-center py-2"><i class="fa fa-user text-primary me-2"></i>30 Students</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+                    <div class="course-item bg-light">
+                        <div class="position-relative overflow-hidden">
+                            <img class="img-fluid" src="{{ asset('elearning-img/course-3.jpg') }}" alt="">
+                            <div class="w-100 d-flex justify-content-center position-absolute bottom-0 start-0 mb-4">
+                                <a href="#" class="flex-shrink-0 btn btn-sm btn-primary px-3 border-end" style="border-radius: 30px 0 0 30px;">Read More</a>
+                                <a href="#" class="flex-shrink-0 btn btn-sm btn-primary px-3" style="border-radius: 0 30px 30px 0;">Join Now</a>
+                            </div>
+                        </div>
+                        <div class="text-center p-4 pb-0">
+                            <h3 class="mb-0">$149.00</h3>
+                            <div class="mb-3">
+                                <small class="fa fa-star text-primary"></small>
+                                <small class="fa fa-star text-primary"></small>
+                                <small class="fa fa-star text-primary"></small>
+                                <small class="fa fa-star text-primary"></small>
+                                <small class="fa fa-star text-primary"></small>
+                                <small>(123)</small>
+                            </div>
+                            <h5 class="mb-4">Web Design & Development Course for Beginners</h5>
+                        </div>
+                        <div class="d-flex border-top">
+                            <small class="flex-fill text-center border-end py-2"><i class="fa fa-user-tie text-primary me-2"></i>John Doe</small>
+                            <small class="flex-fill text-center border-end py-2"><i class="fa fa-clock text-primary me-2"></i>1.49 Hrs</small>
+                            <small class="flex-fill text-center py-2"><i class="fa fa-user text-primary me-2"></i>30 Students</small>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </section>
+    </div>
+    <!-- Courses End -->
 
-    <!-- CTA Section -->
-    <section class="ftco-intro ftco-no-pb img" style="background-image: url({{ asset('website/images/bg_1.jpg') }});">
+
+    <!-- Team Start -->
+    <div class="container-xxl py-5">
         <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-9 col-md-8 d-flex align-items-center heading-section heading-section-white ftco-animate">
-                    <h2 class="mb-3 mb-md-0">You Always Get the Best Guidance</h2>
-                </div>
-                <div class="col-lg-3 col-md-4 ftco-animate">
-                    <p class="mb-0"><a href="{{ route('contact') }}" class="btn btn-white py-3 px-4">Request Quote</a></p>
-                </div>
-            </div>	
-        </div>
-    </section>
-
-    <!-- Projects Section -->
-    <section class="ftco-section ftco-no-pb">
-        <div class="container-fluid px-0">
-            <div class="row no-gutters justify-content-center mb-5">
-                <div class="col-md-7 text-center heading-section ftco-animate">
-                    <h2 class="mb-4">{{ $headerProjects->judul_section ?? 'Our Recent Projects' }}</h2>
-                    <p>{{ $headerProjects->deskripsi_section ?? 'Separated they live in. A small river named Duden flows by their place and supplies it with the necessary regelialia. It is a paradisematic country' }}</p>
-                    <p></p>
-                </div>
+            <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+                <h6 class="section-title bg-white text-center text-primary px-3">Instructors</h6>
+                <h1 class="mb-5">Expert Instructors</h1>
             </div>
-            <div class="row no-gutters">
-                @if($projects->count() > 0)
-                    @foreach($projects as $project)
-                    <div class="col-md-3">
-                        <div class="project img ftco-animate d-flex justify-content-center align-items-center" style="background-image: url({{ $project->gambar_utama ? asset('storage/' . $project->gambar_utama) : asset('website/images/project-1.jpg') }});">
-                            <div class="overlay"></div>
-                            <a href="{{ url('/projects/' . $project->slug) }}" class="btn-site d-flex align-items-center justify-content-center"><span class="icon-subdirectory_arrow_right"></span></a>
-                            <div class="text text-center p-4">
-                                <h3><a href="{{ url('/projects/' . $project->slug) }}">{{ $project->judul }}</a></h3>
-                                <span>{{ $project->deskripsi_singkat ? Str::limit($project->deskripsi_singkat, 50) : 'Project' }}</span>
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                    <div class="team-item bg-light">
+                        <div class="overflow-hidden">
+                            <img class="img-fluid" src="{{ asset('elearning-img/team-1.jpg') }}" alt="">
+                        </div>
+                        <div class="position-relative d-flex justify-content-center" style="margin-top: -23px;">
+                            <div class="bg-light d-flex justify-content-center pt-2 px-1">
+                                <a class="btn btn-sm-square btn-primary mx-1" href=""><i class="fab fa-facebook-f"></i></a>
+                                <a class="btn btn-sm-square btn-primary mx-1" href=""><i class="fab fa-twitter"></i></a>
+                                <a class="btn btn-sm-square btn-primary mx-1" href=""><i class="fab fa-instagram"></i></a>
                             </div>
                         </div>
-                    </div>
-                    @endforeach
-                @else
-                    @foreach(range(1, 4) as $i)
-                    <div class="col-md-3">
-                        <div class="project img ftco-animate d-flex justify-content-center align-items-center" style="background-image: url({{ asset('website/images/project-' . $i . '.jpg') }});">
-                            <div class="overlay"></div>
-                            <a href="#" class="btn-site d-flex align-items-center justify-content-center"><span class="icon-subdirectory_arrow_right"></span></a>
-                            <div class="text text-center p-4">
-                                <h3><a href="#">Sample Project {{ $i }}</a></h3>
-                                <span>Web Design</span>
-                            </div>
+                        <div class="text-center p-4">
+                            <h5 class="mb-0">Instructor Name</h5>
+                            <small>Designation</small>
                         </div>
                     </div>
-                    @endforeach
-                @endif
+                </div>
+                <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                    <div class="team-item bg-light">
+                        <div class="overflow-hidden">
+                            <img class="img-fluid" src="{{ asset('elearning-img/team-2.jpg') }}" alt="">
+                        </div>
+                        <div class="position-relative d-flex justify-content-center" style="margin-top: -23px;">
+                            <div class="bg-light d-flex justify-content-center pt-2 px-1">
+                                <a class="btn btn-sm-square btn-primary mx-1" href=""><i class="fab fa-facebook-f"></i></a>
+                                <a class="btn btn-sm-square btn-primary mx-1" href=""><i class="fab fa-twitter"></i></a>
+                                <a class="btn btn-sm-square btn-primary mx-1" href=""><i class="fab fa-instagram"></i></a>
+                            </div>
+                        </div>
+                        <div class="text-center p-4">
+                            <h5 class="mb-0">Instructor Name</h5>
+                            <small>Designation</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+                    <div class="team-item bg-light">
+                        <div class="overflow-hidden">
+                            <img class="img-fluid" src="{{ asset('elearning-img/team-3.jpg') }}" alt="">
+                        </div>
+                        <div class="position-relative d-flex justify-content-center" style="margin-top: -23px;">
+                            <div class="bg-light d-flex justify-content-center pt-2 px-1">
+                                <a class="btn btn-sm-square btn-primary mx-1" href=""><i class="fab fa-facebook-f"></i></a>
+                                <a class="btn btn-sm-square btn-primary mx-1" href=""><i class="fab fa-twitter"></i></a>
+                                <a class="btn btn-sm-square btn-primary mx-1" href=""><i class="fab fa-instagram"></i></a>
+                            </div>
+                        </div>
+                        <div class="text-center p-4">
+                            <h5 class="mb-0">Instructor Name</h5>
+                            <small>Designation</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.7s">
+                    <div class="team-item bg-light">
+                        <div class="overflow-hidden">
+                            <img class="img-fluid" src="{{ asset('elearning-img/team-4.jpg') }}" alt="">
+                        </div>
+                        <div class="position-relative d-flex justify-content-center" style="margin-top: -23px;">
+                            <div class="bg-light d-flex justify-content-center pt-2 px-1">
+                                <a class="btn btn-sm-square btn-primary mx-1" href=""><i class="fab fa-facebook-f"></i></a>
+                                <a class="btn btn-sm-square btn-primary mx-1" href=""><i class="fab fa-twitter"></i></a>
+                                <a class="btn btn-sm-square btn-primary mx-1" href=""><i class="fab fa-instagram"></i></a>
+                            </div>
+                        </div>
+                        <div class="text-center p-4">
+                            <h5 class="mb-0">Instructor Name</h5>
+                            <small>Designation</small>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </section>
+    </div>
+    <!-- Team End -->
 
-    <!-- Request A Quote Section -->
-    @php
-        \DB::connection()->disableQueryLog();
-        $reqQuote = \DB::table('request_quote_settings')->where('status', 1)->orderBy('updated_at', 'desc')->first();
-        // Fallback to AboutHeroSection image if request-quote background not provided
-        $aboutHero = \App\Models\AboutHeroSection::first();
-        // Determine background image: prefer request quote setting, otherwise about hero, otherwise default
-        $rqBg = null;
-        if ($reqQuote && !empty($reqQuote->bg_image)) {
-            $rqBg = asset('storage/' . $reqQuote->bg_image);
-        } elseif ($aboutHero && !empty($aboutHero->hero_image)) {
-            $rqBg = asset('storage/' . $aboutHero->hero_image);
-        } else {
-            $rqBg = asset('website/images/bg_5.jpg');
-        }
-        // Determine overlay color: prefer request quote setting, otherwise about hero (if present), otherwise default
-        $rqOverlay = ($reqQuote && !empty($reqQuote->overlay_color)) ? $reqQuote->overlay_color : (isset($aboutHero->overlay_color) && !empty($aboutHero->overlay_color) ? $aboutHero->overlay_color : 'rgba(0, 0, 0, 0.5)');
-    @endphp
-    @if($reqQuote || $aboutHero)
-    <section class="ftco-section ftco-consult ftco-no-pt ftco-no-pb" style="background-image: url('{{ $rqBg }}');" data-stellar-background-ratio="0.5">
-        <div class="overlay" style="background: {{ $rqOverlay }} !important; opacity: 1 !important;"></div>
+
+    <!-- Testimonial Start -->
+    <div class="container-xxl py-5 wow fadeInUp" data-wow-delay="0.1s">
         <div class="container">
-            <div class="row justify-content-end">
-                <div class="col-md-6 py-5 px-md-5">
-                    <div class="py-md-5">
-                        <div class="heading-section heading-section-white ftco-animate mb-5">
-                            <h2 class="mb-4">{{ $reqQuote->title }}</h2>
-                            <p>{{ $reqQuote->subtitle }}</p>
-                        </div>
-                        <form id="requestQuoteForm" class="appointment-form ftco-animate">
-                            <div class="d-md-flex">
-                                <div class="form-group">
-                                    <input type="text" class="form-control" name="first_name" placeholder="First Name" required>
-                                </div>
-                                <div class="form-group ml-md-4">
-                                    <input type="text" class="form-control" name="last_name" placeholder="Last Name" required>
-                                </div>
-                            </div>
-                            <div class="d-md-flex">
-                                <div class="form-group">
-                                    <input type="email" class="form-control" name="email" placeholder="Email Address" required>
-                                </div>
-                                <div class="form-group ml-md-4">
-                                    <input type="text" class="form-control" name="phone" placeholder="Phone Number" required>
-                                </div>
-                            </div>
-                            <div class="d-md-flex">
-                                <div class="form-group">
-                                    <div class="form-field">
-                                        <div class="select-wrap">
-                                            <div class="icon"><span class="ion-ios-arrow-down"></span></div>
-                                            <select name="service" class="form-control" required>
-                                                <option value="">Select Service</option>
-                                                @foreach($requestQuoteServices as $service)
-                                                    <option value="{{ $service->slug }}">{{ $service->nama_service }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group ml-md-4">
-                                    <textarea name="message" cols="30" rows="2" class="form-control" placeholder="Message" required></textarea>
-                                </div>
-                            </div>
-                            <div class="d-md-flex">
-                                <div class="form-group ml-auto">
-                                    <input type="submit" value="{{ $reqQuote->button_text }}" class="btn btn-white py-3 px-4">
-                                </div>
-                            </div>
-                        </form>
+            <div class="text-center">
+                <h6 class="section-title bg-white text-center text-primary px-3">Testimonial</h6>
+                <h1 class="mb-5">Our Students Say!</h1>
+            </div>
+            <div class="owl-carousel testimonial-carousel position-relative">
+                <div class="testimonial-item text-center">
+                    <img class="border rounded-circle p-2 mx-auto mb-3" src="{{ asset('elearning-img/testimonial-1.jpg') }}" style="width: 80px; height: 80px;">
+                    <h5 class="mb-0">Client Name</h5>
+                    <p>Profession</p>
+                    <div class="testimonial-text bg-light text-center p-4">
+                    <p class="mb-0">Tempor erat elitr rebum at clita. Diam dolor diam ipsum sit diam amet diam et eos. Clita erat ipsum et lorem et sit.</p>
+                    </div>
+                </div>
+                <div class="testimonial-item text-center">
+                    <img class="border rounded-circle p-2 mx-auto mb-3" src="{{ asset('elearning-img/testimonial-2.jpg') }}" style="width: 80px; height: 80px;">
+                    <h5 class="mb-0">Client Name</h5>
+                    <p>Profession</p>
+                    <div class="testimonial-text bg-light text-center p-4">
+                    <p class="mb-0">Tempor erat elitr rebum at clita. Diam dolor diam ipsum sit diam amet diam et eos. Clita erat ipsum et lorem et sit.</p>
+                    </div>
+                </div>
+                <div class="testimonial-item text-center">
+                    <img class="border rounded-circle p-2 mx-auto mb-3" src="{{ asset('elearning-img/testimonial-3.jpg') }}" style="width: 80px; height: 80px;">
+                    <h5 class="mb-0">Client Name</h5>
+                    <p>Profession</p>
+                    <div class="testimonial-text bg-light text-center p-4">
+                    <p class="mb-0">Tempor erat elitr rebum at clita. Diam dolor diam ipsum sit diam amet diam et eos. Clita erat ipsum et lorem et sit.</p>
+                    </div>
+                </div>
+                <div class="testimonial-item text-center">
+                    <img class="border rounded-circle p-2 mx-auto mb-3" src="{{ asset('elearning-img/testimonial-4.jpg') }}" style="width: 80px; height: 80px;">
+                    <h5 class="mb-0">Client Name</h5>
+                    <p>Profession</p>
+                    <div class="testimonial-text bg-light text-center p-4">
+                    <p class="mb-0">Tempor erat elitr rebum at clita. Diam dolor diam ipsum sit diam amet diam et eos. Clita erat ipsum et lorem et sit.</p>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
-    @endif
+    </div>
+    <!-- Testimonial End -->
+        
 
-    <!-- Blog Section -->
-    @if($posts->count() > 0)
-    <section class="ftco-section bg-light">
+    <!-- Footer Start -->
+    <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container py-5">
+            <div class="row g-5">
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-3">Quick Link</h4>
+                    <a class="btn btn-link" href="">About Us</a>
+                    <a class="btn btn-link" href="">Contact Us</a>
+                    <a class="btn btn-link" href="">Privacy Policy</a>
+                    <a class="btn btn-link" href="">Terms & Condition</a>
+                    <a class="btn btn-link" href="">FAQs & Help</a>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-3">Contact</h4>
+                    <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>123 Street, New York, USA</p>
+                    <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+012 345 67890</p>
+                    <p class="mb-2"><i class="fa fa-envelope me-3"></i>info@example.com</p>
+                    <div class="d-flex pt-2">
+                        <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-twitter"></i></a>
+                        <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-facebook-f"></i></a>
+                        <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-youtube"></i></a>
+                        <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-3">Gallery</h4>
+                    <div class="row g-2 pt-2">
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="{{ asset('elearning-img/course-1.jpg') }}" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="{{ asset('elearning-img/course-2.jpg') }}" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="{{ asset('elearning-img/course-3.jpg') }}" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="{{ asset('elearning-img/course-2.jpg') }}" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="{{ asset('elearning-img/course-3.jpg') }}" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="{{ asset('elearning-img/course-1.jpg') }}" alt="">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-3">Newsletter</h4>
+                    <p>Dolor amet sit justo amet elitr clita ipsum elitr est.</p>
+                    <div class="position-relative mx-auto" style="max-width: 400px;">
+                        <input class="form-control border-0 w-100 py-3 ps-4 pe-5" type="text" placeholder="Your email">
+                        <button type="button" class="btn btn-primary py-2 position-absolute top-0 end-0 mt-2 me-2">SignUp</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="container">
-            <div class="row justify-content-center mb-5 pb-2">
-                <div class="col-md-8 text-center heading-section ftco-animate">
-                    @php
-                        // If controller didn't provide headerBlog, try a direct DB fallback to avoid missing header text
-                        if (!isset($headerBlog) || !$headerBlog) {
-                            try {
-                                $hb = \DB::table('header_blog')->orderBy('updated_at', 'desc')->first();
-                            } catch (\Throwable $e) {
-                                $hb = null;
-                            }
-                        } else {
-                            $hb = $headerBlog;
-                        }
-                    @endphp
-                    <h2 class="mb-4">{{ $hb && isset($hb->judul_section) ? $hb->judul_section : 'Recent Blog' }}</h2>
-                    <p>{{ $hb && isset($hb->deskripsi_section) ? $hb->deskripsi_section : 'Stay updated with our latest insights, tips, and industry news.' }}</p>
-                </div>
-            </div>
-            <div class="row">
-                @foreach($posts as $post)
-                <div class="col-md-6 col-lg-4 ftco-animate">
-                    <div class="blog-entry">
-                        <a href="{{ url('/blog/' . $post->slug) }}" class="block-20 d-flex align-items-end" style="background-image: url('{{ $post->gambar ? asset('storage/' . $post->gambar) : asset('website/images/image_1.jpg') }}');">
-                            <div class="meta-date text-center p-2">
-                                <span class="day">{{ $post->tanggal_dibuat->format('d') }}</span>
-                                <span class="mos">{{ $post->tanggal_dibuat->format('M') }}</span>
-                                <span class="yr">{{ $post->tanggal_dibuat->format('Y') }}</span>
-                            </div>
-                        </a>
-                        <div class="text bg-white p-4">
-                            <h3 class="heading"><a href="{{ url('/blog/' . $post->slug) }}">{{ $post->judul }}</a></h3>
-                            <p>{{ $post->ringkasan ? Str::limit($post->ringkasan, 120) : Str::limit(strip_tags($post->isi), 120) }}</p>
-                            <div class="d-flex align-items-center mt-4">
-                                <p class="mb-0"><a href="{{ url('/blog/' . $post->slug) }}" class="btn btn-primary">Read More <span class="ion-ios-arrow-round-forward"></span></a></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                @endforeach
-            </div>
-            <div class="row mt-4">
-                <div class="col-md-12 text-center">
-                    <a href="{{ url('/blog') }}" class="btn btn-primary py-3 px-5">View All Posts</a>
-                </div>
-            </div>
-        </div>
-    </section>
-    @endif
+            <div class="copyright">
+                <div class="row">
+                    <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                        &copy; <a class="border-bottom" href="#">Your Site Name</a>, All Right Reserved.
 
-    <!-- Testimonials Section -->
-    @if(count($testimonials) > 0)
-    <section class="ftco-section testimony-section">
-        <div class="container">
-            <div class="row justify-content-center mb-5">
-                <div class="col-md-8 text-center heading-section ftco-animate">
-                    <h2 class="mb-4">Our Clients Says</h2>
-                    <p>See what our satisfied clients have to say about working with us.</p>
-                </div>
-            </div>
-            <div class="row ftco-animate justify-content-center">
-                <div class="col-md-12">
-                    <div class="carousel-testimony owl-carousel">
-                        @foreach($testimonials as $testimonial)
-                        <div class="item">
-                            <div class="testimony-wrap d-flex">
-                                <div class="user-img" style="background-image: url({{ isset($testimonial->image) ? asset('storage/' . $testimonial->image) : asset('website/images/person_1.jpg') }})">
-                                </div>
-                                <div class="text pl-4">
-                                    <span class="quote d-flex align-items-center justify-content-center">
-                                        <i class="icon-quote-left"></i>
-                                    </span>
-                                    <p>{{ $testimonial->message ?? '' }}</p>
-                                    <p class="name">{{ $testimonial->name ?? 'Client' }}</p>
-                                    <span class="position">{{ $testimonial->role ?? 'Customer' }}</span>
-                                </div>
-                            </div>
-                        </div>
-                        @endforeach
+                        <!--/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/-->
+                        Designed By <a class="border-bottom" href="https://htmlcodex.com">HTML Codex</a><br><br>
+                        Distributed By <a class="border-bottom" href="https://themewagon.com">ThemeWagon</a>
                     </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    @endif
-
-    <!-- Request A Quote Section (moved) -->
-
-    <!-- Footer -->
-    <footer class="ftco-footer ftco-bg-dark ftco-section">
-        <div class="container">
-            <div class="row mb-5">
-                <div class="col-md">
-                    <div class="ftco-footer-widget mb-4">
-                        <h2 class="ftco-heading-2">{{ config('app.name', 'Jasa Ibnu') }}</h2>
-                        <p>Your trusted partner for digital solutions and business consulting services.</p>
-                        <ul class="ftco-footer-social list-unstyled float-md-left float-lft mt-5">
-                            <li class="ftco-animate"><a href="#"><span class="icon-twitter"></span></a></li>
-                            <li class="ftco-animate"><a href="#"><span class="icon-facebook"></span></a></li>
-                            <li class="ftco-animate"><a href="#"><span class="icon-instagram"></span></a></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-md">
-                    <div class="ftco-footer-widget mb-4 ml-md-5">
-                        <h2 class="ftco-heading-2">Quick Links</h2>
-                        <ul class="list-unstyled">
-                            <li><a href="{{ route('home') }}" class="py-2 d-block">Home</a></li>
-                            <li><a href="{{ route('about') }}" class="py-2 d-block">About</a></li>
-                            <li><a href="{{ route('services') }}" class="py-2 d-block">Services</a></li>
-                            <li><a href="{{ url('/projects') }}" class="py-2 d-block">Projects</a></li>
-                            <li><a href="{{ url('/blog') }}" class="py-2 d-block">Blog</a></li>
-                            <li><a href="{{ route('contact') }}" class="py-2 d-block">Contact</a></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-md">
-                    <div class="ftco-footer-widget mb-4">
-                        <h2 class="ftco-heading-2">Contact Information</h2>
-                        <div class="block-23 mb-3">
-                            <ul>
-                                <li><span class="icon icon-map-marker"></span><span class="text">Indonesia</span></li>
-                                <li><a href="#"><span class="icon icon-phone"></span><span class="text">+62 xxx xxxx</span></a></li>
-                                <li><a href="#"><span class="icon icon-envelope"></span><span class="text">info@jasaibnu.id</span></a></li>
-                            </ul>
+                    <div class="col-md-6 text-center text-md-end">
+                        <div class="footer-menu">
+                            <a href="">Home</a>
+                            <a href="">Cookies</a>
+                            <a href="">Help</a>
+                            <a href="">FQAs</a>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-12 text-center">
-                    <p>Copyright &copy; {{ date('Y') }} All rights reserved | {{ config('app.name', 'Jasa Ibnu') }}</p>
-                </div>
-            </div>
         </div>
-    </footer>
+    </div>
+    <!-- Footer End -->
 
-    <!-- loader -->
-    <div id="ftco-loader" class="show fullscreen"><svg class="circular" width="48px" height="48px"><circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee"/><circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#F96D00"/></svg></div>
 
-    <!-- Scripts -->
-    <script src="{{ asset('website/js/jquery.min.js') }}"></script>
-    <script src="{{ asset('website/js/jquery-migrate-3.0.1.min.js') }}"></script>
-    <script src="{{ asset('website/js/popper.min.js') }}"></script>
-    <script src="{{ asset('website/js/bootstrap.min.js') }}"></script>
-    <script src="{{ asset('website/js/jquery.easing.1.3.js') }}"></script>
-    <script src="{{ asset('website/js/jquery.waypoints.min.js') }}"></script>
-    <script src="{{ asset('website/js/jquery.stellar.min.js') }}"></script>
-    <script src="{{ asset('website/js/owl.carousel.min.js') }}"></script>
-    <script src="{{ asset('website/js/jquery.magnific-popup.min.js') }}"></script>
-    <script src="{{ asset('website/js/aos.js') }}"></script>
-    <script src="{{ asset('website/js/jquery.animateNumber.min.js') }}"></script>
-    <script src="{{ asset('website/js/scrollax.min.js') }}"></script>
-    <script src="{{ asset('website/js/main.js') }}"></script>
-    
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    <!-- Request Quote Form Handler -->
-    <script>
-    $(document).ready(function() {
-        $('#requestQuoteForm').on('submit', function(e) {
-            e.preventDefault();
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
 
-            // collect form values (support select for service)
-            var formData = {
-                first_name: $('input[name="first_name"]').val(),
-                last_name: $('input[name="last_name"]').val(),
-                email: $('input[name="email"]').val(),
-                service: $('select[name="service"]').val() || $('input[name="service"]').val(),
-                phone: $('input[name="phone"]').val(),
-                message: $('textarea[name="message"]').val(),
-                _token: '{{ csrf_token() }}'
-            };
 
-            // Find submit control (input or button)
-            var submitBtn = $(this).find('input[type="submit"], button[type="submit"]');
-            var isInput = submitBtn.is('input');
-            // store original label
-            var origLabel = isInput ? submitBtn.val() : submitBtn.html();
-            submitBtn.data('orig-label', origLabel);
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ asset('elearning-lib/wow/wow.min.js') }}"></script>
+    <script src="{{ asset('elearning-lib/easing/easing.min.js') }}"></script>
+    <script src="{{ asset('elearning-lib/waypoints/waypoints.min.js') }}"></script>
+    <script src="{{ asset('elearning-lib/owlcarousel/owl.carousel.min.js') }}"></script>
 
-            // Disable and show loading
-            submitBtn.prop('disabled', true);
-            if (isInput) {
-                submitBtn.val('Sending...');
-            } else {
-                submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>Sending...');
-            }
-
-            $.ajax({
-                url: '{{ route("request-quote.send") }}',
-                type: 'POST',
-                data: formData,
-                success: function(response) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil!',
-                        text: response.message || 'Permintaan penawaran Anda telah berhasil dikirim. Kami akan menghubungi Anda segera!',
-                        confirmButtonColor: '#4e73df'
-                    });
-                    // Reset form
-                    $('#requestQuoteForm')[0].reset();
-                },
-                error: function(xhr) {
-                    var errorMsg = 'An error occurred. Please try again.';
-                    if (xhr.responseJSON && xhr.responseJSON.message) {
-                        errorMsg = xhr.responseJSON.message;
-                    } else if (xhr.responseJSON && xhr.responseJSON.errors) {
-                        var errors = xhr.responseJSON.errors;
-                        errorMsg = Object.values(errors).flat().join('<br>');
-                    }
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        html: errorMsg,
-                        confirmButtonColor: '#4e73df'
-                    });
-                },
-                complete: function() {
-                    // Re-enable submit control and restore label
-                    submitBtn.prop('disabled', false);
-                    var restore = submitBtn.data('orig-label') || 'Send Message';
-                    if (isInput) {
-                        submitBtn.val(restore);
-                    } else {
-                        submitBtn.html(restore);
-                    }
-                }
-            });
-        });
-    });
-    </script>
+    <!-- Template Javascript -->
+    <script src="{{ asset('elearning-js/main.js') }}"></script>
 </body>
+
 </html>
