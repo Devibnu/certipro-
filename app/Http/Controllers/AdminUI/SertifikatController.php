@@ -5,6 +5,7 @@ namespace App\Http\Controllers\AdminUI;
 use App\Http\Controllers\Controller;
 use App\Models\PendaftaranSertifikasi;
 use App\Models\Sertifikat;
+use App\Services\SertifikatService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,12 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class SertifikatController extends Controller
 {
+    protected $sertifikatService;
+    
+    public function __construct(SertifikatService $sertifikatService)
+    {
+        $this->sertifikatService = $sertifikatService;
+    }
     /**
      * Display list of certificates
      */
@@ -33,10 +40,22 @@ class SertifikatController extends Controller
         
         $sertifikats = $query->orderBy('created_at', 'desc')->paginate(10);
         
-        // Get pendaftaran that are kompeten_final but don't have certificate yet
-        $pendaftaranKompeten = PendaftaranSertifikasi::with(['user', 'skemaSertifikasi', 'keputusan'])
+        // Get pendaftaran READY for certificate issuance (ISO 17024: Keputusan → Sertifikat)
+        // SINGLE SOURCE OF TRUTH: Jika ada Keputusan KOMPETEN, data sudah valid!
+        $pendaftaranKompeten = PendaftaranSertifikasi::with([
+                'user',
+                'skemaSertifikasi', 
+                'keputusan.penetap',
+                'praPendaftaran'
+            ])
             ->where('status', PendaftaranSertifikasi::STATUS_KOMPETEN_FINAL)
             ->whereDoesntHave('sertifikat')
+            // ISO 17024 REQUIREMENT: Keputusan harus ada (decision-based certification)
+            ->whereHas('keputusan', function ($q) {
+                $q->where('keputusan', 'kompeten');
+            })
+            // Skema sertifikasi harus ada
+            ->whereHas('skemaSertifikasi')
             ->orderBy('created_at', 'desc')
             ->get();
         
@@ -44,98 +63,80 @@ class SertifikatController extends Controller
     }
 
     /**
-     * Issue certificate for a pendaftaran
+     * Issue certificate for a pendaftaran (CLEAN ARCHITECTURE VERSION).
+     * 
+     * Controller responsibilities:
+     * 1. Load data with relations
+     * 2. Pre-validation (guard clause) - handles legacy data
+     * 3. Delegate business logic to Service
+     * 4. Handle response/redirect
+     * 
+     * Business logic is in SertifikatService for better testability.
      */
     public function terbitkan($pendaftaranId)
     {
-        $pendaftaran = PendaftaranSertifikasi::with(['user', 'skemaSertifikasi', 'sertifikat'])
-            ->findOrFail($pendaftaranId);
+        // Load pendaftaran with all required relations
+        $pendaftaran = PendaftaranSertifikasi::with([
+            'user',
+            'skemaSertifikasi',
+            'sertifikat',
+            'keputusan',
+            'praPendaftaran', // Load for legacy data
+        ])->findOrFail($pendaftaranId);
         
-        // Validate status is kompeten_final
+        // GUARD CLAUSE: ISO 17024 Flow Validation
+        // Prinsip: Jika KEPUTUSAN sudah ada, semua validasi sudah dilakukan oleh Komite Teknis
+        
+        // 1. CRITICAL: Keputusan sertifikasi HARUS ada (ISO 17024 requirement)
+        if (!$pendaftaran->keputusan) {
+            return redirect()
+                ->route('adminui.sertifikat.index')
+                ->with('error', 'Keputusan sertifikasi belum ditetapkan. Silakan tetapkan keputusan terlebih dahulu melalui menu Keputusan Sertifikasi. Flow ISO 17024: Asesmen → Keputusan → Sertifikat.');
+        }
+        
+        // 2. Keputusan harus KOMPETEN
+        if ($pendaftaran->keputusan->keputusan !== 'kompeten') {
+            return redirect()
+                ->route('adminui.sertifikat.index')
+                ->with('error', 'Keputusan sertifikasi harus KOMPETEN. Keputusan saat ini: ' . $pendaftaran->keputusan->keputusan_label);
+        }
+        
+        // 3. Status harus KOMPETEN_FINAL
         if ($pendaftaran->status !== PendaftaranSertifikasi::STATUS_KOMPETEN_FINAL) {
-            return redirect()->route('adminui.sertifikat.index')
-                ->with('error', 'Sertifikat hanya dapat diterbitkan untuk pendaftaran dengan status Kompeten (Final).');
+            return redirect()
+                ->route('adminui.sertifikat.index')
+                ->with('error', 'Status pendaftaran harus KOMPETEN_FINAL. Status saat ini: ' . $pendaftaran->status);
         }
         
-        // Check if certificate already exists
+        // 4. Skema sertifikasi harus ada
+        if (!$pendaftaran->skemaSertifikasi) {
+            return redirect()
+                ->route('adminui.sertifikat.index')
+                ->with('error', 'Data skema sertifikasi tidak ditemukan.');
+        }
+        
+        // 5. Sertifikat belum pernah diterbitkan
         if ($pendaftaran->sertifikat) {
-            return redirect()->route('adminui.sertifikat.show', $pendaftaran->sertifikat->id)
-                ->with('info', 'Sertifikat sudah diterbitkan sebelumnya.');
+            return redirect()
+                ->route('adminui.sertifikat.show', $pendaftaran->sertifikat->id)
+                ->with('warning', 'Sertifikat sudah pernah diterbitkan sebelumnya.');
         }
         
-        DB::beginTransaction();
+        // Delegate to service for business logic
+        $result = $this->sertifikatService->terbitkan($pendaftaran);
         
-        try {
-            // Generate nomor sertifikat
-            $nomorSertifikat = Sertifikat::generateNomorSertifikat();
-            
-            // Calculate validity period (3 years from now)
-            $tanggalTerbit = now();
-            $tanggalBerlakuSampai = now()->addYears(3);
-            
-            // Create sertifikat record first to get ID
-            $sertifikat = Sertifikat::create([
-                'pendaftaran_id' => $pendaftaran->id,
-                'nomor_sertifikat' => $nomorSertifikat,
-                'nama_peserta' => $pendaftaran->user->name,
-                'skema_sertifikasi' => $pendaftaran->skemaSertifikasi->nama_skema,
-                'tanggal_terbit' => $tanggalTerbit,
-                'tanggal_berlaku_sampai' => $tanggalBerlakuSampai,
-                'diterbitkan_oleh' => Auth::id(),
-            ]);
-            
-            // Generate QR Code
-            $verificationUrl = $sertifikat->getVerificationUrl();
-            $qrCodeFileName = 'qr_' . $sertifikat->id . '_' . time() . '.svg';
-            $qrCodePath = 'sertifikat/qrcodes/' . $qrCodeFileName;
-            
-            // Generate QR code as SVG
-            $qrCode = QrCode::format('svg')
-                ->size(200)
-                ->margin(1)
-                ->generate($verificationUrl);
-            
-            // Save QR code to storage
-            Storage::disk('public')->put($qrCodePath, $qrCode);
-            
-            // Generate PDF
-            $pdfFileName = 'sertifikat_' . $sertifikat->id . '_' . time() . '.pdf';
-            $pdfPath = 'sertifikat/pdf/' . $pdfFileName;
-            
-            // Get QR code for PDF (base64)
-            $qrCodeBase64 = base64_encode($qrCode);
-            
-            // Nama Ketua LSP (bisa diambil dari config atau database)
-            $ketuaLsp = config('certipro.ketua_lsp', 'Dr. Ahmad Hidayat, M.Kom');
-            
-            $pdf = Pdf::loadView('pdf.sertifikat-bnsp', [
-                'sertifikat' => $sertifikat,
-                'pendaftaran' => $pendaftaran,
-                'qrCodeBase64' => $qrCodeBase64,
-                'ketuaLsp' => $ketuaLsp,
-            ]);
-            
-            // A4 Portrait untuk format BNSP resmi
-            $pdf->setPaper('A4', 'portrait');
-            
-            // Save PDF to storage
-            Storage::disk('public')->put($pdfPath, $pdf->output());
-            
-            // Update sertifikat with file paths
-            $sertifikat->update([
-                'qr_code' => $qrCodePath,
-                'file_pdf' => $pdfPath,
-            ]);
-            
-            DB::commit();
-            
-            return redirect()->route('adminui.sertifikat.show', $sertifikat->id)
-                ->with('success', 'Sertifikat berhasil diterbitkan dengan nomor: ' . $nomorSertifikat);
-                
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->route('adminui.sertifikat.index')
-                ->with('error', 'Terjadi kesalahan saat menerbitkan sertifikat: ' . $e->getMessage());
+        // Handle result
+        if ($result['success']) {
+            return redirect()
+                ->route('adminui.sertifikat.show', $result['sertifikat']->id)
+                ->with('success', 
+                    'Sertifikat berhasil diterbitkan dengan nomor: ' . 
+                    $result['sertifikat']->nomor_sertifikat
+                );
+        } else {
+            return redirect()
+                ->route('adminui.sertifikat.index')
+                ->with('error', $result['error']);
         }
     }
 
