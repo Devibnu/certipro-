@@ -298,8 +298,4 @@ class SertifikatService
             ]);
         }
     }
-        Storage::disk('public')->put($pdfPath, $pdf->output());
-        
-        return $pdfPath;
-    }
 }
