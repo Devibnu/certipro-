@@ -254,6 +254,11 @@ class SertifikatService
         
         $pdf->setPaper('A4', 'portrait');
         
+        // Save PDF
+        Storage::disk('public')->put($pdfPath, $pdf->output());
+        
+        return $pdfPath;
+    }
     
     /**
      * Dispatch notification jobs after certificate issuance.
