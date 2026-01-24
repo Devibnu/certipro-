@@ -48,7 +48,7 @@
       </li>
 
       {{-- MANAJEMEN SECTION - Only show if user has any management permission --}}
-      @if(auth()->user()->hasPermission('users.view') || auth()->user()->hasPermission('cms.view') || auth()->user()->hasPermission('pra_pendaftaran.view') || auth()->user()->hasPermission('skema_sertifikasi.view'))
+      @if(auth()->user()->hasPermission('users.view') || auth()->user()->hasPermission('cms.view'))
       <li class="nav-item mt-3">
         <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Manajemen</h6>
       </li>
@@ -93,6 +93,13 @@
             </li>
           </ul>
         </div>
+      </li>
+      @endif
+
+      {{-- MASTER DATA SECTION --}}
+      @if(auth()->user()->hasPermission('pra_pendaftaran.view') || auth()->user()->hasPermission('pendaftaran_sertifikasi.view') || auth()->user()->hasPermission('skema_sertifikasi.view') || auth()->user()->hasPermission('unit_kompetensi.view') || auth()->user()->hasPermission('kuk.view') || auth()->user()->hasPermission('asesmen.view') || auth()->user()->hasPermission('keputusan.view') || auth()->user()->hasPermission('sertifikat.view'))
+      <li class="nav-item mt-3">
+        <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Master Data</h6>
       </li>
       @endif
 
