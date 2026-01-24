@@ -101,26 +101,6 @@
       <li class="nav-item mt-3">
         <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Master Data</h6>
       </li>
-      
-      {{-- PRA-PENDAFTARAN - All Admins --}}
-      <li class="nav-item">
-        <a class="nav-link {{ (Request::is('adminui/pra-pendaftaran*') ? 'active' : '') }}" href="{{ route('adminui.pra-pendaftaran.index') }}">
-          <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-            <i class="fas fa-clipboard-list text-warning text-sm opacity-10"></i>
-          </div>
-          <span class="nav-link-text ms-1">Pra-Pendaftaran</span>
-        </a>
-      </li>
-
-      {{-- PENDAFTARAN SERTIFIKASI - All Admins --}}
-      <li class="nav-item">
-        <a class="nav-link {{ (Request::is('adminui/pendaftaran-sertifikasi*') ? 'active' : '') }}" href="{{ route('adminui.pendaftaran-sertifikasi.index') }}">
-          <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-            <i class="fas fa-user-graduate text-danger text-sm opacity-10"></i>
-          </div>
-          <span class="nav-link-text ms-1">Pendaftaran Sertifikasi</span>
-        </a>
-      </li>
 
       {{-- SKEMA SERTIFIKASI - All Admins --}}
       <li class="nav-item">
@@ -149,6 +129,33 @@
             <i class="fas fa-list-check text-success text-sm opacity-10"></i>
           </div>
           <span class="nav-link-text ms-1">KUK</span>
+        </a>
+      </li>
+      @endif
+
+      {{-- PROSES SERTIFIKASI SECTION - Show for Super Admin and Admin --}}
+      @if(auth()->user()->isSuperAdmin() || auth()->user()->isAdmin())
+      <li class="nav-item mt-3">
+        <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Proses Sertifikasi</h6>
+      </li>
+      
+      {{-- PRA-PENDAFTARAN - All Admins --}}
+      <li class="nav-item">
+        <a class="nav-link {{ (Request::is('adminui/pra-pendaftaran*') ? 'active' : '') }}" href="{{ route('adminui.pra-pendaftaran.index') }}">
+          <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+            <i class="fas fa-clipboard-list text-warning text-sm opacity-10"></i>
+          </div>
+          <span class="nav-link-text ms-1">Pra-Pendaftaran</span>
+        </a>
+      </li>
+
+      {{-- PENDAFTARAN SERTIFIKASI - All Admins --}}
+      <li class="nav-item">
+        <a class="nav-link {{ (Request::is('adminui/pendaftaran-sertifikasi*') ? 'active' : '') }}" href="{{ route('adminui.pendaftaran-sertifikasi.index') }}">
+          <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+            <i class="fas fa-user-graduate text-danger text-sm opacity-10"></i>
+          </div>
+          <span class="nav-link-text ms-1">Pendaftaran Sertifikasi</span>
         </a>
       </li>
 
