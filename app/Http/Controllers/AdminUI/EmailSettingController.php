@@ -54,8 +54,7 @@ class EmailSettingController extends Controller
      */
     public function index(): View
     {
-        $this->authorizeAccess();
-
+        // Role check handled by middleware(['role:super_admin'])
         // Get settings without cache for accurate form display
         $emailSetting = $this->emailService->getSettingsForEdit();
         
@@ -100,8 +99,7 @@ class EmailSettingController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $this->authorizeAccess();
-
+        // Role check handled by middleware(['role:super_admin'])
         // Validate input
         $validated = $request->validate([
             'mail_driver' => 'required|in:' . implode(',', EmailSetting::DRIVERS),
@@ -152,9 +150,7 @@ class EmailSettingController extends Controller
      */
     public function sendTest(Request $request): RedirectResponse
     {
-        $this->authorizeAccess();
-
-        // Validate email address
+        // Role check handled by middleware(['role:super_admin'])\n        // Validate email address
         $validated = $request->validate([
             'test_email' => 'required|email|max:255',
         ], [
@@ -191,9 +187,8 @@ class EmailSettingController extends Controller
             abort(401, 'Anda harus login untuk mengakses halaman ini.');
         }
 
-        $userRole = strtolower($user->role ?? '');
-
-        if (!in_array($userRole, $this->allowedRoles)) {
+        // Use RBAC isSuperAdmin() method for proper role checking
+        if (!$user->isSuperAdmin()) {
             abort(403, 'Akses ditolak. Hanya Super Admin yang dapat mengelola pengaturan email.');
         }
     }
