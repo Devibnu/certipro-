@@ -3,8 +3,9 @@
 
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="viewport" content="width=device-width, initial-scale-1, shrink-to-fit=no">
   <meta name="csrf-token" content="{{ csrf_token() }}">
+  <meta name="notification-route" content="{{ route('adminui.notifications.recent') }}">
   <link rel="apple-touch-icon" sizes="76x76" href="{{ asset('assets/img/apple-icon.png') }}">
   @php
     // Get logo from branding system (LogoAdmin)
@@ -174,6 +175,9 @@
       max-width: 380px !important;
   }
   </style>
+  
+  <!-- Notification Bell System -->
+  <script src="{{ asset('assets/js/notification-bell.js') }}"></script>
   
   @stack('scripts')
 </body>

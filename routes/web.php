@@ -194,6 +194,18 @@ Route::prefix('adminui')->name('adminui.')->group(function () {
         Route::get('dashboard', [App\Http\Controllers\AdminUI\DashboardController::class, 'index'])->name('dashboard');
         
     // =====================================================
+    // NOTIFICATION ROUTES - All authenticated users
+    // =====================================================
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/', [App\Http\Controllers\AdminUI\NotificationController::class, 'index'])->name('index');
+        Route::get('/unread-count', [App\Http\Controllers\AdminUI\NotificationController::class, 'getUnreadCount'])->name('unread-count');
+        Route::get('/recent', [App\Http\Controllers\AdminUI\NotificationController::class, 'getRecent'])->name('recent');
+        Route::post('/{notification}/read', [App\Http\Controllers\AdminUI\NotificationController::class, 'markAsRead'])->name('mark-as-read');
+        Route::post('/mark-all-read', [App\Http\Controllers\AdminUI\NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
+        Route::delete('/{notification}', [App\Http\Controllers\AdminUI\NotificationController::class, 'destroy'])->name('destroy');
+    });
+        
+    // =====================================================
     // PROFILE ROUTES - All authenticated users
     // =====================================================
     Route::get('profile', [App\Http\Controllers\AdminUI\ProfileController::class, 'index'])

@@ -16,9 +16,14 @@
                         <div class="avatar avatar-sm bg-gradient-primary me-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
                             <span class="text-white text-xs font-weight-bold">{{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 1)) }}</span>
                         </div>
+                        @php
+                            $userRole = Auth::user()->userRole;
+                            $roleName = $userRole ? ucwords(str_replace('_', ' ', $userRole->name)) : 'User';
+                            $roleClass = $userRole && $userRole->name === 'super_admin' ? 'dark' : ($userRole && $userRole->name === 'admin' ? 'info' : 'success');
+                        @endphp
                         <div class="d-none d-sm-block">
                             <span class="font-weight-bold text-sm">{{ Auth::user()->name ?? 'Admin' }}</span>
-                            <span class="badge badge-sm bg-gradient-{{ Auth::user()->role == 'Super Admin' ? 'dark' : (Auth::user()->role == 'Admin' ? 'info' : 'success') }} ms-1">{{ Auth::user()->role ?? 'User' }}</span>
+                            <span class="badge badge-sm bg-gradient-{{ $roleClass }} ms-1">{{ $roleName }}</span>
                         </div>
                         <i class="fa fa-chevron-down ms-2 text-xs"></i>
                     </a>
@@ -33,7 +38,7 @@
                                     <div class="d-flex flex-column justify-content-center">
                                         <h6 class="text-sm font-weight-bold mb-0">{{ Auth::user()->name ?? 'Admin' }}</h6>
                                         <p class="text-xs text-secondary mb-0">{{ Auth::user()->email ?? '' }}</p>
-                                        <span class="badge badge-sm bg-gradient-{{ Auth::user()->role == 'Super Admin' ? 'dark' : (Auth::user()->role == 'Admin' ? 'info' : 'success') }} mt-1" style="width: fit-content;">{{ Auth::user()->role ?? 'User' }}</span>
+                                        <span class="badge badge-sm bg-gradient-{{ $roleClass }} mt-1" style="width: fit-content;">{{ $roleName }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -95,77 +100,33 @@
                 <li class="nav-item dropdown pe-2 d-flex align-items-center">
                     <a href="javascript:;" class="nav-link text-body p-0 position-relative" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fa fa-bell cursor-pointer"></i>
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 8px;">
-                            3
+                        <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 8px; display: none;">
+                            0
                         </span>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="dropdownMenuButton" style="min-width: 300px;">
+                    <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="dropdownMenuButton" style="min-width: 320px; max-height: 500px; overflow-y: auto;">
                         <li class="mb-2">
                             <div class="dropdown-header d-flex justify-content-between align-items-center px-2">
                                 <h6 class="text-sm font-weight-bold mb-0">Notifikasi</h6>
-                                <span class="badge bg-gradient-primary">3 Baru</span>
+                                <span id="notificationCount" class="badge bg-gradient-primary">0 Baru</span>
                             </div>
                         </li>
                         <li><hr class="dropdown-divider"></li>
-                        <li class="mb-2">
-                            <a class="dropdown-item border-radius-md" href="javascript:;">
-                                <div class="d-flex py-1">
-                                    <div class="icon icon-shape icon-sm bg-gradient-success shadow text-center border-radius-md me-3 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
-                                        <i class="fas fa-certificate text-white text-xs"></i>
-                                    </div>
-                                    <div class="d-flex flex-column justify-content-center">
-                                        <h6 class="text-sm font-weight-normal mb-1">
-                                            <span class="font-weight-bold">Pendaftaran Baru</span>
-                                        </h6>
-                                        <p class="text-xs text-secondary mb-0">
-                                            <i class="fa fa-clock me-1"></i>
-                                            13 menit yang lalu
-                                        </p>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a class="dropdown-item border-radius-md" href="javascript:;">
-                                <div class="d-flex py-1">
-                                    <div class="icon icon-shape icon-sm bg-gradient-warning shadow text-center border-radius-md me-3 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
-                                        <i class="fas fa-clipboard-check text-white text-xs"></i>
-                                    </div>
-                                    <div class="d-flex flex-column justify-content-center">
-                                        <h6 class="text-sm font-weight-normal mb-1">
-                                            <span class="font-weight-bold">Asesmen Selesai</span>
-                                        </h6>
-                                        <p class="text-xs text-secondary mb-0">
-                                            <i class="fa fa-clock me-1"></i>
-                                            1 jam yang lalu
-                                        </p>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item border-radius-md" href="javascript:;">
-                                <div class="d-flex py-1">
-                                    <div class="icon icon-shape icon-sm bg-gradient-info shadow text-center border-radius-md me-3 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
-                                        <i class="fas fa-award text-white text-xs"></i>
-                                    </div>
-                                    <div class="d-flex flex-column justify-content-center">
-                                        <h6 class="text-sm font-weight-normal mb-1">
-                                            <span class="font-weight-bold">Sertifikat Diterbitkan</span>
-                                        </h6>
-                                        <p class="text-xs text-secondary mb-0">
-                                            <i class="fa fa-clock me-1"></i>
-                                            2 hari yang lalu
-                                        </p>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
+                        <div id="notificationList">
+                            <li class="text-center py-3">
+                                <p class="text-xs text-secondary mb-0">Memuat notifikasi...</p>
+                            </li>
+                        </div>
                         <li><hr class="dropdown-divider"></li>
                         <li>
-                            <a class="dropdown-item text-center text-primary text-sm font-weight-bold" href="javascript:;">
-                                Lihat Semua Notifikasi
-                            </a>
+                            <div class="d-flex justify-content-between px-2">
+                                <a class="text-primary text-xs font-weight-bold" href="#" id="markAllReadBtn" style="display: none;">
+                                    Tandai Semua Dibaca
+                                </a>
+                                <a class="text-primary text-xs font-weight-bold ms-auto" href="{{ route('adminui.notifications.index') }}">
+                                    Lihat Semua Notifikasi
+                                </a>
+                            </div>
                         </li>
                     </ul>
                 </li>

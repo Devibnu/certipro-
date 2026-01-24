@@ -4,6 +4,7 @@ namespace App\Listeners;
 
 use App\Events\PraPendaftaranDiterimaEvent;
 use App\Services\EmailNotificationService;
+use App\Services\InAppNotificationService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
@@ -51,11 +52,17 @@ class SendPraPendaftaranDiterimaEmail implements ShouldQueue
     protected EmailNotificationService $emailService;
 
     /**
+     * The in-app notification service
+     */
+    protected InAppNotificationService $inAppService;
+
+    /**
      * Create the event listener.
      */
-    public function __construct(EmailNotificationService $emailService)
+    public function __construct(EmailNotificationService $emailService, InAppNotificationService $inAppService)
     {
         $this->emailService = $emailService;
+        $this->inAppService = $inAppService;
     }
 
     /**
@@ -85,6 +92,18 @@ class SendPraPendaftaranDiterimaEmail implements ShouldQueue
             Log::info('[Listener] Email marked as sent', [
                 'pra_id' => $praPendaftaran->id,
                 'status_email' => 'sent',
+            ]);
+            
+            // ========================================================================
+            // CREATE IN-APP NOTIFICATION FOR ADMINS
+            // ========================================================================
+            $this->inAppService->notifyPraPendaftaranBaru(
+                $praPendaftaran->id,
+                $praPendaftaran->nama_lengkap
+            );
+            
+            Log::info('[Listener] In-app notification created for Pra-Pendaftaran', [
+                'pra_id' => $praPendaftaran->id,
             ]);
             
         } catch (\Exception $e) {
