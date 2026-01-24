@@ -27,11 +27,6 @@ use Illuminate\Support\Facades\Log;
 class BrandingController extends Controller
 {
     /**
-     * Allowed roles for accessing this controller.
-     */
-    protected array $allowedRoles = ['super admin', 'super_admin', 'superadmin'];
-
-    /**
      * Display branding & logo settings.
      * 
      * GET /adminui/settings/branding
@@ -40,8 +35,7 @@ class BrandingController extends Controller
      */
     public function index(): View
     {
-        $this->authorizeAccess();
-
+        // Role check handled by middleware(['role:super_admin'])
         // Get current active logo
         $currentLogo = LogoAdmin::active()->first();
 
@@ -68,8 +62,7 @@ class BrandingController extends Controller
      */
     public function update(Request $request): RedirectResponse
     {
-        $this->authorizeAccess();
-
+        // Role check handled by middleware(['role:super_admin'])
         try {
             // Check if logo already exists
             $existingLogo = LogoAdmin::active()->first();
@@ -188,8 +181,7 @@ class BrandingController extends Controller
      */
     public function destroy(): RedirectResponse
     {
-        $this->authorizeAccess();
-
+        // Role check handled by middleware(['role:super_admin'])
         try {
             $currentLogo = LogoAdmin::active()->first();
 
@@ -248,13 +240,8 @@ class BrandingController extends Controller
             abort(403, 'Unauthorized access');
         }
 
-        $userRole = strtolower(str_replace(' ', '_', $user->role ?? ''));
-        
-        $hasAccess = collect($this->allowedRoles)->contains(function ($role) use ($userRole) {
-            return strtolower(str_replace(' ', '_', $role)) === $userRole;
-        });
-
-        if (!$hasAccess) {
+        // Use RBAC method - Super Admin bypass via isSuperAdmin()
+        if (!$user->isSuperAdmin()) {
             abort(403, 'Akses ditolak. Hanya Super Admin yang dapat mengelola branding.');
         }
     }
