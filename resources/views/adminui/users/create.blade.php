@@ -24,55 +24,64 @@
                     @endif
                     <form action="{{ route('adminui.users.store') }}" method="POST">
                         @csrf
-                        <div class="row g-4 align-items-stretch">
-                            <div class="col-lg-8 col-md-8">
+                        <div class="row g-4">
+                            <div class="col-lg-6 col-md-12">
                                 <div class="card h-100 shadow-sm border-0 rounded-3">
                                     <div class="card-body px-5 py-5">
                                         <div class="mb-3">
-                                            <label for="name" class="form-label">Name</label>
+                                            <label for="name" class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
                                             <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" required>
                                             @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                         </div>
                                         <div class="mb-3">
-                                            <label for="email" class="form-label">Email</label>
+                                            <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
                                             <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" required>
                                             @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                         </div>
                                         <div class="mb-3">
-                                            <label for="password" class="form-label">Password</label>
+                                            <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
                                             <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" required>
                                             <small class="text-muted">Minimal 8 karakter</small>
                                             @error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                         </div>
                                         <div class="mb-3">
-                                            <label for="role" class="form-label">Role</label>
-                                            <select class="form-select @error('role') is-invalid @enderror" id="role" name="role" required>
-                                                <option value="Super Admin" {{ old('role') == 'Super Admin' ? 'selected' : '' }}>Super Admin</option>
-                                                <option value="Admin" {{ old('role', 'Admin') == 'Admin' ? 'selected' : '' }}>Admin</option>
-                                                <option value="Staff" {{ old('role') == 'Staff' ? 'selected' : '' }}>Staff</option>
+                                            <label for="role_id" class="form-label">Role <span class="text-danger">*</span></label>
+                                            <select class="form-select @error('role_id') is-invalid @enderror" id="role_id" name="role_id" required>
+                                                <option value="">-- Pilih Role --</option>
+                                                @foreach($roles as $role)
+                                                    <option value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'selected' : '' }}>
+                                                        {{ ucwords(str_replace('_', ' ', $role->name)) }}
+                                                    </option>
+                                                @endforeach
                                             </select>
-                                            @error('role')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                            <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Hak akses ditentukan otomatis berdasarkan role.</small>
+                                            @error('role_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-4 col-md-4">
-                                <div class="card h-100 shadow-sm border-0 rounded-3">
-                                    <div class="card-header bg-gradient-light pb-2 px-3">
-                                        <h6 class="mb-0 font-weight-bold">Hak Akses Menu</h6>
+                            <div class="col-lg-6 col-md-12">
+                                <div class="card h-100 shadow-sm border-0 rounded-3 bg-light">
+                                    <div class="card-header bg-gradient-light pb-2 px-4">
+                                        <h6 class="mb-0 font-weight-bold"><i class="fas fa-info-circle me-2"></i>Informasi Role</h6>
                                     </div>
-                                    <div class="card-body pt-3 pb-2 px-3">
-                                        <div class="row g-3">
-                                            @foreach($menuList as $menu)
-                                            <div class="col-12">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" name="permissions[]" id="menu_{{ Str::slug($menu, '_') }}" value="{{ $menu }}" {{ is_array(old('permissions')) && in_array($menu, old('permissions', [])) ? 'checked' : '' }}>
-                                                    <label class="form-check-label ms-2" for="menu_{{ Str::slug($menu, '_') }}">{{ $menu }}</label>
-                                                </div>
-                                            </div>
-                                            @endforeach
+                                    <div class="card-body pt-3 pb-3 px-4">
+                                        <div class="mb-3">
+                                            <strong>Super Admin</strong>
+                                            <p class="text-muted mb-2 small">Akses penuh ke seluruh sistem tanpa batasan.</p>
                                         </div>
-                                        <small class="text-muted d-block mt-3">Centang menu yang boleh diakses user. <strong>Super Admin</strong> otomatis akses semua menu.</small>
+                                        <div class="mb-3">
+                                            <strong>Admin</strong>
+                                            <p class="text-muted mb-2 small">Mengelola operasional sistem, pengguna, dan data.</p>
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong>Asesor</strong>
+                                            <p class="text-muted mb-2 small">Melakukan asesmen dan penilaian kompetensi.</p>
+                                        </div>
+                                        <div class="mb-0">
+                                            <strong>Komite Teknis</strong>
+                                            <p class="text-muted mb-0 small">Review hasil asesmen dan keputusan sertifikasi.</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

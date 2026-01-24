@@ -40,49 +40,61 @@
                     <form action="{{ route('adminui.users.update', $user->id) }}" method="POST">
                         @csrf
                         @method('PUT')
-                        <div class="row g-4 align-items-stretch">
-                            <div class="col-lg-8 col-md-8">
+                        <div class="row g-4">
+                            <div class="col-lg-6 col-md-12">
                                 <div class="card h-100 shadow-sm border-0 rounded-3">
                                     <div class="card-body px-5 py-5">
                                         <div class="mb-3">
-                                            <label for="name" class="form-label">Name</label>
+                                            <label for="name" class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
                                             <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $user->name) }}" required>
                                             @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                         </div>
                                         <div class="mb-3">
-                                            <label for="email" class="form-label">Email</label>
+                                            <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
                                             <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email', $user->email) }}" required>
                                             @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                         </div>
                                         <div class="mb-3">
-                                            <label for="role" class="form-label">Role</label>
-                                            <select class="form-select @error('role') is-invalid @enderror" id="role" name="role" required>
-                                                <option value="Super Admin" {{ old('role', $user->role) == 'Super Admin' ? 'selected' : '' }}>Super Admin</option>
-                                                <option value="Admin" {{ old('role', $user->role) == 'Admin' ? 'selected' : '' }}>Admin</option>
-                                                <option value="Staff" {{ old('role', $user->role) == 'Staff' ? 'selected' : '' }}>Staff</option>
+                                            <label for="role_id" class="form-label">Role <span class="text-danger">*</span></label>
+                                            <select class="form-select @error('role_id') is-invalid @enderror" id="role_id" name="role_id" required>
+                                                <option value="">-- Pilih Role --</option>
+                                                @foreach($roles as $role)
+                                                    <option value="{{ $role->id }}" {{ old('role_id', $user->role_id) == $role->id ? 'selected' : '' }}>
+                                                        {{ ucwords(str_replace('_', ' ', $role->name)) }}
+                                                    </option>
+                                                @endforeach
                                             </select>
-                                            @error('role')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                            <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Hak akses ditentukan otomatis berdasarkan role.</small>
+                                            @error('role_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="password" class="form-label">Password Baru</label>
+                                            <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password">
+                                            <small class="text-muted">Kosongkan jika tidak ingin mengubah password</small>
+                                            @error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-4 col-md-4">
-                                <div class="card h-100 shadow-sm border-0 rounded-3">
-                                    <div class="card-body px-4 py-4">
-                                        <label class="form-label">Hak Akses Menu</label>
-                                        <div class="row">
-                                            @foreach($menuList as $menu)
-                                            <div class="col-12 mb-2">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" name="permissions[]" value="{{ $menu }}" id="menu-{{ $loop->index }}" {{ (is_array(old('permissions', $user->permissions)) && in_array($menu, old('permissions', $user->permissions))) ? 'checked' : '' }}>
-                                                    <label class="form-check-label" for="menu-{{ $loop->index }}">{{ $menu }}</label>
-                                                </div>
-                                            </div>
-                                            @endforeach
+                            <div class="col-lg-6 col-md-12">
+                                <div class="card h-100 shadow-sm border-0 rounded-3 bg-light">
+                                    <div class="card-header bg-gradient-light pb-2 px-4">
+                                        <h6 class="mb-0 font-weight-bold"><i class="fas fa-info-circle me-2"></i>Informasi User</h6>
+                                    </div>
+                                    <div class="card-body pt-3 pb-3 px-4">
+                                        <div class="mb-3">
+                                            <strong>ID:</strong> {{ $user->id }}
                                         </div>
-                                        @if(strtolower(old('role', $user->role)) == 'super admin')
-                                            <div class="text-muted small mt-2">Super Admin akses semua menu.</div>
-                                        @endif
+                                        <div class="mb-3">
+                                            <strong>Role Saat Ini:</strong> 
+                                            <span class="badge bg-primary">{{ $user->userRole?->name ? ucwords(str_replace('_', ' ', $user->userRole->name)) : 'Tidak ada' }}</span>
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong>Terdaftar:</strong> {{ $user->created_at->format('d M Y H:i') }}
+                                        </div>
+                                        <div class="mb-0">
+                                            <strong>Terakhir Update:</strong> {{ $user->updated_at->format('d M Y H:i') }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -96,7 +108,7 @@
             </div>
 
             {{-- Keamanan Akun Section - Only for Super Admin / Admin --}}
-            @if(in_array(strtolower(auth()->user()->role), ['super admin', 'admin']) && auth()->id() !== $user->id)
+            @if((auth()->user()->isSuperAdmin() || auth()->user()->isAdmin()) && auth()->id() !== $user->id)
             <div class="card shadow-lg border-0 mb-4 rounded-3">
                 <div class="card-header bg-transparent pb-0 px-5 pt-4">
                     <h5 class="mb-0 font-weight-bold"><i class="fas fa-shield-alt me-2 text-warning"></i>Keamanan Akun</h5>
@@ -124,7 +136,7 @@
 </div>
 
 {{-- Reset Password Modal --}}
-@if(in_array(strtolower(auth()->user()->role), ['super admin', 'admin']) && auth()->id() !== $user->id)
+@if((auth()->user()->isSuperAdmin() || auth()->user()->isAdmin()) && auth()->id() !== $user->id)
 <div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
