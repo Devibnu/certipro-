@@ -23,7 +23,6 @@
                         @endphp
                         <div class="d-none d-sm-block">
                             <span class="font-weight-bold text-sm">{{ Auth::user()->name ?? 'Admin' }}</span>
-                            <span class="badge badge-sm bg-gradient-{{ $roleClass }} ms-1">{{ $roleName }}</span>
                         </div>
                         <i class="fa fa-chevron-down ms-2 text-xs"></i>
                     </a>
