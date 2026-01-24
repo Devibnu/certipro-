@@ -44,31 +44,48 @@ class PraPendaftaranObserver
         $oldStatus = $oldValues['status'] ?? null;
         $newStatus = $newValues['status'] ?? null;
         
-        // Determine action and description based on new status
+        // ========================================================================
+        // ONLY 3 VALID STATUS TRANSITIONS (Clean Architecture)
+        // ========================================================================
+        // MENUNGGU_VERIFIKASI → DITERIMA (Admin approves)
+        // MENUNGGU_VERIFIKASI → DITOLAK (Admin rejects)
+        // No other transitions allowed
+        // ========================================================================
+        
         if ($statusChanged && $newStatus === PraPendaftaran::STATUS_DITERIMA) {
+            // ✅ VALID: Admin approved after document verification
             $action = AuditLog::ACTION_VERIFY;
-            $description = "Pra-pendaftaran {$praPendaftaran->nama_lengkap} diterima (diverifikasi)";
+            $description = "Pra-pendaftaran {$praPendaftaran->nama_lengkap} DITERIMA. Menunggu penetapan skema di modul Pendaftaran Sertifikasi.";
             $event = 'pra_pendaftaran_diterima';
             
-            // Send acceptance notification
-            PraPendaftaranNotificationService::sendAcceptedNotification($praPendaftaran);
+            // ========================================================================
+            // IDEMPOTENT EMAIL CHECK
+            // Only send email if old_status !== new_status (true state transition)
+            // ========================================================================
+            if ($oldStatus !== $newStatus) {
+                // Send acceptance notification: "Menunggu penetapan skema"
+                PraPendaftaranNotificationService::sendAcceptedNotification($praPendaftaran);
+            }
             
         } elseif ($statusChanged && $newStatus === PraPendaftaran::STATUS_DITOLAK) {
+            // ❌ VALID: Admin rejected with reason
             $action = AuditLog::ACTION_REJECT;
-            $description = "Pra-pendaftaran {$praPendaftaran->nama_lengkap} ditolak";
+            $description = "Pra-pendaftaran {$praPendaftaran->nama_lengkap} DITOLAK. Alasan: {$praPendaftaran->alasan_penolakan}";
             $event = 'pra_pendaftaran_ditolak';
             
-            // Send rejection notification
-            PraPendaftaranNotificationService::sendRejectedNotification($praPendaftaran);
-            
-        } elseif ($statusChanged && $newStatus === PraPendaftaran::STATUS_DIPROSES) {
-            $action = AuditLog::ACTION_UPDATE;
-            $description = "Pra-pendaftaran {$praPendaftaran->nama_lengkap} sedang diverifikasi";
-            $event = 'pra_pendaftaran_diproses';
+            // ========================================================================
+            // IDEMPOTENT EMAIL CHECK
+            // Only send email if old_status !== new_status (true state transition)
+            // ========================================================================
+            if ($oldStatus !== $newStatus) {
+                // Send rejection notification with reason
+                PraPendaftaranNotificationService::sendRejectedNotification($praPendaftaran);
+            }
             
         } else {
+            // Other updates (non-status changes)
             $action = AuditLog::ACTION_UPDATE;
-            $description = "Pra-pendaftaran {$praPendaftaran->nama_lengkap} diperbarui";
+            $description = "Pra-pendaftaran {$praPendaftaran->nama_lengkap} diperbarui (data non-status)";
             $event = 'pra_pendaftaran_diperbarui';
         }
         
