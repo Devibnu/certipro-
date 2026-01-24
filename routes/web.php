@@ -5,9 +5,9 @@ use App\Http\Controllers\AdminUI\UserController;
 use App\Http\Controllers\HomeController;
 
 // =====================================================
-// USER MANAGEMENT ROUTES - Permission-Based
+// USER MANAGEMENT ROUTES - SUPER ADMIN ONLY
 // =====================================================
-Route::middleware(['auth'])->prefix('adminui')->group(function () {
+Route::middleware(['auth', 'role:super_admin'])->prefix('adminui')->group(function () {
     Route::get('/users', [UserController::class, 'index'])
         ->name('adminui.users.index')
         ->middleware('permission:users.view');
@@ -525,9 +525,9 @@ Route::prefix('adminui')->name('adminui.')->group(function () {
     });
     
     // =====================================================
-    // AUDIT LOG ROUTES - Permission-Based
+    // AUDIT LOG ROUTES - SUPER ADMIN ONLY
     // =====================================================
-    Route::prefix('audit-log')->name('audit-log.')->group(function () {
+    Route::middleware(['role:super_admin'])->prefix('audit-log')->name('audit-log.')->group(function () {
         Route::get('/', [App\Http\Controllers\AdminUI\AuditLogController::class, 'index'])
             ->name('index')
             ->middleware('permission:audit.view');
@@ -555,9 +555,9 @@ Route::prefix('adminui')->name('adminui.')->group(function () {
     });
     
     // =====================================================
-    // SYSTEM SETTINGS ROUTES - Permission-Based
+    // SYSTEM SETTINGS ROUTES - SUPER ADMIN ONLY
     // =====================================================
-    Route::prefix('settings')->name('settings.')->group(function () {
+    Route::middleware(['role:super_admin'])->prefix('settings')->name('settings.')->group(function () {
         // Email Settings
         Route::get('/email', [App\Http\Controllers\AdminUI\EmailSettingController::class, 'index'])
             ->name('email')

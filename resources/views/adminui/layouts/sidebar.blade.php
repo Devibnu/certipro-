@@ -47,15 +47,15 @@
         </a>
       </li>
 
-      {{-- MANAJEMEN SECTION - Only show if user has any management permission --}}
-      @if(auth()->user()->hasPermission('users.view') || auth()->user()->hasPermission('cms.view'))
+      {{-- MANAJEMEN SECTION - Only show for Super Admin --}}
+      @if(auth()->user()->isSuperAdmin())
       <li class="nav-item mt-3">
         <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Manajemen</h6>
       </li>
       @endif
 
-      {{-- USERS - Only for users with users.view permission --}}
-      @if(auth()->user()->hasPermission('users.view'))
+      {{-- USERS - Only for Super Admin --}}
+      @if(auth()->user()->isSuperAdmin())
       <li class="nav-item">
         <a class="nav-link {{ (Request::is('adminui/users*') ? 'active' : '') }}" href="{{ route('adminui.users.index') }}">
           <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
@@ -199,8 +199,8 @@
       </li>
       @endif
 
-      {{-- AUDIT LOG - For users with audit_log.view permission --}}
-      @if(auth()->user()->hasPermission('audit_log.view'))
+      {{-- AUDIT LOG - Super Admin ONLY --}}
+      @if(auth()->user()->isSuperAdmin())
       <li class="nav-item mt-3">
         <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Audit & Kepatuhan</h6>
       </li>
@@ -214,8 +214,8 @@
       </li>
       @endif
 
-      {{-- SYSTEM SETTINGS - For users with settings.view permission --}}
-      @if(auth()->user()->hasPermission('settings.view'))
+      {{-- SYSTEM SETTINGS - Super Admin ONLY --}}
+      @if(auth()->user()->isSuperAdmin())
       <li class="nav-item mt-3">
         <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Pengaturan Sistem</h6>
       </li>
