@@ -383,6 +383,6 @@ class AuditPackageController extends Controller
             return $user->roles->pluck('name')->first() ?? 'User';
         }
 
-        return $user->role ?? 'User';
+        return $user->userRole?->name ?? 'User';
     }
 }

@@ -11,11 +11,13 @@
                             <div class="col">
                                 <h6 class="text-white text-capitalize ps-3">Kelola User</h6>
                             </div>
+                            @if(auth()->user()->hasPermission('users.create'))
                             <div class="col-auto pe-3">
                                 <a href="{{ route('adminui.users.create') }}" class="btn bg-gradient-dark mb-0">
                                     <i class="material-icons text-sm">add</i>&nbsp;&nbsp;Tambah User
                                 </a>
                             </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -47,14 +49,9 @@
                                     <td>
                                         <div class="d-flex px-2 py-1 align-items-center">
                                             <div>
-                                                @if($user->photo)
-                                                    {{-- user->photo already stores path like 'uploads/profile/filename' so use it directly --}}
-                                                    <img src="{{ asset($user->photo) }}" class="avatar avatar-lg me-3 border-radius-lg" alt="avatar">
-                                                @else
-                                                    <div class="avatar avatar-lg me-3 border-radius-lg bg-gradient-info d-flex align-items-center justify-content-center">
-                                                        <i class="fas fa-user text-white"></i>
-                                                    </div>
-                                                @endif
+                                                <div class="avatar avatar-lg me-3 border-radius-lg bg-gradient-info d-flex align-items-center justify-content-center">
+                                                    <span class="text-white font-weight-bold">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
+                                                </div>
                                             </div>
                                             <div class="d-flex flex-column">
                                                 <h6 class="mb-0 text-sm">{{ $user->name }}</h6>
@@ -63,7 +60,7 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="badge bg-gradient-info text-white">{{ $user->role }}</span>
+                                        <span class="badge bg-gradient-info text-white">{{ $user->userRole?->name ? ucwords(str_replace('_', ' ', $user->userRole->name)) : 'Tidak ada' }}</span>
                                     </td>
                                     <td class="text-center">
                                         <span class="badge bg-gradient-success">AKTIF</span>
@@ -73,7 +70,10 @@
                                         <span class="text-xs text-muted">{{ $user->created_at->diffForHumans() }}</span>
                                     </td>
                                     <td class="text-center">
+                                        @if(auth()->user()->hasPermission('users.update'))
                                         <a href="{{ route('adminui.users.edit', $user->id) }}" class="btn btn-sm btn-dark me-2"><i class="fas fa-edit"></i> EDIT</a>
+                                        @endif
+                                        @if(auth()->user()->hasPermission('users.delete'))
                                         <button type="button" class="btn btn-sm btn-danger btn-delete-user" 
                                                 data-user-id="{{ $user->id }}" 
                                                 data-user-name="{{ $user->name }}">
@@ -83,6 +83,7 @@
                                             @csrf
                                             @method('DELETE')
                                         </form>
+                                        @endif
                                     </td>
                                 </tr>
                                 @empty

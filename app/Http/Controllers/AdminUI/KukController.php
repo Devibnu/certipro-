@@ -102,14 +102,8 @@ class KukController extends Controller
         
         Kuk::create($validated);
         
-        // Get skema_id for redirect
-        $unit = UnitKompetensi::find($validated['unit_kompetensi_id']);
-        
         return redirect()
-            ->route('adminui.kuk.index', [
-                'skema_sertifikasi_id' => $unit->skema_sertifikasi_id,
-                'unit_kompetensi_id' => $validated['unit_kompetensi_id']
-            ])
+            ->route('adminui.kuk.index')
             ->with('success', 'KUK berhasil ditambahkan.');
     }
 
@@ -159,14 +153,8 @@ class KukController extends Controller
         
         $kuk->update($validated);
         
-        // Get skema_id for redirect
-        $unit = UnitKompetensi::find($validated['unit_kompetensi_id']);
-        
         return redirect()
-            ->route('adminui.kuk.index', [
-                'skema_sertifikasi_id' => $unit->skema_sertifikasi_id,
-                'unit_kompetensi_id' => $validated['unit_kompetensi_id']
-            ])
+            ->route('adminui.kuk.index')
             ->with('success', 'KUK berhasil diperbarui.');
     }
 
@@ -175,17 +163,12 @@ class KukController extends Controller
      */
     public function destroy(Kuk $kuk)
     {
-        $unitId = $kuk->unit_kompetensi_id;
-        $unit = $kuk->unitKompetensi;
         $kodeKuk = $kuk->kode_kuk;
         
         $kuk->delete();
         
         return redirect()
-            ->route('adminui.kuk.index', [
-                'skema_sertifikasi_id' => $unit->skema_sertifikasi_id ?? null,
-                'unit_kompetensi_id' => $unitId
-            ])
+            ->route('adminui.kuk.index')
             ->with('success', "KUK {$kodeKuk} berhasil dihapus.");
     }
 

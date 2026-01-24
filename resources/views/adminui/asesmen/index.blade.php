@@ -146,8 +146,31 @@
                 <div class="tab-pane fade" id="riwayat-asesmen" role="tabpanel" aria-labelledby="riwayat-tab">
                     <div class="card mb-4">
                         <div class="card-header pb-0">
-                            <h6>Riwayat Asesmen</h6>
-                            <p class="text-sm mb-0">Daftar asesmen yang sudah dilakukan</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6>Riwayat Asesmen</h6>
+                                    <p class="text-sm mb-0">Daftar asesmen yang sudah dilakukan</p>
+                                </div>
+                                @can('sampling.view')
+                                <div>
+                                    {{-- Sampling Filter --}}
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ route('adminui.asesmen.index') }}#riwayat-asesmen" 
+                                           class="btn btn-sm {{ !request('sampling') ? 'bg-gradient-primary' : 'btn-outline-primary' }}">
+                                            Semua
+                                        </a>
+                                        <a href="{{ route('adminui.asesmen.index', ['sampling' => 'sampled']) }}#riwayat-asesmen" 
+                                           class="btn btn-sm {{ request('sampling') === 'sampled' ? 'bg-gradient-info' : 'btn-outline-info' }}">
+                                            <i class="fas fa-clipboard-check me-1"></i> Sampling
+                                        </a>
+                                        <a href="{{ route('adminui.asesmen.index', ['sampling' => 'not_sampled']) }}#riwayat-asesmen" 
+                                           class="btn btn-sm {{ request('sampling') === 'not_sampled' ? 'bg-gradient-secondary' : 'btn-outline-secondary' }}">
+                                            Non-Sampling
+                                        </a>
+                                    </div>
+                                </div>
+                                @endcan
+                            </div>
                         </div>
                         <div class="card-body px-0 pt-0 pb-2">
                             <div class="table-responsive p-0">
@@ -159,6 +182,9 @@
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Skema</th>
                                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Tanggal Asesmen</th>
                                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Hasil</th>
+                                            @can('sampling.view')
+                                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Sampling</th>
+                                            @endcan
                                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Asesor</th>
                                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Aksi</th>
                                         </tr>
@@ -196,6 +222,17 @@
                                                     </span>
                                                 @endif
                                             </td>
+                                            @can('sampling.view')
+                                            <td class="align-middle text-center">
+                                                @if($asesmen->isSampled())
+                                                    <span class="badge badge-sm bg-gradient-info" title="Ditandai: {{ $asesmen->sampled_at?->format('d M Y') }}">
+                                                        <i class="fas fa-clipboard-check me-1"></i> SAMPLING
+                                                    </span>
+                                                @else
+                                                    <span class="text-xs text-muted">-</span>
+                                                @endif
+                                            </td>
+                                            @endcan
                                             <td class="align-middle text-center">
                                                 <span class="text-sm">{{ $asesmen->asesor->name ?? '-' }}</span>
                                             </td>
@@ -208,9 +245,15 @@
                                         </tr>
                                         @empty
                                         <tr>
-                                            <td colspan="7" class="text-center py-4">
+                                            <td colspan="{{ auth()->user()->can('sampling.view') ? 8 : 7 }}" class="text-center py-4">
                                                 <i class="fas fa-inbox text-secondary fa-3x mb-3"></i>
-                                                <p class="text-sm mb-0">Belum ada riwayat asesmen.</p>
+                                                <p class="text-sm mb-0">
+                                                    @if(request('sampling'))
+                                                        Tidak ada data asesmen {{ request('sampling') === 'sampled' ? 'sampling' : 'non-sampling' }}.
+                                                    @else
+                                                        Belum ada riwayat asesmen.
+                                                    @endif
+                                                </p>
                                             </td>
                                         </tr>
                                         @endforelse

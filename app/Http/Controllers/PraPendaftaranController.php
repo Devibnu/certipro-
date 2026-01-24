@@ -18,9 +18,38 @@ class PraPendaftaranController extends Controller
 
     /**
      * Simpan data pra-pendaftaran
+     * 
+     * VALIDATION ADDED:
+     * - Cek apakah email sudah pernah daftar dengan status DITERIMA
+     * - Jika sudah DITERIMA → TOLAK pra-pendaftaran baru (redirect dengan pesan)
+     * - Prinsip: 1 Email = 1 Pra-Pendaftaran AKTIF (idempotent)
      */
     public function store(Request $request)
     {
+        // HARD VALIDATION: Cek apakah email sudah punya pra-pendaftaran DITERIMA
+        $existingPraPendaftaran = PraPendaftaran::where('email', $request->email)
+            ->where('status', PraPendaftaran::STATUS_DITERIMA)
+            ->first();
+
+        if ($existingPraPendaftaran) {
+            // CASE: Email sudah punya pra-pendaftaran yang DITERIMA
+            
+            // Cek apakah sudah ada pendaftaran sertifikasi
+            $pendaftaran = $existingPraPendaftaran->pendaftaranSertifikasi;
+            
+            if ($pendaftaran) {
+                // Ada pendaftaran sertifikasi → arahkan ke detail
+                return redirect()
+                    ->route('status-pra-pendaftaran.index')
+                    ->with('warning', 'Anda sudah memiliki pendaftaran sertifikasi aktif. Silakan cek email Anda atau hubungi admin untuk melanjutkan proses.');
+            } else {
+                // Belum ada pendaftaran sertifikasi → kasih info untuk cek email
+                return redirect()
+                    ->route('status-pra-pendaftaran.index')
+                    ->with('warning', 'Pra-pendaftaran Anda sudah diverifikasi. Silakan cek email untuk link lanjut pendaftaran sertifikasi.');
+            }
+        }
+
         // Validasi dasar
         $rules = [
             'nama_lengkap' => 'required|string|max:255',
@@ -28,7 +57,7 @@ class PraPendaftaranController extends Controller
             'no_hp' => 'required|string|max:20',
             'tipe_peserta' => 'required|in:umum,kampus',
             'institusi' => 'nullable|string|max:255',
-            'upload_identitas' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'upload_identitas' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:51200', // 50MB
         ];
 
         // Validasi kondisional berdasarkan tipe peserta
@@ -50,7 +79,7 @@ class PraPendaftaranController extends Controller
             'nik.size' => 'NIK harus 16 digit',
             'nim.required' => 'NIM wajib diisi untuk peserta kampus',
             'upload_identitas.mimes' => 'File harus berformat JPG, PNG, atau PDF',
-            'upload_identitas.max' => 'Ukuran file maksimal 2MB',
+            'upload_identitas.max' => 'Ukuran file maksimal 50MB',
         ]);
 
         // Handle file upload

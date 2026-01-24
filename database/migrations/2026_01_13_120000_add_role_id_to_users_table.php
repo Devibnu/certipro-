@@ -68,9 +68,15 @@ return new class extends Migration
 
     /**
      * Migrate legacy role column values to role_id
+     * Only run if legacy 'role' column exists
      */
     protected function migrateLegacyRoles(): void
     {
+        // Skip if 'role' column doesn't exist (fresh install)
+        if (!Schema::hasColumn('users', 'role')) {
+            return;
+        }
+
         $legacyMappings = [
             'super admin' => 'super_admin',
             'super_admin' => 'super_admin',

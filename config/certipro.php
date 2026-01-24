@@ -42,8 +42,14 @@ return [
     |--------------------------------------------------------------------------
     */
     
-    // Nomor Lisensi BNSP
-    'nomor_lisensi' => env('CERTIPRO_NOMOR_LISENSI', 'LSP-XXXXX-ID'),
+    // Status Lisensi BNSP - Aktif atau Tidak
+    // TRUE = Logo BNSP akan ditampilkan di sertifikat
+    // FALSE = Logo BNSP TIDAK akan ditampilkan (BNSP Compliant - No Placeholder)
+    'is_bnsp_licensed' => env('CERTIPRO_IS_BNSP_LICENSED', false),
+    
+    // Nomor Lisensi BNSP - Hanya tampil jika ada value
+    // Set NULL atau kosongkan jika belum memiliki lisensi
+    'nomor_lisensi' => env('CERTIPRO_NOMOR_LISENSI', null),
     
     /*
     |--------------------------------------------------------------------------

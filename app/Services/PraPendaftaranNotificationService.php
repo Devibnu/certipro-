@@ -18,17 +18,30 @@ class PraPendaftaranNotificationService
      */
     public static function sendCreatedNotification(PraPendaftaran $praPendaftaran): void
     {
+        // DEBUGGING: Log function call
+        Log::info('[PraPendaftaran] sendCreatedNotification CALLED', [
+            'pra_id' => $praPendaftaran->id,
+            'email' => $praPendaftaran->email,
+            'nama' => $praPendaftaran->nama_lengkap,
+        ]);
+        
         // Send Email
         try {
             Mail::to($praPendaftaran->email)
                 ->send(new PraPendaftaranDibuat($praPendaftaran));
 
+            Log::info('[PraPendaftaran] Email SENT successfully', [
+                'pra_id' => $praPendaftaran->id,
+                'email' => $praPendaftaran->email,
+            ]);
+
             self::logNotification($praPendaftaran, 'email', 'dibuat', true);
         } catch (\Exception $e) {
-            Log::error('Failed to send pra-pendaftaran created email', [
+            Log::error('[PraPendaftaran] Failed to send created email', [
                 'pra_pendaftaran_id' => $praPendaftaran->id,
                 'email' => $praPendaftaran->email,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
             self::logNotification($praPendaftaran, 'email', 'dibuat', false, $e->getMessage());
@@ -42,24 +55,20 @@ class PraPendaftaranNotificationService
 
     /**
      * Send notification when pra-pendaftaran is accepted.
+     * REFACTORED: Using Event-Driven Architecture
      */
     public static function sendAcceptedNotification(PraPendaftaran $praPendaftaran): void
     {
-        // Send Email
-        try {
-            Mail::to($praPendaftaran->email)
-                ->send(new PraPendaftaranDiterima($praPendaftaran));
-
-            self::logNotification($praPendaftaran, 'email', 'diterima', true);
-        } catch (\Exception $e) {
-            Log::error('Failed to send pra-pendaftaran accepted email', [
-                'pra_pendaftaran_id' => $praPendaftaran->id,
-                'email' => $praPendaftaran->email,
-                'error' => $e->getMessage(),
-            ]);
-
-            self::logNotification($praPendaftaran, 'email', 'diterima', false, $e->getMessage());
-        }
+        // ======================================================
+        // NEW: Fire Event instead of direct Mail::send()
+        // Event → Listener (queue-based) → EmailNotificationService
+        // ======================================================
+        event(new \App\Events\PraPendaftaranDiterimaEvent($praPendaftaran));
+        
+        Log::info('[PraPendaftaranNotif] PraPendaftaranDiterimaEvent dispatched', [
+            'pra_id' => $praPendaftaran->id,
+            'email' => $praPendaftaran->email,
+        ]);
 
         // Send WhatsApp (optional)
         if (config('services.whatsapp.enabled', false)) {
@@ -69,24 +78,20 @@ class PraPendaftaranNotificationService
 
     /**
      * Send notification when pra-pendaftaran is rejected.
+     * REFACTORED: Using Event-Driven Architecture
      */
     public static function sendRejectedNotification(PraPendaftaran $praPendaftaran): void
     {
-        // Send Email
-        try {
-            Mail::to($praPendaftaran->email)
-                ->send(new PraPendaftaranDitolak($praPendaftaran));
-
-            self::logNotification($praPendaftaran, 'email', 'ditolak', true);
-        } catch (\Exception $e) {
-            Log::error('Failed to send pra-pendaftaran rejected email', [
-                'pra_pendaftaran_id' => $praPendaftaran->id,
-                'email' => $praPendaftaran->email,
-                'error' => $e->getMessage(),
-            ]);
-
-            self::logNotification($praPendaftaran, 'email', 'ditolak', false, $e->getMessage());
-        }
+        // ======================================================
+        // NEW: Fire Event instead of direct Mail::send()
+        // Event → Listener (queue-based) → EmailNotificationService
+        // ======================================================
+        event(new \App\Events\PraPendaftaranDitolakEvent($praPendaftaran));
+        
+        Log::info('[PraPendaftaranNotif] PraPendaftaranDitolakEvent dispatched', [
+            'pra_id' => $praPendaftaran->id,
+            'email' => $praPendaftaran->email,
+        ]);
 
         // Send WhatsApp (optional)
         if (config('services.whatsapp.enabled', false)) {

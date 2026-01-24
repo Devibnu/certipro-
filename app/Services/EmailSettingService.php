@@ -281,6 +281,7 @@ class EmailSettingService
     {
         $timestamp = now()->format('d/m/Y H:i:s');
         $user = auth()->user();
+        $userRole = $user?->userRole?->display_name ?? $user?->userRole?->name ?? 'User';
         
         return <<<TEXT
 ====================================
@@ -300,7 +301,7 @@ INFORMASI KONFIGURASI:
 
 INFORMASI PENGIRIM:
 - User: {$user->name}
-- Role: {$user->role}
+- Role: {$userRole}
 - Waktu: {$timestamp}
 
 ------------------------------------

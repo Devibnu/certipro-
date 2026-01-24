@@ -100,6 +100,7 @@ class EmailAuditEvidenceController extends Controller
 
     /**
      * Check if user has permission to access audit evidence
+     * Uses RBAC methods from User model
      */
     protected function canAccessAuditEvidence(): bool
     {
@@ -109,20 +110,7 @@ class EmailAuditEvidenceController extends Controller
             return false;
         }
 
-        // Check roles (adjust based on your auth implementation)
-        if (method_exists($user, 'hasRole')) {
-            return $user->hasRole(['super_admin', 'admin', 'Super Admin', 'Admin']);
-        }
-
-        if (method_exists($user, 'roles') && $user->roles) {
-            $roleNames = $user->roles->pluck('name')->toArray();
-            return count(array_intersect($roleNames, ['super_admin', 'admin', 'Super Admin', 'Admin'])) > 0;
-        }
-
-        if (isset($user->role)) {
-            return in_array($user->role, ['super_admin', 'admin', 'Super Admin', 'Admin']);
-        }
-
-        return true; // Default to true if no role system is implemented
+        // Super Admin or Admin can access
+        return $user->isSuperAdmin() || $user->isAdmin();
     }
 }

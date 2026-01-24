@@ -74,22 +74,39 @@
         
         <!-- Next Steps -->
         <div style="background-color: #fefce8; border-left: 4px solid #eab308; padding: 20px; margin: 25px 0; border-radius: 0 8px 8px 0;">
-            <p style="margin: 0; color: #854d0e; font-size: 14px;">
-                <strong>📌 Langkah Selanjutnya:</strong><br>
-                Silakan lanjutkan ke tahap <strong>Pendaftaran Sertifikasi</strong> untuk:
-            </p>
-            <ul style="margin: 10px 0 0; padding-left: 20px; color: #854d0e; font-size: 14px;">
-                <li>Memilih skema kompetensi yang diinginkan</li>
-                <li>Melengkapi dokumen persyaratan</li>
-                <li>Memilih jadwal asesmen yang tersedia</li>
-            </ul>
+            @if($hasPendaftaran ?? false)
+                <p style="margin: 0; color: #854d0e; font-size: 14px;">
+                    <strong>📌 Pendaftaran Sertifikasi Telah Dibuat:</strong><br>
+                    Pendaftaran Anda sudah otomatis dibuat dengan nomor <strong>{{ $pendaftaran->nomor_pendaftaran }}</strong>.<br>
+                    Silakan lanjutkan untuk:
+                </p>
+                <ul style="margin: 10px 0 0; padding-left: 20px; color: #854d0e; font-size: 14px;">
+                    <li>Memilih skema kompetensi yang diinginkan</li>
+                    <li>Melengkapi dokumen persyaratan</li>
+                    <li>Memilih jadwal asesmen yang tersedia</li>
+                </ul>
+            @else
+                <p style="margin: 0; color: #854d0e; font-size: 14px;">
+                    <strong>📌 Langkah Selanjutnya:</strong><br>
+                    Silakan lanjutkan ke tahap <strong>Pendaftaran Sertifikasi</strong> untuk:
+                </p>
+                <ul style="margin: 10px 0 0; padding-left: 20px; color: #854d0e; font-size: 14px;">
+                    <li>Memilih skema kompetensi yang diinginkan</li>
+                    <li>Melengkapi dokumen persyaratan</li>
+                    <li>Memilih jadwal asesmen yang tersedia</li>
+                </ul>
+            @endif
         </div>
         
         <!-- CTA Buttons -->
         <div style="text-align: center; margin: 30px 0;">
             <a href="{{ $daftarUrl }}" 
                style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 14px 35px; border-radius: 8px; font-size: 15px; font-weight: 600; box-shadow: 0 4px 14px -3px rgba(16, 185, 129, 0.4); margin-bottom: 10px;">
-                🚀 Lanjut Daftar Sertifikasi
+                @if($hasPendaftaran ?? false)
+                    ✏️ Lengkapi Pendaftaran Sertifikasi
+                @else
+                    🚀 Lanjut Daftar Sertifikasi
+                @endif
             </a>
         </div>
         

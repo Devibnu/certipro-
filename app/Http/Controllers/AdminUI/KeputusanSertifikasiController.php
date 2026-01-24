@@ -146,6 +146,32 @@ class KeputusanSertifikasiController extends Controller
             
             DB::commit();
             
+            // ======================================================
+            // EVENT 3: FIRE EVENT - KEPUTUSAN (KOMPETEN / BELUM KOMPETEN)
+            // Refactored to Event-Driven Architecture
+            // ======================================================
+            try {
+                if ($request->keputusan === KeputusanSertifikasi::KEPUTUSAN_KOMPETEN) {
+                    event(new \App\Events\KeputusanKompetenEvent($keputusan));
+                    \Log::info('[KeputusanController] KeputusanKompetenEvent dispatched', [
+                        'keputusan_id' => $keputusan->id,
+                        'pendaftaran_id' => $pendaftaran->id,
+                    ]);
+                } else {
+                    event(new \App\Events\KeputusanBelumKompetenEvent($keputusan));
+                    \Log::info('[KeputusanController] KeputusanBelumKompetenEvent dispatched', [
+                        'keputusan_id' => $keputusan->id,
+                        'pendaftaran_id' => $pendaftaran->id,
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('[KeputusanController] Failed to dispatch Keputusan event', [
+                    'keputusan_id' => $keputusan->id,
+                    'keputusan' => $request->keputusan,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+            
             return redirect()->route('adminui.keputusan.show', $pendaftaran->id)
                 ->with('success', 'Keputusan sertifikasi berhasil disimpan dan dikunci.');
                 

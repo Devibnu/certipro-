@@ -99,9 +99,11 @@
                                     </td>
                                     <td class="align-middle text-center text-sm">
                                         @php
+                                            // ========================================================================
+                                            // STATUS BADGE COLORS - ONLY 3 VALID STATES
+                                            // ========================================================================
                                             $statusColors = [
-                                                'baru' => 'bg-gradient-secondary',
-                                                'diproses' => 'bg-gradient-info',
+                                                'menunggu_verifikasi' => 'bg-gradient-secondary',
                                                 'diterima' => 'bg-gradient-success',
                                                 'ditolak' => 'bg-gradient-danger',
                                             ];
@@ -114,9 +116,25 @@
                                         <span class="text-xs text-secondary">{{ $item->created_at->format('d/m/Y H:i') }}</span>
                                     </td>
                                     <td class="align-middle text-center">
+                                        {{-- ========================================================================
+                                             AKSI: HANYA LIHAT DETAIL
+                                             ========================================================================
+                                             Prinsip: Pra-Pendaftaran TIDAK boleh ada logic skema
+                                             Admin hanya bisa:
+                                             1. Lihat detail (untuk verifikasi)
+                                             2. Terima/Tolak (di halaman detail)
+                                             
+                                             TIDAK BOLEH:
+                                             ❌ Pilih skema di sini
+                                             ❌ Buat pendaftaran sertifikasi dari sini
+                                             ❌ Modal penetapan skema
+                                             
+                                             Penetapan skema dilakukan di modul Pendaftaran Sertifikasi
+                                         ======================================================================== --}}
                                         <a href="{{ route('adminui.pra-pendaftaran.show', $item->id) }}" 
-                                           class="btn btn-link text-info px-2 mb-0" title="Lihat Detail">
-                                            <i class="fas fa-eye"></i>
+                                           class="btn btn-link text-info px-2 mb-0" 
+                                           title="Lihat Detail & Verifikasi">
+                                            <i class="fas fa-eye"></i> Detail
                                         </a>
                                     </td>
                                 </tr>
@@ -142,4 +160,20 @@
         </div>
     </div>
 </div>
+
+{{-- ========================================================================
+     NO MODAL FOR SKEMA ASSIGNMENT IN PRA-PENDAFTARAN MODULE
+     ========================================================================
+     Prinsip Clean Architecture:
+     - Pra-Pendaftaran = Data verification only
+     - Pendaftaran Sertifikasi = Skema assignment (separate module)
+     
+     Admin workflow:
+     1. Verify documents in Pra-Pendaftaran (Terima/Tolak)
+     2. Go to Pendaftaran Sertifikasi module
+     3. Create Pendaftaran from approved Pra-Pendaftaran with Skema
+     
+     Modal removed to prevent confusion and enforce clean separation
+     ======================================================================== --}}
+
 @endsection

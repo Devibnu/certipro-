@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Models\AuditLog;
 use App\Models\PraPendaftaran;
 use App\Services\PraPendaftaranNotificationService;
+use Illuminate\Support\Facades\Log;
 
 class PraPendaftaranObserver
 {
@@ -13,6 +14,11 @@ class PraPendaftaranObserver
      */
     public function created(PraPendaftaran $praPendaftaran): void
     {
+        Log::info('[Observer] PraPendaftaran created event FIRED', [
+            'pra_id' => $praPendaftaran->id,
+            'email' => $praPendaftaran->email,
+        ]);
+        
         AuditLog::log(
             AuditLog::ACTION_CREATE,
             AuditLog::MODULE_PRA_PENDAFTARAN,
@@ -29,6 +35,10 @@ class PraPendaftaranObserver
 
         // Send notification to peserta
         PraPendaftaranNotificationService::sendCreatedNotification($praPendaftaran);
+        
+        Log::info('[Observer] Notification service CALLED', [
+            'pra_id' => $praPendaftaran->id,
+        ]);
     }
 
     /**

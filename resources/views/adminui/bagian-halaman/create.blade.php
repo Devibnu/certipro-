@@ -111,6 +111,17 @@
                             </div>
                         </div>
 
+                        {{-- Info untuk tipe Hero --}}
+                        <div class="row mt-3" id="heroInfo" style="display: none;">
+                            <div class="col-12">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Untuk Tipe Hero:</strong> Setelah menyimpan bagian ini, Anda dapat menambahkan <strong>slide gambar</strong> (carousel) dengan mengklik tombol <strong>"Edit"</strong> pada bagian yang sudah dibuat.
+                                    <br><small class="mt-1 d-block">Fitur upload gambar, tombol CTA, dan multiple slides tersedia di halaman Edit.</small>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="row mt-3">
                             <div class="col-md-6">
                                 <div class="form-check form-switch">
@@ -137,4 +148,25 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.getElementById('tipe').addEventListener('change', function() {
+    const heroInfo = document.getElementById('heroInfo');
+    if (this.value === 'hero') {
+        heroInfo.style.display = 'block';
+    } else {
+        heroInfo.style.display = 'none';
+    }
+});
+
+// Check on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const tipe = document.getElementById('tipe').value;
+    if (tipe === 'hero') {
+        document.getElementById('heroInfo').style.display = 'block';
+    }
+});
+</script>
+@endpush
 @endsection

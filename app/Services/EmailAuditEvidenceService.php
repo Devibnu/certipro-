@@ -370,11 +370,17 @@ class EmailAuditEvidenceService
             return 'System';
         }
 
-        if (method_exists($user, 'roles') && $user->roles) {
+        // Use userRole relation (primary RBAC)
+        if ($user->userRole) {
+            return $user->userRole->display_name ?? $user->userRole->name ?? 'User';
+        }
+
+        // Fallback: check roles() pivot
+        if (method_exists($user, 'roles') && $user->roles->isNotEmpty()) {
             return $user->roles->pluck('name')->first() ?? 'User';
         }
 
-        return $user->role ?? 'User';
+        return 'User';
     }
 
     /**
@@ -386,11 +392,17 @@ class EmailAuditEvidenceService
             return 'System';
         }
 
-        if (method_exists($user, 'roles') && $user->relationLoaded('roles')) {
+        // Use userRole relation (primary RBAC)
+        if ($user->userRole) {
+            return $user->userRole->display_name ?? $user->userRole->name ?? 'User';
+        }
+
+        // Fallback: check roles() pivot
+        if (method_exists($user, 'roles') && $user->relationLoaded('roles') && $user->roles->isNotEmpty()) {
             return $user->roles->pluck('name')->first() ?? 'User';
         }
 
-        return $user->role ?? 'User';
+        return 'User';
     }
 
     /**

@@ -121,27 +121,26 @@ class PermissionService
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($user) {
             $permissions = [];
 
-            // Get permissions from RBAC roles
-            $rbacPermissions = $user->roles()
-                ->with('permissions')
-                ->get()
-                ->pluck('permissions')
-                ->flatten()
-                ->pluck('name')
-                ->unique()
-                ->toArray();
-            
-            $permissions = array_merge($permissions, $rbacPermissions);
+            // Get permissions from userRole (primary RBAC via role_id FK)
+            if ($user->role_id && $user->userRole) {
+                $rolePermissions = $user->userRole->permissions()
+                    ->pluck('name')
+                    ->toArray();
+                $permissions = array_merge($permissions, $rolePermissions);
+            }
 
-            // Add legacy permissions (backward compatibility)
-            if (is_array($user->permissions)) {
-                // Map legacy permission names to new format
-                foreach ($user->permissions as $legacyPerm) {
-                    $mappedPerm = $this->mapLegacyPermission($legacyPerm);
-                    if ($mappedPerm) {
-                        $permissions[] = $mappedPerm;
-                    }
-                }
+            // Fallback: Get permissions from roles pivot (legacy RBAC)
+            if (empty($permissions)) {
+                $rbacPermissions = $user->roles()
+                    ->with('permissions')
+                    ->get()
+                    ->pluck('permissions')
+                    ->flatten()
+                    ->pluck('name')
+                    ->unique()
+                    ->toArray();
+                
+                $permissions = array_merge($permissions, $rbacPermissions);
             }
 
             return array_unique($permissions);
@@ -357,7 +356,7 @@ class PermissionService
         AuditLog::create([
             'user_id' => $changedBy?->id,
             'user_name' => $changedBy?->name ?? 'System',
-            'user_role' => $changedBy?->role ?? 'system',
+            'user_role' => $changedBy?->userRole?->name ?? 'system',
             'action' => $action,
             'module' => 'rbac',
             'description' => $description,

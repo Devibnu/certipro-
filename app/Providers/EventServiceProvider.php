@@ -12,10 +12,24 @@ use App\Events\PraPendaftaranStatusChanged;
 use App\Events\PendaftaranSertifikasiStatusChanged;
 use App\Events\KeputusanSertifikasiDitetapkan;
 
+// NEW: Event-Driven Email Architecture
+use App\Events\PraPendaftaranDiterimaEvent;
+use App\Events\PraPendaftaranDitolakEvent;
+use App\Events\KeputusanKompetenEvent;
+use App\Events\KeputusanBelumKompetenEvent;
+use App\Events\SertifikatTerbitEvent;
+
 // CertiPro Listeners
 use App\Listeners\SendEmailOnPraPendaftaranStatus;
 use App\Listeners\SendEmailOnPendaftaranStatus;
 use App\Listeners\SendEmailOnKeputusanFinal;
+
+// NEW: Queue-based Email Listeners
+use App\Listeners\SendPraPendaftaranDiterimaEmail;
+use App\Listeners\SendPraPendaftaranDitolakEmail;
+use App\Listeners\SendKeputusanKompetenEmail;
+use App\Listeners\SendKeputusanBelumKompetenEmail;
+use App\Listeners\SendSertifikatTerbitEmail;
 
 /**
  * ============================================================================
@@ -45,7 +59,7 @@ class EventServiceProvider extends ServiceProvider
         ],
 
         // =====================================================
-        // CERTIPRO: Email Notification Events
+        // CERTIPRO: Email Notification Events (LEGACY)
         // =====================================================
         
         // Pra-Pendaftaran Status Changes
@@ -65,6 +79,42 @@ class EventServiceProvider extends ServiceProvider
         // IMPORTANT: Emails are sent only ONCE (idempotent)
         KeputusanSertifikasiDitetapkan::class => [
             SendEmailOnKeputusanFinal::class,
+        ],
+
+        // =====================================================
+        // CERTIPRO: Event-Driven Email Architecture (NEW)
+        // Queue-based, Retry-safe, Idempotent
+        // Compliance: EMAIL_STATUS_MATRIX.md
+        // =====================================================
+
+        // Pra-Pendaftaran Diterima
+        // Trigger: PraPendaftaranAdminController::updateStatus() status='diterima'
+        PraPendaftaranDiterimaEvent::class => [
+            SendPraPendaftaranDiterimaEmail::class,
+        ],
+
+        // Pra-Pendaftaran Ditolak
+        // Trigger: PraPendaftaranAdminController::updateStatus() status='ditolak'
+        PraPendaftaranDitolakEvent::class => [
+            SendPraPendaftaranDitolakEmail::class,
+        ],
+
+        // Keputusan Kompeten
+        // Trigger: KeputusanSertifikasiController::simpan() keputusan='kompeten'
+        KeputusanKompetenEvent::class => [
+            SendKeputusanKompetenEmail::class,
+        ],
+
+        // Keputusan Belum Kompeten
+        // Trigger: KeputusanSertifikasiController::simpan() keputusan='belum_kompeten'
+        KeputusanBelumKompetenEvent::class => [
+            SendKeputusanBelumKompetenEmail::class,
+        ],
+
+        // Sertifikat Terbit (RESERVED - belum diimplementasikan)
+        // Trigger: SertifikatController::approve()
+        SertifikatTerbitEvent::class => [
+            SendSertifikatTerbitEmail::class,
         ],
     ];
 

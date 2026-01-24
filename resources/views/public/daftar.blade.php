@@ -125,7 +125,11 @@
                             <div class="col-12">
                                 <label for="upload_identitas" class="form-label">Upload Identitas (KTP/KTM)</label>
                                 <input type="file" class="form-control @error('upload_identitas') is-invalid @enderror" id="upload_identitas" name="upload_identitas" accept=".jpg,.jpeg,.png,.pdf">
-                                <small class="text-muted">Format: JPG, PNG, PDF. Maksimal 2MB (opsional)</small>
+                                <small class="text-muted">Format: JPG, PNG, PDF. Maksimal 50MB (opsional)</small>
+                                <div class="alert alert-danger mt-2" id="fileSizeWarning" style="display: none;">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>File terlalu besar!</strong> Ukuran file maksimal adalah 50MB. File yang Anda pilih: <span id="fileSize"></span>MB
+                                </div>
                             </div>
                         </div>
 
@@ -164,6 +168,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const nimRequired = document.getElementById('nim_required');
     const nikInput = document.getElementById('nik');
     const nimInput = document.getElementById('nim');
+    const fileInput = document.getElementById('upload_identitas');
+    const fileSizeWarning = document.getElementById('fileSizeWarning');
+    const fileSizeSpan = document.getElementById('fileSize');
 
     function toggleFields() {
         if (tipeUmum.checked) {
@@ -186,6 +193,28 @@ document.addEventListener('DOMContentLoaded', function() {
             nimInput.setAttribute('required', 'required');
         }
     }
+
+    // Validasi ukuran file
+    fileInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
+            const maxSizeMB = 50;
+            
+            if (fileSizeMB > maxSizeMB) {
+                fileSizeSpan.textContent = fileSizeMB;
+                fileSizeWarning.style.display = 'block';
+                this.value = ''; // Clear file input
+                
+                // Scroll ke warning
+                fileSizeWarning.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+                fileSizeWarning.style.display = 'none';
+            }
+        } else {
+            fileSizeWarning.style.display = 'none';
+        }
+    });
 
     tipeUmum.addEventListener('change', toggleFields);
     tipeKampus.addEventListener('change', toggleFields);

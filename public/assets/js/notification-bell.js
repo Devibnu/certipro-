@@ -31,18 +31,26 @@ function loadNotifications() {
 
 function updateNotificationUI(data) {
     const badge = document.getElementById('notificationBadge');
+    const bellIcon = document.getElementById('bellIcon');
     const count = document.getElementById('notificationCount');
     const list = document.getElementById('notificationList');
     const markAllBtn = document.getElementById('markAllReadBtn');
     
     if (!badge || !count || !list) return;
     
-    // Update badge
+    // Update badge with icon animation
     if (data.unread_count > 0) {
         badge.textContent = data.unread_count;
         badge.style.display = 'block';
+        // Add visual emphasis to bell icon
+        if (bellIcon) {
+            bellIcon.classList.add('text-danger');
+        }
     } else {
         badge.style.display = 'none';
+        if (bellIcon) {
+            bellIcon.classList.remove('text-danger');
+        }
     }
     
     // Update count text

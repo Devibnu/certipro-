@@ -167,10 +167,18 @@ class CheckPermission
     protected function logAccessDenied(Request $request, $user, array $requiredPermissions): void
     {
         try {
+            // Get user roles safely - handle null relations
+            $userRoles = [];
+            if ($user->userRole) {
+                $userRoles[] = $user->userRole->name;
+            } elseif ($user->roles && $user->roles->isNotEmpty()) {
+                $userRoles = $user->roles->pluck('name')->toArray();
+            }
+
             AuditLog::create([
                 'user_id' => $user->id,
                 'user_name' => $user->name,
-                'user_role' => $user->role ?? 'unknown',
+                'user_role' => $user->userRole?->name ?? 'unknown',
                 'action' => self::AUDIT_ACTION_ACCESS_DENIED,
                 'module' => self::AUDIT_MODULE,
                 'description' => sprintf(
@@ -181,7 +189,7 @@ class CheckPermission
                 'metadata' => [
                     'required_permissions' => $requiredPermissions,
                     'user_permissions' => $this->getUserPermissions($user),
-                    'user_roles' => $user->roles->pluck('name')->toArray(),
+                    'user_roles' => $userRoles,
                     'route_name' => $request->route()?->getName(),
                     'route_action' => $request->route()?->getActionName(),
                     'referer' => $request->header('Referer'),
@@ -214,11 +222,9 @@ class CheckPermission
     {
         try {
             $rbacPermissions = $user->getAllPermissions()->pluck('name')->toArray();
-            $legacyPermissions = is_array($user->permissions) ? $user->permissions : [];
             
             return [
                 'rbac' => $rbacPermissions,
-                'legacy' => $legacyPermissions,
             ];
         } catch (\Exception $e) {
             return ['error' => 'Could not retrieve permissions'];

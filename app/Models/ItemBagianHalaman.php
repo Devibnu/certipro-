@@ -12,13 +12,21 @@ class ItemBagianHalaman extends Model
     protected $fillable = [
         'bagian_halaman_id',
         'judul',
+        'subjudul',
         'deskripsi',
         'ikon',
+        'gambar',
+        'tombol_text',
+        'tombol_link',
+        'tombol_text_2',
+        'tombol_link_2',
         'urutan',
+        'aktif',
     ];
 
     protected $casts = [
         'urutan' => 'integer',
+        'aktif' => 'boolean',
     ];
 
     /**

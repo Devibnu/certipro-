@@ -2,6 +2,17 @@
 
 @section('title', 'Detail Asesmen' . (systemCompanyName() ? ' - ' . systemCompanyName() . ' Admin' : ' - Admin'))
 
+@php
+    // Check permissions for evidence
+    $canUploadEvidence = auth()->user()->can('evidence.upload');
+    $canViewEvidence = auth()->user()->can('evidence.view');
+    $canDeleteEvidence = auth()->user()->can('evidence.delete');
+    $isLocked = $asesmen->isLocked();
+    
+    // Preload evidence per KUK
+    $evidenceByKuk = $asesmen->evidences->groupBy('kuk_id');
+@endphp
+
 @section('content')
 <div class="container-fluid py-4">
     <div class="row">
@@ -119,6 +130,9 @@
                 </div>
             </div>
 
+            <!-- Sampling Audit Section (Quality Control) -->
+            @include('adminui.asesmen.partials.sampling-section', ['asesmen' => $asesmen])
+
             <!-- Hasil Penilaian per Unit -->
             <div class="card mb-4">
                 <div class="card-header pb-0">
@@ -160,18 +174,30 @@
                             <div id="collapse{{ $unitId }}" class="accordion-collapse collapse {{ $unitIndex == 0 ? 'show' : '' }}" 
                                  aria-labelledby="heading{{ $unitId }}" data-bs-parent="#accordionUnits">
                                 <div class="accordion-body">
+                                    @if($isLocked)
+                                    <div class="alert alert-info alert-sm py-2 mb-3" role="alert">
+                                        <i class="fas fa-lock me-1"></i>
+                                        <span class="text-sm">Asesmen telah dikunci. Evidence tidak dapat ditambah/dihapus.</span>
+                                    </div>
+                                    @endif
                                     <div class="table-responsive">
                                         <table class="table table-hover mb-0">
                                             <thead class="bg-light">
                                                 <tr>
-                                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder" width="120">Kode KUK</th>
+                                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder" width="100">Kode KUK</th>
                                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Kriteria Unjuk Kerja</th>
-                                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center" width="150">Hasil</th>
-                                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder" width="200">Catatan</th>
+                                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center" width="120">Hasil</th>
+                                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder" width="150">Catatan</th>
+                                                    @if($canViewEvidence)
+                                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder" width="250">Evidence</th>
+                                                    @endif
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 @foreach($details as $detail)
+                                                @php
+                                                    $kukEvidence = $evidenceByKuk->get($detail->kuk_id, collect());
+                                                @endphp
                                                 <tr>
                                                     <td class="align-middle">
                                                         <span class="text-sm font-weight-bold">{{ $detail->kuk->kode_kuk }}</span>
@@ -190,8 +216,21 @@
                                                         </span>
                                                     </td>
                                                     <td class="align-middle">
-                                                        <span class="text-sm text-secondary">{{ $detail->catatan ?? '-' }}</span>
+                                                        <span class="text-xs text-secondary">{{ $detail->catatan ?? '-' }}</span>
                                                     </td>
+                                                    @if($canViewEvidence)
+                                                    <td class="align-middle">
+                                                        @include('adminui.asesmen.partials.evidence-kuk', [
+                                                            'asesmenId' => $asesmen->id,
+                                                            'kukId' => $detail->kuk_id,
+                                                            'kukKode' => $detail->kuk->kode_kuk,
+                                                            'evidences' => $kukEvidence,
+                                                            'isLocked' => $isLocked,
+                                                            'canUpload' => $canUploadEvidence,
+                                                            'canDelete' => $canDeleteEvidence,
+                                                        ])
+                                                    </td>
+                                                    @endif
                                                 </tr>
                                                 @endforeach
                                             </tbody>
@@ -358,4 +397,9 @@
         </div>
     </div>
 </div>
+
+{{-- Evidence Modals --}}
+@if($canViewEvidence)
+    @include('adminui.asesmen.partials.evidence-modals', ['asesmenId' => $asesmen->id])
+@endif
 @endsection

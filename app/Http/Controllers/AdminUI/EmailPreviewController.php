@@ -26,17 +26,6 @@ use Illuminate\Http\JsonResponse;
 class EmailPreviewController extends Controller
 {
     /**
-     * Allowed roles for email preview/resend
-     */
-    protected array $allowedRoles = [
-        'super admin',
-        'super_admin',
-        'superadmin',
-        'admin',
-        'administrator',
-    ];
-
-    /**
      * EmailNotificationService instance
      */
     protected EmailNotificationService $emailService;
@@ -240,6 +229,7 @@ class EmailPreviewController extends Controller
 
     /**
      * Check if current user has access
+     * Uses RBAC methods from User model
      */
     protected function authorizeAccess(): bool
     {
@@ -249,42 +239,7 @@ class EmailPreviewController extends Controller
             return false;
         }
 
-        // Check role - using multiple possible methods
-        if (method_exists($user, 'hasRole')) {
-            foreach ($this->allowedRoles as $role) {
-                if ($user->hasRole($role)) {
-                    return true;
-                }
-            }
-        }
-
-        // Check via role relationship
-        if (method_exists($user, 'roles') && $user->roles) {
-            $userRoles = $user->roles->pluck('name')->map(fn($r) => strtolower($r))->toArray();
-            foreach ($this->allowedRoles as $role) {
-                if (in_array(strtolower($role), $userRoles)) {
-                    return true;
-                }
-            }
-        }
-
-        // Check via role attribute
-        if (isset($user->role)) {
-            if (in_array(strtolower($user->role), $this->allowedRoles)) {
-                return true;
-            }
-        }
-
-        // Check via is_admin flag
-        if (isset($user->is_admin) && $user->is_admin) {
-            return true;
-        }
-
-        // Check via is_super_admin flag
-        if (isset($user->is_super_admin) && $user->is_super_admin) {
-            return true;
-        }
-
-        return false;
+        // Super Admin or Admin can access email preview
+        return $user->isSuperAdmin() || $user->isAdmin();
     }
 }

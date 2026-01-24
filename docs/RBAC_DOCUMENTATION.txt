@@ -1,0 +1,626 @@
+================================================================================
+                    DOKUMENTASI RBAC - SISTEM CERTIPRO LSP
+                   ISO 17024:2012 & BNSP Pedoman 201 Compliant
+================================================================================
+
+Dokumen: RBAC-DOC-001
+Versi: 2.0
+Tanggal: 14 Januari 2026
+Penyusun: System Architect
+
+================================================================================
+1. RINGKASAN EKSEKUTIF (5 Menit untuk Auditor)
+================================================================================
+
+CertiPro menggunakan Role-Based Access Control (RBAC) dengan prinsip:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          ARSITEKTUR RBAC                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   USER ──→ ROLE ──→ PERMISSIONS ←── MIDDLEWARE ←── ROUTE/ACTION            │
+│                                                                              │
+│   • User memiliki 1 Role (one-to-one via role_id)                           │
+│   • Role adalah grouping, BUKAN authority                                   │
+│   • Permission adalah authority sesungguhnya                                 │
+│   • Middleware mengecek Permission, BUKAN Role                              │
+│   • Controller TIDAK boleh hardcode role                                    │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+================================================================================
+2. DATABASE SCHEMA
+================================================================================
+
+┌─────────────┐      ┌─────────────────┐      ┌─────────────────┐
+│   users     │      │  role_permission │      │   permissions   │
+├─────────────┤      ├─────────────────┤      ├─────────────────┤
+│ id          │      │ role_id (FK)    │      │ id              │
+│ name        │      │ permission_id(FK)│      │ name            │
+│ email       │      └─────────────────┘      │ display_name    │
+│ role_id(FK) │──┐                            │ description     │
+│ ...         │  │   ┌─────────────────┐      │ module          │
+└─────────────┘  └──→│     roles       │      └─────────────────┘
+                     ├─────────────────┤              ▲
+                     │ id              │              │
+                     │ name            │──────────────┘
+                     │ display_name    │     (many-to-many)
+                     │ description     │
+                     └─────────────────┘
+
+================================================================================
+3. DAFTAR ROLE (5 Role)
+================================================================================
+
+┌────────────────┬────────────────────────────────────────────────────────────┐
+│ ROLE           │ DESKRIPSI                                                  │
+├────────────────┼────────────────────────────────────────────────────────────┤
+│ super_admin    │ Akses penuh ke seluruh sistem, bypass permission check     │
+│ admin          │ Mengelola operasional LSP, verifikasi pendaftaran          │
+│ asesor         │ Melaksanakan asesmen, input hasil penilaian                │
+│ komite_teknis  │ Membuat keputusan sertifikasi, approve/reject              │
+│ asesi          │ Peserta sertifikasi, mendaftar dan melihat hasil           │
+└────────────────┴────────────────────────────────────────────────────────────┘
+
+================================================================================
+4. DAFTAR PERMISSION (48 Permission)
+================================================================================
+
+┌───────────────────────────────────────────────────────────────────────────────┐
+│ MODULE: DASHBOARD                                                              │
+├───────────────────────────────────────────────────────────────────────────────┤
+│ dashboard.view               │ Melihat halaman dashboard                      │
+└───────────────────────────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────────────────────┐
+│ MODULE: PRA-PENDAFTARAN                                                        │
+├───────────────────────────────────────────────────────────────────────────────┤
+│ pra_pendaftaran.view         │ Melihat daftar pra-pendaftaran                 │
+│ pra_pendaftaran.create       │ Membuat pra-pendaftaran baru                   │
+│ pra_pendaftaran.manage       │ Mengelola/edit pra-pendaftaran                 │
+│ pra_pendaftaran.process      │ Memproses pra-pendaftaran ke pendaftaran       │
+└───────────────────────────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────────────────────┐
+│ MODULE: PENDAFTARAN SERTIFIKASI                                                │
+├───────────────────────────────────────────────────────────────────────────────┤
+│ pendaftaran.view             │ Melihat daftar pendaftaran                     │
+│ pendaftaran.verify           │ Memverifikasi dokumen pendaftaran              │
+│ pendaftaran.assign           │ Menugaskan asesor ke pendaftaran               │
+│ pendaftaran.reject           │ Menolak pendaftaran                            │
+│ pendaftaran_sertifikasi.view │ Alias untuk pendaftaran.view                   │
+│ pendaftaran_sertifikasi.verify│ Alias untuk pendaftaran.verify                │
+│ pendaftaran_sertifikasi.assign_skema │ Menugaskan skema ke pendaftaran        │
+└───────────────────────────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────────────────────┐
+│ MODULE: ASESMEN                                                                │
+├───────────────────────────────────────────────────────────────────────────────┤
+│ asesmen.view                 │ Melihat daftar asesmen                         │
+│ asesmen.input                │ Menginput hasil asesmen                        │
+│ asesmen.submit               │ Menyimpan/submit hasil asesmen                 │
+│ asesmen.lock                 │ Mengunci asesmen (finalisasi)                  │
+└───────────────────────────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────────────────────┐
+│ MODULE: KEPUTUSAN SERTIFIKASI                                                  │
+├───────────────────────────────────────────────────────────────────────────────┤
+│ keputusan.view               │ Melihat daftar keputusan                       │
+│ keputusan.approve            │ Menyetujui/menolak keputusan                   │
+│ keputusan_sertifikasi.view   │ Alias untuk keputusan.view                     │
+│ keputusan_sertifikasi.decide │ Membuat keputusan sertifikasi                  │
+└───────────────────────────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────────────────────┐
+│ MODULE: SERTIFIKAT                                                             │
+├───────────────────────────────────────────────────────────────────────────────┤
+│ sertifikat.view              │ Melihat daftar sertifikat                      │
+│ sertifikat.generate          │ Membuat/generate sertifikat                    │
+│ sertifikat.issue             │ Menerbitkan sertifikat                         │
+│ sertifikat.download          │ Mengunduh sertifikat                           │
+│ sertifikat.revoke            │ Mencabut sertifikat                            │
+└───────────────────────────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────────────────────┐
+│ MODULE: DATA MASTER                                                            │
+├───────────────────────────────────────────────────────────────────────────────┤
+│ skema.view                   │ Melihat skema sertifikasi                      │
+│ skema.manage                 │ Mengelola skema sertifikasi                    │
+│ skema_sertifikasi.view       │ Alias untuk skema.view                         │
+│ skema_sertifikasi.manage     │ Alias untuk skema.manage                       │
+│ unit_kompetensi.view         │ Melihat unit kompetensi                        │
+│ unit_kompetensi.manage       │ Mengelola unit kompetensi                      │
+│ kuk.view                     │ Melihat kriteria unjuk kerja                   │
+│ kuk.manage                   │ Mengelola kriteria unjuk kerja                 │
+└───────────────────────────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────────────────────┐
+│ MODULE: MANAJEMEN PENGGUNA                                                     │
+├───────────────────────────────────────────────────────────────────────────────┤
+│ users.view                   │ Melihat daftar pengguna                        │
+│ users.create                 │ Membuat pengguna baru                          │
+│ users.update                 │ Mengupdate data pengguna                       │
+│ users.delete                 │ Menghapus pengguna                             │
+│ users.manage                 │ Mengelola pengguna (full access)               │
+│ users.reset_password         │ Mereset password pengguna                      │
+└───────────────────────────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────────────────────┐
+│ MODULE: AUDIT LOG                                                              │
+├───────────────────────────────────────────────────────────────────────────────┤
+│ audit.view                   │ Melihat audit log                              │
+│ audit.export                 │ Mengekspor audit log                           │
+│ audit.statistics             │ Melihat statistik audit                        │
+│ audit_log.view               │ Alias untuk audit.view                         │
+│ audit_log.export             │ Alias untuk audit.export                       │
+└───────────────────────────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────────────────────┐
+│ MODULE: CMS & PENGATURAN                                                       │
+├───────────────────────────────────────────────────────────────────────────────┤
+│ cms.view                     │ Melihat CMS landing page                       │
+│ cms.manage                   │ Mengelola CMS landing page                     │
+│ settings.view                │ Melihat pengaturan sistem                      │
+│ settings.manage              │ Mengelola pengaturan sistem                    │
+└───────────────────────────────────────────────────────────────────────────────┘
+
+================================================================================
+5. MATRIKS ROLE → PERMISSION
+================================================================================
+
+Legenda: ✓ = Memiliki permission, - = Tidak memiliki
+
+┌─────────────────────────────┬───────┬───────┬────────┬────────┬───────┐
+│ PERMISSION                  │SUPER  │ADMIN  │ASESOR  │KOMITE  │ASESI  │
+│                             │ADMIN  │       │        │TEKNIS  │       │
+├─────────────────────────────┼───────┼───────┼────────┼────────┼───────┤
+│ dashboard.view              │   ✓   │   ✓   │   ✓    │   ✓    │   ✓   │
+├─────────────────────────────┼───────┼───────┼────────┼────────┼───────┤
+│ pra_pendaftaran.view        │   ✓   │   ✓   │   -    │   -    │   -   │
+│ pra_pendaftaran.create      │   ✓   │   ✓   │   -    │   -    │   ✓   │
+│ pra_pendaftaran.manage      │   ✓   │   ✓   │   -    │   -    │   -   │
+│ pra_pendaftaran.process     │   ✓   │   -   │   -    │   -    │   -   │
+├─────────────────────────────┼───────┼───────┼────────┼────────┼───────┤
+│ pendaftaran.view            │   ✓   │   ✓   │   ✓    │   ✓    │   ✓   │
+│ pendaftaran.verify          │   ✓   │   ✓   │   -    │   -    │   -   │
+│ pendaftaran.assign          │   ✓   │   ✓   │   -    │   -    │   -   │
+│ pendaftaran.reject          │   ✓   │   ✓   │   -    │   -    │   -   │
+├─────────────────────────────┼───────┼───────┼────────┼────────┼───────┤
+│ asesmen.view                │   ✓   │   -   │   ✓    │   ✓    │   ✓   │
+│ asesmen.input               │   ✓   │   -   │   -    │   -    │   -   │
+│ asesmen.submit              │   ✓   │   -   │   ✓    │   -    │   -   │
+│ asesmen.lock                │   ✓   │   -   │   -    │   -    │   -   │
+├─────────────────────────────┼───────┼───────┼────────┼────────┼───────┤
+│ keputusan.view              │   ✓   │   -   │   -    │   ✓    │   -   │
+│ keputusan.approve           │   ✓   │   -   │   -    │   ✓    │   -   │
+├─────────────────────────────┼───────┼───────┼────────┼────────┼───────┤
+│ sertifikat.view             │   ✓   │   -   │   -    │   ✓    │   ✓   │
+│ sertifikat.generate         │   ✓   │   -   │   -    │   ✓    │   -   │
+│ sertifikat.download         │   ✓   │   -   │   -    │   ✓    │   ✓   │
+│ sertifikat.revoke           │   ✓   │   -   │   -    │   -    │   -   │
+├─────────────────────────────┼───────┼───────┼────────┼────────┼───────┤
+│ skema.view                  │   ✓   │   ✓   │   ✓    │   ✓    │   ✓   │
+│ skema.manage                │   ✓   │   ✓   │   -    │   -    │   -   │
+│ unit_kompetensi.view        │   ✓   │   ✓   │   ✓    │   -    │   -   │
+│ unit_kompetensi.manage      │   ✓   │   ✓   │   -    │   -    │   -   │
+│ kuk.view                    │   ✓   │   ✓   │   ✓    │   -    │   -   │
+│ kuk.manage                  │   ✓   │   ✓   │   -    │   -    │   -   │
+├─────────────────────────────┼───────┼───────┼────────┼────────┼───────┤
+│ users.view                  │   ✓   │   ✓   │   -    │   -    │   -   │
+│ users.manage                │   ✓   │   ✓   │   -    │   -    │   -   │
+│ users.reset_password        │   ✓   │   ✓   │   -    │   -    │   -   │
+├─────────────────────────────┼───────┼───────┼────────┼────────┼───────┤
+│ audit.view                  │   ✓   │   ✓   │   -    │   -    │   -   │
+│ audit.export                │   ✓   │   -   │   -    │   -    │   -   │
+├─────────────────────────────┼───────┼───────┼────────┼────────┼───────┤
+│ cms.view                    │   ✓   │   ✓   │   -    │   -    │   -   │
+│ cms.manage                  │   ✓   │   ✓   │   -    │   -    │   -   │
+│ settings.view               │   ✓   │   -   │   -    │   -    │   -   │
+│ settings.manage             │   ✓   │   -   │   -    │   -    │   -   │
+└─────────────────────────────┴───────┴───────┴────────┴────────┴───────┘
+
+================================================================================
+6. MIDDLEWARE IMPLEMENTATION
+================================================================================
+
+File: app/Http/Middleware/CheckPermission.php
+
+USAGE:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ // Single permission                                                         │
+│ Route::get('/asesmen', ...)->middleware('permission:asesmen.view');         │
+│                                                                              │
+│ // Multiple permissions (OR logic)                                          │
+│ Route::post('/asesmen', ...)->middleware('permission:asesmen.submit|asesmen.input');│
+│                                                                              │
+│ // Controller tidak boleh cek role langsung!                                │
+│ // ❌ SALAH: if ($user->role == 'asesor')                                   │
+│ // ✅ BENAR: if ($user->hasPermission('asesmen.submit'))                    │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+LOGIC FLOW:
+1. Middleware menerima permission name
+2. Jika user adalah super_admin → BYPASS (allowed)
+3. Cek user->hasPermission() melalui role->permissions
+4. Jika tidak punya permission → Log ke audit_log + return 403
+5. Jika punya permission → Continue request
+
+================================================================================
+7. CONTOH ROUTE DENGAN MIDDLEWARE
+================================================================================
+
+// routes/web.php
+
+// ASESMEN MODULE
+Route::prefix('adminui/asesmen')->middleware('auth')->group(function () {
+    Route::get('/', [AsesmenController::class, 'index'])
+        ->middleware('permission:asesmen.view');
+    
+    Route::get('/{id}', [AsesmenController::class, 'show'])
+        ->middleware('permission:asesmen.view');
+    
+    Route::post('/{id}/submit', [AsesmenController::class, 'submit'])
+        ->middleware('permission:asesmen.submit');
+    
+    Route::post('/{id}/lock', [AsesmenController::class, 'lock'])
+        ->middleware('permission:asesmen.lock');
+});
+
+// KEPUTUSAN MODULE
+Route::prefix('adminui/keputusan')->middleware('auth')->group(function () {
+    Route::get('/', [KeputusanController::class, 'index'])
+        ->middleware('permission:keputusan.view');
+    
+    Route::post('/{id}/approve', [KeputusanController::class, 'approve'])
+        ->middleware('permission:keputusan.approve');
+});
+
+// SERTIFIKAT MODULE
+Route::prefix('adminui/sertifikat')->middleware('auth')->group(function () {
+    Route::get('/', [SertifikatController::class, 'index'])
+        ->middleware('permission:sertifikat.view');
+    
+    Route::post('/{id}/generate', [SertifikatController::class, 'generate'])
+        ->middleware('permission:sertifikat.generate');
+    
+    Route::post('/{id}/revoke', [SertifikatController::class, 'revoke'])
+        ->middleware('permission:sertifikat.revoke');
+});
+
+================================================================================
+8. VALIDASI AKSES (TEST CASES)
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ TEST CASE 1: Asesor tidak bisa akses Keputusan                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ User: Asesor                                                                │
+│ Action: GET /adminui/keputusan                                              │
+│ Expected: 403 Forbidden                                                     │
+│ Reason: Asesor tidak memiliki keputusan.view                               │
+│ Audit Log: ✓ Dicatat sebagai access_denied                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ TEST CASE 2: Komite Teknis tidak bisa edit Asesmen                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ User: Komite Teknis                                                         │
+│ Action: POST /adminui/asesmen/1/submit                                      │
+│ Expected: 403 Forbidden                                                     │
+│ Reason: Komite Teknis tidak memiliki asesmen.submit                        │
+│ Audit Log: ✓ Dicatat sebagai access_denied                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ TEST CASE 3: Admin LSP tidak bisa approve Keputusan                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ User: Admin                                                                 │
+│ Action: POST /adminui/keputusan/1/approve                                   │
+│ Expected: 403 Forbidden                                                     │
+│ Reason: Admin tidak memiliki keputusan.approve                             │
+│ Audit Log: ✓ Dicatat sebagai access_denied                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ TEST CASE 4: Super Admin bisa semua                                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ User: Super Admin                                                           │
+│ Action: Any action                                                          │
+│ Expected: 200 OK (Allowed)                                                  │
+│ Reason: Super Admin bypass semua permission check                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+================================================================================
+9. AUDIT TRAIL
+================================================================================
+
+Semua akses yang ditolak dicatat di tabel audit_logs:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ {                                                                            │
+│   "id": 1234,                                                               │
+│   "user_id": 5,                                                             │
+│   "action": "access_denied",                                                │
+│   "module": "access_control",                                               │
+│   "data": {                                                                 │
+│     "url": "/adminui/keputusan",                                           │
+│     "method": "GET",                                                        │
+│     "permission_required": "keputusan.view",                               │
+│     "user_role": "asesor",                                                  │
+│     "ip_address": "192.168.1.100"                                          │
+│   },                                                                        │
+│   "created_at": "2026-01-14 10:30:00"                                      │
+│ }                                                                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+================================================================================
+10. CONTOH PENGGUNAAN MIDDLEWARE DI ROUTES
+================================================================================
+
+PRINSIP UTAMA:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ ✅ BENAR: Route::get('/asesmen', ...)->middleware('permission:asesmen.view')│
+│ ❌ SALAH: Route::get('/asesmen', ...)->middleware('check.role:asesor')     │
+│ ❌ SALAH: if (auth()->user()->role->name === 'asesor') { ... }             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+CONTOH ROUTE SERTIFIKASI:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ // ASESMEN - Asesor melakukan penilaian                                     │
+│ Route::prefix('asesmen')->name('asesmen.')->group(function () {            │
+│     Route::get('/', [AsesmenController::class, 'index'])                   │
+│         ->middleware('permission:asesmen.view');                            │
+│     Route::post('/{id}/simpan', [AsesmenController::class, 'simpan'])      │
+│         ->middleware('permission:asesmen.submit');                          │
+│ });                                                                          │
+│                                                                              │
+│ // KEPUTUSAN - Komite Teknis memutuskan                                     │
+│ Route::prefix('keputusan')->name('keputusan.')->group(function () {        │
+│     Route::get('/', [KeputusanController::class, 'index'])                 │
+│         ->middleware('permission:keputusan.view');                          │
+│     Route::post('/{id}/approve', [KeputusanController::class, 'approve'])  │
+│         ->middleware('permission:keputusan.approve');                       │
+│ });                                                                          │
+│                                                                              │
+│ // SERTIFIKAT - Generate dan download                                       │
+│ Route::prefix('sertifikat')->name('sertifikat.')->group(function () {      │
+│     Route::get('/', [SertifikatController::class, 'index'])                │
+│         ->middleware('permission:sertifikat.view');                         │
+│     Route::post('/{id}/terbit', [SertifikatController::class, 'terbit'])   │
+│         ->middleware('permission:sertifikat.generate');                     │
+│ });                                                                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+CONTOH ROUTE CMS (Admin Website):
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Route::get('/about', ...)->middleware('permission:cms.about');              │
+│ Route::get('/services', ...)->middleware('permission:cms.services');        │
+│ Route::get('/home-hero', ...)->middleware('permission:cms.home');           │
+│ Route::get('/footer', ...)->middleware('permission:cms.footer');            │
+│ Route::get('/contact', ...)->middleware('permission:cms.contact');          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+CATATAN PENTING:
+1. super_admin OTOMATIS bypass semua permission check di middleware
+2. Gunakan 'permission:xxx.yyy', BUKAN 'check.role:xxx'
+3. Controller TIDAK BOLEH cek role secara manual
+4. Semua akses denied tercatat di audit_logs
+
+================================================================================
+11. REFERENSI STANDAR
+================================================================================
+
+1. ISO 17024:2012
+   - Clause 5.2: Confidentiality
+   - Clause 7.4: Examination process
+   - Clause 7.6: Certification decision
+
+2. BNSP Pedoman
+   - Pedoman 201: Keamanan Data
+   - Pedoman 304: Audit Internal
+
+3. Laravel Security
+   - Middleware-based authorization
+   - Database-driven permissions
+   - Audit logging
+
+================================================================================
+12. FILE TERKAIT
+================================================================================
+
+Migrations:
+- database/migrations/2026_01_10_100000_create_rbac_tables.php
+- database/migrations/2026_01_10_120000_seed_roles_and_permissions.php
+- database/migrations/2026_01_13_120000_add_role_id_to_users_table.php
+- database/migrations/2026_01_14_100000_add_asesi_role.php
+- database/migrations/2026_01_14_051050_normalize_cms_permissions_for_rbac.php
+
+Models:
+- app/Models/Role.php
+- app/Models/Permission.php
+- app/Models/User.php (hasRole, hasPermission methods)
+
+Middleware:
+- app/Http/Middleware/CheckPermission.php
+
+Config:
+- app/Http/Kernel.php (middleware registration)
+
+Routes:
+- routes/web.php (all permission-based middleware)
+
+Documentation:
+- docs/SOP_AKSES_SISTEM_CERTIPRO.txt
+- docs/LAMPIRAN_MATRIKS_HAK_AKSES.txt
+- docs/RBAC_DOCUMENTATION.txt (this file)
+
+================================================================================
+13. CATATAN AUDIT UI CONSISTENCY (ISO 17024 COMPLIANCE)
+================================================================================
+
+PRINSIP KEAMANAN UI-BACKEND CERTIPRO:
+────────────────────────────────────────────────────────────────────────────────
+
+CertiPro menerapkan prinsip "Backend = Single Source of Truth" untuk keamanan
+akses sistem. UI (User Interface) berfungsi HANYA sebagai refleksi dari 
+permission yang tersimpan di database, BUKAN sebagai mekanisme keamanan utama.
+
+ARSITEKTUR KEAMANAN:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ LAYER 1: ROUTE MIDDLEWARE (Proteksi Wajib)                                  │
+│ ─────────────────────────────────────────────────────────────────────────── │
+│ • Semua route admin menggunakan middleware 'permission:xxx.yyy'             │
+│ • Request tanpa permission yang valid SELALU ditolak (403 Forbidden)        │
+│ • Bypass API/curl/Postman tetap terproteksi                                 │
+│ • Audit log mencatat setiap akses ditolak                                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ LAYER 2: UI VISIBILITY (User Experience)                                    │
+│ ─────────────────────────────────────────────────────────────────────────── │
+│ • Menu sidebar hanya tampil jika user punya permission                      │
+│ • Tombol aksi (Create/Edit/Delete) tersembunyi jika tidak punya akses       │
+│ • Form input disabled/hidden berdasarkan permission                         │
+│ • TUJUAN: UX yang konsisten, bukan keamanan                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+JAMINAN KEAMANAN:
+
+1. TIDAK ADA menu yang bisa diklik tapi ditolak (konsistensi UX)
+2. TIDAK ADA tombol aksi yang mengarah ke 403 (user experience)
+3. Menyembunyikan UI BUKAN pengganti proteksi backend
+4. Backend tetap reject meskipun user bypass UI (via curl/API)
+5. Audit log mencatat SEMUA akses (granted + denied)
+
+IMPLEMENTASI DI BLADE TEMPLATE:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ // Sidebar Menu                                                             │
+│ @if(auth()->user()->hasPermission('users.view'))                            │
+│     <a href="{{ route('admin.users.index') }}">Manajemen User</a>           │
+│ @endif                                                                      │
+│                                                                             │
+│ // Action Button                                                            │
+│ @if(auth()->user()->hasPermission('users.delete'))                          │
+│     <button type="submit">Hapus User</button>                               │
+│ @endif                                                                      │
+│                                                                             │
+│ // Form Input                                                               │
+│ @if(auth()->user()->hasPermission('keputusan.approve'))                     │
+│     <select name="keputusan">...</select>                                   │
+│ @else                                                                       │
+│     <div class="alert">Menunggu Keputusan Komite Teknis</div>               │
+│ @endif                                                                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+FILE YANG DIAUDIT UNTUK UI CONSISTENCY:
+- resources/views/adminui/layouts/sidebar.blade.php
+- resources/views/adminui/sertifikat/index.blade.php
+- resources/views/adminui/keputusan/show.blade.php
+- resources/views/adminui/users/index.blade.php
+- resources/views/adminui/pendaftaran-sertifikasi/show.blade.php
+- resources/views/adminui/errors/403.blade.php
+
+CATATAN UNTUK AUDITOR ISO 17024:
+Sistem CertiPro menjamin bahwa:
+• Setiap akses ke data sertifikasi SELALU melalui permission check
+• UI hanyalah refleksi visual dari hak akses, BUKAN mekanisme keamanan
+• Tidak ada jalan pintas untuk bypass permission di level backend
+• Audit trail lengkap tersedia di tabel audit_logs
+• Compliance dengan ISO 17024 Clause 5.2 (Confidentiality) terjaga
+
+Tanggal Audit UI: 2026-01-14
+Versi Dokumen: 1.4
+
+================================================================================
+14. FITUR RESET PASSWORD (ISO 27001 & ISO 17024 COMPLIANT)
+================================================================================
+
+ARSITEKTUR KEAMANAN RESET PASSWORD:
+────────────────────────────────────────────────────────────────────────────────
+
+CertiPro menyediakan fitur reset password yang aman untuk semua user dengan
+mekanisme self-service (Lupa Password) dan admin-initiated reset.
+
+A. FLOW RESET PASSWORD (SELF-SERVICE):
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 1. User klik "Lupa Password" di halaman login                               │
+│ 2. Input email terdaftar                                                     │
+│ 3. Sistem validasi & generate token (hashed, 60 menit expiry)               │
+│ 4. Email reset dikirim dengan link unik                                      │
+│ 5. User klik link → form password baru                                       │
+│ 6. Password baru disimpan (hashed), token invalidated                        │
+│ 7. Audit log mencatat seluruh proses                                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+B. KEAMANAN TOKEN:
+- Token tersimpan HASHED di tabel password_resets
+- Expiry: 60 menit (configurable via config/auth.php)
+- Single-use: Token invalidated setelah dipakai
+- Rate limiting: 5 request/menit (route level) + 3 request/jam (service level)
+
+C. ROUTE RESET PASSWORD:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ GET  /forgot-password           → Form input email                           │
+│ POST /forgot-password           → Kirim email reset (throttle:5,1)           │
+│ GET  /reset-password/{token}    → Form password baru                         │
+│ POST /reset-password            → Simpan password baru (throttle:5,1)        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+D. AUDIT LOG EVENTS:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ password_reset_requested    → User meminta reset password                    │
+│ password_reset_email_sent   → Email reset berhasil dikirim                   │
+│ password_reset_success      → Password berhasil direset                      │
+│ password_reset_failed       → Reset gagal (token invalid/expired)            │
+│ password_reset_by_admin     → Admin mengirim reset ke user lain              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+E. EMAIL TEMPLATE (BRANDED):
+- Logo LSP (dynamic dari setting)
+- Nama LSP (dynamic via systemCompanyName())
+- Warna konsisten dengan UI admin (#2563eb primary)
+- Tombol CTA "Reset Password"
+- Expiry notice (60 menit)
+- Footer legal LSP
+- Gmail-compatible (table-based, inline CSS)
+
+F. SECURITY CHECKLIST:
+✅ Token hashed di database (tidak plain text)
+✅ Token kadaluarsa 60 menit
+✅ Token single-use (sekali pakai)
+✅ Rate limiting di route dan service level
+✅ CSRF protection aktif
+✅ Generic response untuk mencegah email enumeration
+✅ Password complexity enforced (min 8 char, uppercase, lowercase, number)
+✅ Audit log lengkap untuk semua event
+
+G. FILE TERKAIT:
+- app/Http/Controllers/Auth/PasswordResetLinkController.php
+- app/Http/Controllers/Auth/NewPasswordController.php
+- app/Services/PasswordResetService.php
+- app/Mail/PasswordResetSelfServiceMail.php
+- app/Mail/PasswordResetByAdminMail.php
+- resources/views/emails/password-reset-self-service.blade.php
+- resources/views/emails/password-reset-by-admin.blade.php
+- resources/views/adminui/auth/forgot-password.blade.php
+- resources/views/adminui/auth/reset-password.blade.php
+- config/auth.php (passwords.users.expire)
+
+CATATAN AUDIT ISO 27001 / ISO 17024:
+Fitur reset password CertiPro menjamin:
+• Keamanan token dengan hashing dan expiry
+• Tidak ada informasi sensitif (email existence) yang bocor
+• Rate limiting mencegah brute-force attack
+• Semua aksi tercatat di audit_logs dengan IP dan user agent
+• Compliance dengan ISO 27001 Annex A.9 (Access Control)
+• Compliance dengan ISO 17024 Clause 5.2 (Confidentiality)
+
+Tanggal Implementasi: 2026-01-14
+Versi: 2.0
+
+================================================================================
+                              AKHIR DOKUMEN
+================================================================================

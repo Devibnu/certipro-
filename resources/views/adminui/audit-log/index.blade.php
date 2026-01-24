@@ -172,7 +172,7 @@
                 </div>
             </div>
             <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                @if(auth()->user()->role === 'super admin')
+                @if(auth()->user()->isSuperAdmin())
                 <a href="{{ route('adminui.audit-evidence.pdf') }}" 
                    class="btn btn-warning btn-sm me-2" target="_blank">
                     <i class="fas fa-file-pdf me-1"></i> Cetak Audit Evidence
@@ -281,7 +281,7 @@
                             <option value="">Semua User</option>
                             @foreach($users as $user)
                             <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>
-                                {{ $user->name }} ({{ ucfirst($user->role) }})
+                                {{ $user->name }} ({{ $user->userRole?->name ? ucwords(str_replace('_', ' ', $user->userRole->name)) : 'N/A' }})
                             </option>
                             @endforeach
                         </select>

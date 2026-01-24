@@ -51,22 +51,26 @@ class PraPendaftaran extends Model
     ];
 
     /**
-     * Status constants
+     * ========================================================================
+     * STATUS CONSTANTS - ONLY 3 VALID STATES (Clean Architecture)
+     * ========================================================================
+     * Prinsip:
+     * - Pra-Pendaftaran BUKAN proses sertifikasi
+     * - Hanya untuk validasi data awal
+     * - Tidak boleh ada status ambigu
      */
-    const STATUS_BARU = 'baru';
-    const STATUS_DIPROSES = 'diproses';
+    const STATUS_MENUNGGU_VERIFIKASI = 'menunggu_verifikasi';
     const STATUS_DITERIMA = 'diterima';
     const STATUS_DITOLAK = 'ditolak';
 
     /**
-     * Status labels for display
+     * Status labels for admin display
      */
     public static function statusLabels(): array
     {
         return [
-            self::STATUS_BARU => 'Menunggu Verifikasi',
-            self::STATUS_DIPROSES => 'Sedang Diverifikasi',
-            self::STATUS_DITERIMA => 'Diterima',
+            self::STATUS_MENUNGGU_VERIFIKASI => 'Menunggu Verifikasi',
+            self::STATUS_DITERIMA => 'Diterima (Menunggu Penetapan Skema)',
             self::STATUS_DITOLAK => 'Ditolak',
         ];
     }
@@ -77,7 +81,7 @@ class PraPendaftaran extends Model
     public static function statusPublicLabels(): array
     {
         return [
-            self::STATUS_BARU => 'MENUNGGU VERIFIKASI',
+            self::STATUS_MENUNGGU_VERIFIKASI => 'MENUNGGU VERIFIKASI',
             self::STATUS_DIPROSES => 'SEDANG DIVERIFIKASI',
             self::STATUS_DITERIMA => 'DITERIMA',
             self::STATUS_DITOLAK => 'DITOLAK',

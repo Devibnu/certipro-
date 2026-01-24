@@ -750,10 +750,19 @@
                 
                 <!-- Action Section -->
                 <div class="action-section">
-                    @if($praPendaftaran->status === 'diterima' && $praPendaftaran->canProceedToSertifikasi())
-                        <a href="{{ route('daftar') }}" class="btn btn-primary">
+                    @if($praPendaftaran->status === 'diterima')
+                        @php
+                            $pendaftaran = $praPendaftaran->pendaftaranSertifikasi;
+                            $daftarUrl = $pendaftaran 
+                                ? route('pendaftaran-sertifikasi.show', $pendaftaran->id) 
+                                : route('daftar');
+                            $daftarLabel = $pendaftaran 
+                                ? 'Lengkapi Pendaftaran Sertifikasi' 
+                                : 'Lanjut Daftar Sertifikasi';
+                        @endphp
+                        <a href="{{ $daftarUrl }}" class="btn btn-primary">
                             <i class="fas fa-arrow-right"></i>
-                            <span>Lanjut Daftar Sertifikasi</span>
+                            <span>{{ $daftarLabel }}</span>
                         </a>
                     @endif
                     

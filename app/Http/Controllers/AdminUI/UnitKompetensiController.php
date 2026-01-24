@@ -61,9 +61,20 @@ class UnitKompetensiController extends Controller
      */
     public function store(Request $request)
     {
+        // Normalize kode_unit before validation
+        $request->merge([
+            'kode_unit' => strtoupper(trim($request->kode_unit ?? ''))
+        ]);
+
         $validated = $request->validate([
             'skema_sertifikasi_id' => 'required|exists:skema_sertifikasi,id',
-            'kode_unit' => 'required|string|max:50',
+            'kode_unit' => [
+                'required',
+                'string',
+                'max:50',
+                // Unique per skema sertifikasi
+                'unique:unit_kompetensi,kode_unit,NULL,id,skema_sertifikasi_id,' . $request->skema_sertifikasi_id,
+            ],
             'nama_unit' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
             'aktif' => 'boolean',
@@ -71,6 +82,7 @@ class UnitKompetensiController extends Controller
             'skema_sertifikasi_id.required' => 'Skema Sertifikasi wajib dipilih.',
             'skema_sertifikasi_id.exists' => 'Skema Sertifikasi tidak valid.',
             'kode_unit.required' => 'Kode Unit wajib diisi.',
+            'kode_unit.unique' => 'Kode Unit sudah ada di Skema Sertifikasi ini.',
             'nama_unit.required' => 'Nama Unit wajib diisi.',
         ]);
         
@@ -79,7 +91,7 @@ class UnitKompetensiController extends Controller
         UnitKompetensi::create($validated);
         
         return redirect()
-            ->route('adminui.unit-kompetensi.index', ['skema_sertifikasi_id' => $validated['skema_sertifikasi_id']])
+            ->route('adminui.unit-kompetensi.index')
             ->with('success', 'Unit Kompetensi berhasil ditambahkan.');
     }
 
@@ -106,9 +118,20 @@ class UnitKompetensiController extends Controller
      */
     public function update(Request $request, UnitKompetensi $unitKompetensi)
     {
+        // Normalize kode_unit before validation
+        $request->merge([
+            'kode_unit' => strtoupper(trim($request->kode_unit ?? ''))
+        ]);
+
         $validated = $request->validate([
             'skema_sertifikasi_id' => 'required|exists:skema_sertifikasi,id',
-            'kode_unit' => 'required|string|max:50',
+            'kode_unit' => [
+                'required',
+                'string',
+                'max:50',
+                // Unique per skema, ignore current record
+                'unique:unit_kompetensi,kode_unit,' . $unitKompetensi->id . ',id,skema_sertifikasi_id,' . $request->skema_sertifikasi_id,
+            ],
             'nama_unit' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
             'aktif' => 'boolean',
@@ -116,6 +139,7 @@ class UnitKompetensiController extends Controller
             'skema_sertifikasi_id.required' => 'Skema Sertifikasi wajib dipilih.',
             'skema_sertifikasi_id.exists' => 'Skema Sertifikasi tidak valid.',
             'kode_unit.required' => 'Kode Unit wajib diisi.',
+            'kode_unit.unique' => 'Kode Unit sudah ada di Skema Sertifikasi ini.',
             'nama_unit.required' => 'Nama Unit wajib diisi.',
         ]);
         
@@ -124,7 +148,7 @@ class UnitKompetensiController extends Controller
         $unitKompetensi->update($validated);
         
         return redirect()
-            ->route('adminui.unit-kompetensi.index', ['skema_sertifikasi_id' => $validated['skema_sertifikasi_id']])
+            ->route('adminui.unit-kompetensi.index')
             ->with('success', 'Unit Kompetensi berhasil diperbarui.');
     }
 
@@ -139,7 +163,7 @@ class UnitKompetensiController extends Controller
         $unitKompetensi->delete();
         
         return redirect()
-            ->route('adminui.unit-kompetensi.index', ['skema_sertifikasi_id' => $skemaId])
+            ->route('adminui.unit-kompetensi.index')
             ->with('success', "Unit Kompetensi {$kodeUnit} berhasil dihapus.");
     }
 }

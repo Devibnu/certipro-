@@ -37,7 +37,7 @@
                                     </div>
                                     <div>
                                         <small class="text-muted d-block">Pengguna</small>
-                                        <strong>{{ $user->name ?? Auth::user()->name }}</strong>
+                                        <strong>{{ Auth::user()->name ?? 'N/A' }}</strong>
                                     </div>
                                 </div>
                             </div>
@@ -48,7 +48,7 @@
                                     </div>
                                     <div>
                                         <small class="text-muted d-block">Role</small>
-                                        <strong>{{ $user->role ?? Auth::user()->role ?? 'N/A' }}</strong>
+                                        <strong>{{ Auth::user()->userRole?->display_name ?? Auth::user()->role ?? 'N/A' }}</strong>
                                     </div>
                                 </div>
                             </div>
@@ -77,15 +77,15 @@
                         <div class="row g-2 small text-muted">
                             <div class="col-md-4">
                                 <i class="fas fa-clock me-1"></i>
-                                <strong>Waktu:</strong> {{ isset($timestamp) ? $timestamp->format('d M Y H:i:s') : now()->format('d M Y H:i:s') }}
+                                <strong>Waktu:</strong> {{ now()->format('d M Y H:i:s') }}
                             </div>
                             <div class="col-md-4">
                                 <i class="fas fa-globe me-1"></i>
                                 <strong>IP:</strong> {{ request()->ip() }}
                             </div>
                             <div class="col-md-4">
-                                <i class="fas fa-hashtag me-1"></i>
-                                <strong>Request ID:</strong> {{ $request_id ?? 'N/A' }}
+                                <i class="fas fa-link me-1"></i>
+                                <strong>URL:</strong> {{ Str::limit(request()->path(), 30) }}
                             </div>
                         </div>
                     </div>

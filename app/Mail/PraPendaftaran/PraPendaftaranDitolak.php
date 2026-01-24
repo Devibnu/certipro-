@@ -4,14 +4,13 @@ namespace App\Mail\PraPendaftaran;
 
 use App\Models\PraPendaftaran;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class PraPendaftaranDitolak extends Mailable implements ShouldQueue
+class PraPendaftaranDitolak extends Mailable
 {
     use Queueable, SerializesModels;
 

@@ -610,14 +610,18 @@
                     <table class="kuk-table">
                         <thead>
                             <tr>
-                                <th style="width: 100px;">Kode KUK</th>
+                                <th style="width: 80px;">Kode KUK</th>
                                 <th>Pernyataan KUK</th>
-                                <th style="width: 100px;">Nilai</th>
-                                <th style="width: 150px;">Catatan Asesor</th>
+                                <th style="width: 60px;">Nilai</th>
+                                <th style="width: 120px;">Evidence</th>
+                                <th style="width: 100px;">Catatan Asesor</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($details as $detail)
+                            @php
+                                $kukEvidence = isset($evidenceByKuk) ? $evidenceByKuk->get($detail->kuk_id, collect()) : collect();
+                            @endphp
                             <tr>
                                 <td class="kuk-code">{{ $detail->kuk?->kode_kuk ?? '-' }}</td>
                                 <td>{{ $detail->kuk?->pernyataan ?? '-' }}</td>
@@ -625,6 +629,21 @@
                                     <span class="hasil-badge hasil-{{ $detail->hasil }}">
                                         {{ $detail->hasil === 'kompeten' ? 'K' : 'BK' }}
                                     </span>
+                                </td>
+                                <td style="font-size: 7pt;">
+                                    @if($kukEvidence->isNotEmpty())
+                                        @foreach($kukEvidence as $evidence)
+                                            <div style="margin-bottom: 2px;">
+                                                @if($evidence->isFile())
+                                                    📎 {{ Str::limit($evidence->file_name_original, 20) }}
+                                                @else
+                                                    🔗 {{ Str::limit($evidence->description ?: parse_url($evidence->link_url, PHP_URL_HOST), 25) }}
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    @else
+                                        <span style="color: #999;">-</span>
+                                    @endif
                                 </td>
                                 <td>{{ $detail->catatan ?? '-' }}</td>
                             </tr>
@@ -639,13 +658,58 @@
             @endforelse
         </div>
 
-        <!-- Page break before summary -->
-        <div class="page-break"></div>
-
-        <!-- Section 4: Rekap Hasil Asesmen -->
+        <!-- Section 4: Sampling Audit (Quality Control) -->
         <div class="section">
             <div class="section-title">
                 <span class="section-number">4</span>
+                Sampling Audit (Pengendalian Mutu)
+            </div>
+            <div class="summary-box">
+                <p style="font-size: 8pt; color: #4a5568; margin-bottom: 10px; font-style: italic;">
+                    Sebagai bagian dari pengendalian mutu, LSP melakukan sampling asesmen secara berkala 
+                    untuk memastikan konsistensi dan objektivitas penilaian.
+                    <span style="color: #718096;">(ISO 17024:2012 Clause 4.3 - Impartiality & Clause 9.4 - Internal Audits)</span>
+                </p>
+                <table class="data-table">
+                    <tr>
+                        <th style="width: 180px;">Status Sampling</th>
+                        <td>
+                            @if($asesmen->isSampled())
+                                <span style="background: #3182ce; color: white; padding: 3px 8px; border-radius: 4px; font-size: 8pt; font-weight: bold;">
+                                    ✓ SAMPLING AUDIT
+                                </span>
+                            @else
+                                <span style="background: #a0aec0; color: white; padding: 3px 8px; border-radius: 4px; font-size: 8pt;">
+                                    Tidak Disampling
+                                </span>
+                            @endif
+                        </td>
+                    </tr>
+                    @if($asesmen->isSampled())
+                    <tr>
+                        <th>Tanggal Sampling</th>
+                        <td>{{ $asesmen->sampled_at?->format('d F Y H:i') ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Ditandai Oleh</th>
+                        <td>{{ $asesmen->sampledByUser?->name ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Catatan Sampling</th>
+                        <td>{{ $asesmen->sampling_note ?: '-' }}</td>
+                    </tr>
+                    @endif
+                </table>
+            </div>
+        </div>
+
+        <!-- Page break before summary -->
+        <div class="page-break"></div>
+
+        <!-- Section 5: Rekap Hasil Asesmen -->
+        <div class="section">
+            <div class="section-title">
+                <span class="section-number">5</span>
                 Rekap Hasil Asesmen
             </div>
             <div class="summary-box">
@@ -700,10 +764,10 @@
             @endif
         </div>
 
-        <!-- Section 5: Audit Log Ringkas -->
+        <!-- Section 6: Audit Log Ringkas -->
         <div class="section">
             <div class="section-title">
-                <span class="section-number">5</span>
+                <span class="section-number">6</span>
                 Riwayat Audit Log
             </div>
             @if($auditLogs->count() > 0)

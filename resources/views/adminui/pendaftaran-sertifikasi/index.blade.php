@@ -92,10 +92,21 @@
                                         <p class="text-xs text-secondary mb-0">{{ $item->user->email ?? $item->email ?? '-' }}</p>
                                     </td>
                                     <td>
-                                        <span class="badge badge-sm bg-gradient-info">
-                                            {{ $item->skemaSertifikasi->kode_skema ?? '-' }}
-                                        </span>
-                                        <p class="text-xs text-secondary mb-0">{{ $item->skemaSertifikasi->nama_skema ?? '-' }}</p>
+                                        @if($item->skemaSertifikasi)
+                                            <span class="badge badge-sm bg-gradient-info">
+                                                {{ $item->skemaSertifikasi->kode_skema }}
+                                            </span>
+                                            <p class="text-xs text-secondary mb-0">{{ $item->skemaSertifikasi->nama_skema }}</p>
+                                        @else
+                                            <span class="badge badge-sm bg-gradient-warning">
+                                                <i class="fas fa-exclamation-triangle me-1"></i>Belum Dipilih
+                                            </span>
+                                            <p class="text-xs text-muted mb-0">
+                                                <a href="{{ route('adminui.pendaftaran-sertifikasi.show', $item->id) }}" class="text-primary">
+                                                    Tetapkan Skema →
+                                                </a>
+                                            </p>
+                                        @endif
                                     </td>
                                     <td class="align-middle text-center">
                                         <span class="text-sm">{{ $item->tanggal_daftar->format('d M Y') }}</span>

@@ -56,6 +56,15 @@ class UnitKompetensi extends Model
     }
 
     /**
+     * Normalize kode_unit to uppercase and trimmed.
+     * This ensures data consistency at model level.
+     */
+    public function setKodeUnitAttribute($value): void
+    {
+        $this->attributes['kode_unit'] = strtoupper(trim($value ?? ''));
+    }
+
+    /**
      * Get the KUK (Kriteria Unjuk Kerja) for the unit kompetensi.
      */
     public function kuk(): \Illuminate\Database\Eloquent\Relations\HasMany

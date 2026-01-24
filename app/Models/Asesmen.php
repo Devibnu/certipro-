@@ -47,6 +47,11 @@ class Asesmen extends Model
         'metode_asesmen',
         'catatan_asesor',
         'status',
+        // Sampling Audit fields
+        'is_sampled',
+        'sampled_at',
+        'sampled_by',
+        'sampling_note',
     ];
 
     /**
@@ -56,6 +61,9 @@ class Asesmen extends Model
         'tanggal_asesmen' => 'date',
         'pendaftaran_id' => 'integer',
         'asesor_id' => 'integer',
+        'is_sampled' => 'boolean',
+        'sampled_at' => 'datetime',
+        'sampled_by' => 'integer',
     ];
 
     /**
@@ -75,11 +83,36 @@ class Asesmen extends Model
     }
 
     /**
+     * Get the user who marked this asesmen for sampling.
+     */
+    public function sampledByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'sampled_by');
+    }
+
+    /**
      * Get the asesmen details.
      */
     public function details(): HasMany
     {
         return $this->hasMany(AsesmenDetail::class, 'asesmen_id');
+    }
+
+    /**
+     * Get the evidence files/links for this asesmen.
+     */
+    public function evidences(): HasMany
+    {
+        return $this->hasMany(EvidenceKuk::class, 'asesmen_id');
+    }
+
+    /**
+     * Check if asesmen is locked (selesai = locked).
+     * Evidence cannot be added/deleted when locked.
+     */
+    public function isLocked(): bool
+    {
+        return $this->status === self::STATUS_SELESAI;
     }
 
     /**
@@ -163,5 +196,67 @@ class Asesmen extends Model
     public function scopeByAsesor($query, $asesorId)
     {
         return $query->where('asesor_id', $asesorId);
+    }
+
+    /**
+     * Scope to filter only sampled asesmen.
+     */
+    public function scopeSampled($query)
+    {
+        return $query->where('is_sampled', true);
+    }
+
+    /**
+     * Scope to filter non-sampled asesmen.
+     */
+    public function scopeNotSampled($query)
+    {
+        return $query->where('is_sampled', false);
+    }
+
+    /**
+     * Check if asesmen is marked for sampling audit.
+     */
+    public function isSampled(): bool
+    {
+        return (bool) $this->is_sampled;
+    }
+
+    /**
+     * Check if sampling can be modified.
+     * Sampling can only be modified if:
+     * - Asesmen is selesai (completed)
+     * - Keputusan is not locked yet
+     */
+    public function canModifySampling(): bool
+    {
+        // Must be completed first
+        if (!$this->isSelesai()) {
+            return false;
+        }
+
+        // Check if keputusan is locked
+        $keputusan = $this->pendaftaran?->keputusanSertifikasi;
+        if ($keputusan && $keputusan->isLocked()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Get sampling status label.
+     */
+    public function getSamplingStatusLabelAttribute(): string
+    {
+        return $this->is_sampled ? 'Sampling Audit' : 'Tidak Disampling';
+    }
+
+    /**
+     * Get sampling badge class.
+     */
+    public function getSamplingBadgeAttribute(): string
+    {
+        return $this->is_sampled ? 'bg-gradient-info' : 'bg-secondary';
     }
 }

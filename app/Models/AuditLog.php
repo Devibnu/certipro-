@@ -71,6 +71,9 @@ class AuditLog extends Model
     const ACTION_PASSWORD_RESET_BY_ADMIN = 'password_reset_by_admin';
     const ACTION_PASSWORD_RESET_BY_USER = 'password_reset_by_user';
     const ACTION_PASSWORD_RESET_REQUESTED = 'password_reset_requested';
+    const ACTION_PASSWORD_RESET_EMAIL_SENT = 'password_reset_email_sent';
+    const ACTION_PASSWORD_RESET_FAILED = 'password_reset_failed';
+    const ACTION_PASSWORD_RESET_SUCCESS = 'password_reset_success';
     
     // RBAC Actions - ISO 17024 Compliant
     const ACTION_ACCESS_DENIED = 'access_denied';
@@ -79,6 +82,17 @@ class AuditLog extends Model
     const ACTION_ROLES_SYNCED = 'roles_synced';
     const ACTION_PERMISSION_GRANTED = 'permission_granted';
     const ACTION_PERMISSION_REVOKED = 'permission_revoked';
+    
+    // Evidence Actions - ISO 17024 Audit Trail
+    const ACTION_EVIDENCE_UPLOADED = 'evidence_uploaded';
+    const ACTION_EVIDENCE_DELETED = 'evidence_deleted';
+    const ACTION_EVIDENCE_LINK_ADDED = 'evidence_link_added';
+    const ACTION_EVIDENCE_DOWNLOADED = 'evidence_downloaded';
+    
+    // Sampling Audit Actions - ISO 17024 Quality Control
+    const ACTION_SAMPLING_MARKED = 'asesmen_marked_sampling';
+    const ACTION_SAMPLING_UNMARKED = 'asesmen_unmarked_sampling';
+    const ACTION_SAMPLING_NOTE_UPDATED = 'asesmen_sampling_note_updated';
 
     /**
      * Module constants
@@ -86,6 +100,8 @@ class AuditLog extends Model
     const MODULE_AUTH = 'auth';
     const MODULE_ACCESS_CONTROL = 'access_control';
     const MODULE_RBAC = 'rbac';
+    const MODULE_EVIDENCE = 'evidence';
+    const MODULE_SAMPLING = 'sampling';
     const MODULE_PRA_PENDAFTARAN = 'pra_pendaftaran';
     const MODULE_PENDAFTARAN = 'pendaftaran';
     const MODULE_ASESMEN = 'asesmen';

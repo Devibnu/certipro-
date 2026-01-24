@@ -98,8 +98,8 @@
                 {{-- Notifications Dropdown --}}
                 <li class="nav-item dropdown pe-2 d-flex align-items-center">
                     <a href="javascript:;" class="nav-link text-body p-0 position-relative" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fa fa-bell cursor-pointer"></i>
-                        <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 8px; display: none;">
+                        <i class="fa fa-bell cursor-pointer" id="bellIcon"></i>
+                        <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 8px; display: none; animation: pulse 2s infinite;">
                             0
                         </span>
                     </a>
@@ -113,17 +113,19 @@
                         <li><hr class="dropdown-divider"></li>
                         <div id="notificationList">
                             <li class="text-center py-3">
-                                <p class="text-xs text-secondary mb-0">Memuat notifikasi...</p>
+                                <p class="text-xs text-secondary mb-0">
+                                    <i class="fas fa-spinner fa-spin me-2"></i>Memuat notifikasi...
+                                </p>
                             </li>
                         </div>
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <div class="d-flex justify-content-between px-2">
                                 <a class="text-primary text-xs font-weight-bold" href="#" id="markAllReadBtn" style="display: none;">
-                                    Tandai Semua Dibaca
+                                    <i class="fas fa-check-double me-1"></i>Tandai Semua Dibaca
                                 </a>
                                 <a class="text-primary text-xs font-weight-bold ms-auto" href="{{ route('adminui.notifications.index') }}">
-                                    Lihat Semua Notifikasi
+                                    <i class="fas fa-list me-1"></i>Lihat Semua Notifikasi
                                 </a>
                             </div>
                         </li>
@@ -134,3 +136,37 @@
     </div>
 </nav>
 <!-- End Navbar -->
+
+{{-- Add custom CSS for notification animations --}}
+<style>
+@keyframes pulse {
+    0% {
+        transform: translate(100%, -50%) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(100%, -50%) scale(1.1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(100%, -50%) scale(1);
+        opacity: 1;
+    }
+}
+
+#bellIcon {
+    transition: color 0.3s ease;
+}
+
+#notificationBadge {
+    transition: all 0.3s ease;
+}
+
+.dropdown-item {
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.dropdown-item:hover {
+    transform: translateX(3px);
+}
+</style>

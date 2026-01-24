@@ -84,8 +84,10 @@ class AuditLogController extends Controller
             AuditLog::ACTION_LOGOUT => 'Logout',
         ];
         
-        $users = User::select('id', 'name', 'role')
-            ->whereIn('role', ['super admin', 'admin', 'staff', 'komite_teknis'])
+        $users = User::with('userRole')
+            ->whereHas('userRole', function($q) {
+                $q->whereIn('name', ['super_admin', 'admin', 'asesor', 'komite_teknis']);
+            })
             ->orderBy('name')
             ->get();
         

@@ -43,12 +43,25 @@ class AsesmenController extends Controller
         $pendaftarans = $query->orderBy('created_at', 'desc')->paginate(10);
         
         // Query for completed asesmens
-        $asesmens = Asesmen::with([
+        $asesmenQuery = Asesmen::with([
             'pendaftaran.user', 
             'pendaftaran.praPendaftaran',
             'pendaftaran.skemaSertifikasi',
-            'asesor'
-        ])->orderBy('created_at', 'desc')->paginate(10, ['*'], 'asesmen_page');
+            'asesor',
+            'sampledByUser',
+        ]);
+        
+        // Filter by sampling status (for Komite Teknis)
+        if ($request->filled('sampling')) {
+            if ($request->sampling === 'sampled') {
+                $asesmenQuery->sampled();
+            } elseif ($request->sampling === 'not_sampled') {
+                $asesmenQuery->notSampled();
+            }
+        }
+        
+        $asesmens = $asesmenQuery->orderBy('created_at', 'desc')
+            ->paginate(10, ['*'], 'asesmen_page');
         
         return view('adminui.asesmen.index', compact('pendaftarans', 'asesmens'));
     }
@@ -155,6 +168,23 @@ class AsesmenController extends Controller
             
             DB::commit();
             
+            // EVENT 2: KIRIM EMAIL - ASESMEN SELESAI
+            try {
+                \Mail::to($pendaftaran->email)->send(
+                    new \App\Mail\AsesmenSelesai($asesmen)
+                );
+                \Log::info('Email Asesmen Selesai sent', [
+                    'asesmen_id' => $asesmen->id,
+                    'pendaftaran_id' => $pendaftaran->id,
+                    'email' => $pendaftaran->email,
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Failed to send Asesmen Selesai email', [
+                    'asesmen_id' => $asesmen->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+            
             return redirect()->route('adminui.asesmen.show', $asesmen->id)
                 ->with('success', 'Asesmen berhasil disimpan.');
                 
@@ -177,7 +207,11 @@ class AsesmenController extends Controller
             'pendaftaran.skemaSertifikasi',
             'asesor',
             'details.unitKompetensi',
-            'details.kuk'
+            'details.kuk',
+            'evidences.uploader', // Load evidence with uploader for display
+            'evidences.kuk',
+            'sampledByUser', // Load sampling user for QC section
+            'pendaftaran.keputusan', // Check if keputusan is locked
         ])->findOrFail($id);
         
         // Group details by unit kompetensi
@@ -208,10 +242,16 @@ class AsesmenController extends Controller
             'asesor',
             'details.unitKompetensi',
             'details.kuk',
+            'evidences.uploader', // Load evidence for Audit PDF
+            'evidences.kuk',
+            'sampledByUser', // Load sampling user for QC section in PDF
         ])->findOrFail($id);
 
         // Group details by unit kompetensi
         $detailsByUnit = $asesmen->details->groupBy('unit_kompetensi_id');
+        
+        // Group evidence by KUK
+        $evidenceByKuk = $asesmen->evidences->groupBy('kuk_id');
 
         // Calculate summary statistics
         $summary = $this->calculateAsesmenSummary($asesmen, $detailsByUnit);
@@ -268,6 +308,7 @@ class AsesmenController extends Controller
         $pdf = Pdf::loadView('audit.pdf.asesmen-kompetensi', [
             'asesmen' => $asesmen,
             'detailsByUnit' => $detailsByUnit,
+            'evidenceByKuk' => $evidenceByKuk,
             'summary' => $summary,
             'auditLogs' => $auditLogs,
             'documentNumber' => $documentNumber,

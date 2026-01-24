@@ -12,10 +12,10 @@
             </div>
             <div class="col-lg-3 col-md-6">
                 <h4 class="text-white mb-3">Layanan Peserta</h4>
-                <a class="btn btn-link" href="{{ route('daftar') }}"><i class="fa fa-angle-right me-2"></i>Daftar Sertifikasi</a>
-                <a class="btn btn-link" href="{{ route('status-pra-pendaftaran.index') }}"><i class="fa fa-angle-right me-2"></i>Cek Status Pendaftaran</a>
-                <a class="btn btn-link" href="{{ url('/verifikasi') }}"><i class="fa fa-angle-right me-2"></i>Verifikasi Sertifikat</a>
-                <a class="btn btn-link" href="{{ url('/faq') }}"><i class="fa fa-angle-right me-2"></i>FAQ</a>
+                <a class="btn btn-link" href="{{ route('daftar') }}">Daftar Sertifikasi</a>
+                <a class="btn btn-link" href="{{ route('status-pra-pendaftaran.index') }}">Cek Status Pendaftaran</a>
+                <a class="btn btn-link" href="{{ url('/verifikasi') }}">Verifikasi Sertifikat</a>
+                <a class="btn btn-link" href="{{ url('/faq') }}">FAQ</a>
             </div>
             <div class="col-lg-3 col-md-6">
                 <h4 class="text-white mb-3">Kontak</h4>

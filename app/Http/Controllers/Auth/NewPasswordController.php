@@ -67,9 +67,9 @@ class NewPasswordController extends Controller
                     'remember_token' => Str::random(60),
                 ])->save();
 
-                // Audit log - ISO 27001 compliance
+                // Audit log - password_reset_success (ISO 27001 compliance)
                 AuditLog::log(
-                    AuditLog::ACTION_PASSWORD_RESET_BY_USER,
+                    AuditLog::ACTION_PASSWORD_RESET_SUCCESS,
                     AuditLog::MODULE_USER,
                     "User '{$user->name}' berhasil mereset password",
                     $user,
@@ -86,6 +86,24 @@ class NewPasswordController extends Controller
                 event(new PasswordReset($user));
             }
         );
+
+        // Log failed attempt if applicable
+        if ($status !== Password::PASSWORD_RESET) {
+            AuditLog::log(
+                AuditLog::ACTION_PASSWORD_RESET_FAILED,
+                AuditLog::MODULE_USER,
+                "Gagal reset password untuk email '{$request->email}' - token tidak valid atau kadaluarsa",
+                null,
+                null,
+                null,
+                [
+                    'email' => $request->email,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'reason' => 'invalid_or_expired_token',
+                ]
+            );
+        }
 
         return $status == Password::PASSWORD_RESET
             ? redirect()->route('login')->with('status', 'Password berhasil diperbarui. Silakan login dengan password baru Anda.')

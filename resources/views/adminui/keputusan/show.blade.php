@@ -313,7 +313,8 @@
                 </div>
             </div>
             @else
-            <!-- Form Keputusan -->
+            {{-- Form Keputusan - Only show if user has keputusan.approve permission --}}
+            @if(auth()->user()->hasPermission('keputusan.approve'))
             <form action="{{ route('adminui.keputusan.simpan', $pendaftaran->id) }}" method="POST" id="formKeputusan">
                 @csrf
                 <div class="card border border-2 border-danger">
@@ -386,6 +387,21 @@
                     </div>
                 </div>
             </form>
+            @else
+            {{-- No permission to approve - show info only --}}
+            <div class="card border border-2 border-secondary">
+                <div class="card-header pb-0 bg-gradient-secondary">
+                    <h6 class="text-white mb-0">
+                        <i class="fas fa-info-circle me-2"></i> Menunggu Keputusan Komite Teknis
+                    </h6>
+                </div>
+                <div class="card-body text-center py-4">
+                    <i class="fas fa-hourglass-half fa-3x text-muted mb-3"></i>
+                    <p class="text-muted mb-0">Keputusan sertifikasi belum ditetapkan oleh Komite Teknis.</p>
+                    <p class="text-xs text-muted">Anda tidak memiliki izin untuk membuat keputusan sertifikasi.</p>
+                </div>
+            </div>
+            @endif
             @endif
         </div>
     </div>

@@ -148,7 +148,8 @@
                         <span class="text-white">Skema sertifikasi belum dipilih. Silakan pilih skema untuk melanjutkan proses pendaftaran.</span>
                     </div>
                     
-                    <!-- Form Pilih Skema -->
+                    <!-- Form Pilih Skema (RBAC-Safe) -->
+                    @if(auth()->user()->hasPermission('pendaftaran_sertifikasi.assign_skema'))
                     <div class="card card-body border card-plain border-radius-lg">
                         <h6 class="text-sm font-weight-bold mb-3">
                             <i class="fas fa-certificate me-2 text-info"></i>Pilih Skema Sertifikasi
@@ -175,6 +176,12 @@
                             </button>
                         </form>
                     </div>
+                    @else
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <span class="text-white">Menunggu penugasan skema oleh admin yang berwenang.</span>
+                    </div>
+                    @endif
                     @endif
 
                     @if($pendaftaran->catatan_admin)
@@ -185,16 +192,23 @@
                         </div>
                     @endif
 
-                    <!-- Action Buttons -->
+                    <!-- Action Buttons (RBAC-Safe) -->
                     @if($pendaftaran->isDiajukan())
                         <hr class="horizontal dark mt-4">
                         <div class="d-flex gap-2">
+                            @if(auth()->user()->hasPermission('pendaftaran_sertifikasi.verify'))
                             <button type="button" class="btn bg-gradient-success" data-bs-toggle="modal" data-bs-target="#verifikasiModal">
                                 <i class="fas fa-check me-1"></i> Verifikasi
                             </button>
                             <button type="button" class="btn bg-gradient-danger" data-bs-toggle="modal" data-bs-target="#tolakModal">
                                 <i class="fas fa-times me-1"></i> Tolak
                             </button>
+                            @else
+                            <div class="alert alert-info mb-0">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <span class="text-white">Menunggu verifikasi oleh admin yang berwenang.</span>
+                            </div>
+                            @endif
                         </div>
                     @endif
                 </div>

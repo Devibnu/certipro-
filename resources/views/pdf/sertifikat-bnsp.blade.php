@@ -6,14 +6,12 @@
     <title>Sertifikat Kompetensi - {{ $sertifikat->nomor_sertifikat }}</title>
     <style>
         /* ================================================================
-           SERTIFIKAT KOMPETENSI LSP - STANDAR BNSP
-           Template PDF A4 Portrait
-           Production-Ready Template
+           SERTIFIKAT KOMPETENSI LSP - DomPDF SIMPLE & STABLE
            ================================================================ */
         
         @page {
             size: A4 portrait;
-            margin: 0;
+            margin: 6mm;
         }
         
         * {
@@ -22,588 +20,433 @@
             box-sizing: border-box;
         }
         
-        body {
+        html, body {
+            margin: 0;
+            padding: 0;
             font-family: 'DejaVu Serif', 'Times New Roman', Georgia, serif;
-            background: #ffffff;
-            color: #1a1a1a;
-            line-height: 1.4;
         }
         
-        /* ================================================================
-           CONTAINER & BORDERS
-           ================================================================ */
+        .page {
+            padding: 7mm;
+        }
         
-        .certificate-page {
-            width: 210mm;
-            height: 297mm;
+        .certificate {
+            border: 3px solid #1a365d;
+            padding: 15mm;
+            text-align: center;
             position: relative;
-            background: #ffffff;
-            overflow: hidden;
         }
         
-        /* Border Utama */
-        .border-outer {
+        /* WATERMARK */
+        .watermark {
             position: absolute;
-            top: 8mm;
-            left: 8mm;
-            right: 8mm;
-            bottom: 8mm;
-            border: 4px solid #1a365d;
+            top: 50%;
+            left: 50%;
+            width: 120px;
+            height: 120px;
+            margin-left: -60px;
+            margin-top: -60px;
+            opacity: 0.05;
+            z-index: 0;
         }
         
-        .border-inner {
-            position: absolute;
-            top: 12mm;
-            left: 12mm;
-            right: 12mm;
-            bottom: 12mm;
-            border: 1.5px solid #b8860b;
+        .content {
+            position: relative;
+            z-index: 1;
         }
         
-        /* Dekorasi sudut */
-        .corner-decoration {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-        }
-        
-        .corner-tl { top: 10mm; left: 10mm; border-top: 3px solid #b8860b; border-left: 3px solid #b8860b; }
-        .corner-tr { top: 10mm; right: 10mm; border-top: 3px solid #b8860b; border-right: 3px solid #b8860b; }
-        .corner-bl { bottom: 10mm; left: 10mm; border-bottom: 3px solid #b8860b; border-left: 3px solid #b8860b; }
-        .corner-br { bottom: 10mm; right: 10mm; border-bottom: 3px solid #b8860b; border-right: 3px solid #b8860b; }
-        
-        /* Content Area */
-        .content-wrapper {
-            position: absolute;
-            top: 18mm;
-            left: 18mm;
-            right: 18mm;
-            bottom: 18mm;
-        }
-        
-        /* ================================================================
-           HEADER - LOGO SECTION
-           ================================================================ */
-        
+        /* HEADER LOGO */
         .header-logos {
-            display: table;
-            width: 100%;
             margin-bottom: 5mm;
         }
         
-        .logo-cell {
-            display: table-cell;
+        .header-logos table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .header-logos td {
             vertical-align: middle;
-        }
-        
-        .logo-left {
-            width: 35%;
-            text-align: left;
-        }
-        
-        .logo-center {
-            width: 30%;
-            text-align: center;
-        }
-        
-        .logo-right {
-            width: 35%;
-            text-align: right;
+            padding: 1mm;
         }
         
         .logo-img {
-            max-height: 22mm;
-            max-width: 55mm;
-        }
-        
-        .logo-placeholder {
-            width: 50mm;
-            height: 18mm;
-            border: 1px dashed #ccc;
-            display: inline-block;
-            line-height: 18mm;
-            font-size: 8pt;
-            color: #aaa;
-            text-align: center;
-            font-family: 'DejaVu Sans', Arial, sans-serif;
-        }
-        
-        .lsp-info {
-            margin-top: 2mm;
+            max-height: 42px;
+            max-width: 105px;
         }
         
         .lsp-name {
-            font-size: 10pt;
+            font-size: 7pt;
+            color: #333;
             font-weight: bold;
-            color: #1a365d;
+            margin-top: 1.5mm;
         }
         
         .lsp-lisensi {
-            font-size: 7pt;
-            color: #666;
+            font-size: 6pt;
+            color: #777;
         }
         
-        /* ================================================================
-           TITLE SECTION
-           ================================================================ */
-        
-        .title-section {
-            text-align: center;
-            margin: 8mm 0 10mm 0;
-            padding-bottom: 5mm;
-            border-bottom: 1px solid #e0e0e0;
+        /* TITLE */
+        .title {
+            margin-bottom: 5mm;
+            padding-bottom: 2.5mm;
+            border-bottom: 1px solid #ddd;
         }
         
-        .title-main {
-            font-size: 28pt;
-            font-weight: bold;
-            color: #1a365d;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            margin-bottom: 2mm;
-        }
-        
-        .title-sub {
-            font-size: 11pt;
-            color: #666;
-            font-style: italic;
-            letter-spacing: 2px;
-        }
-        
-        /* ================================================================
-           BODY CONTENT
-           ================================================================ */
-        
-        .body-content {
-            text-align: center;
-            padding: 0 15mm;
-        }
-        
-        .intro-text {
-            font-size: 12pt;
-            color: #444;
-            margin-bottom: 4mm;
-        }
-        
-        .recipient-name {
-            font-size: 26pt;
-            font-weight: bold;
-            color: #1a365d;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            padding: 4mm 0;
-            margin: 0 auto 6mm auto;
-            border-bottom: 2.5px solid #b8860b;
-            display: inline-block;
-            min-width: 65%;
-        }
-        
-        /* Info Grid */
-        .info-section {
-            margin: 8mm 0;
-        }
-        
-        .info-row {
-            margin: 5mm 0;
-        }
-        
-        .info-label {
-            font-size: 10pt;
-            color: #666;
-            margin-bottom: 1mm;
-        }
-        
-        .info-value {
-            font-size: 13pt;
-            font-weight: bold;
-            color: #1a365d;
-        }
-        
-        .info-value-large {
-            font-size: 15pt;
-            font-weight: bold;
-            color: #1a365d;
-            line-height: 1.4;
-        }
-        
-        .info-code {
-            font-size: 9pt;
-            color: #888;
-            font-family: 'DejaVu Sans Mono', monospace;
-        }
-        
-        /* Declaration Box */
-        .declaration-box {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            padding: 5mm 8mm;
-            margin: 8mm auto;
-            display: inline-block;
-            min-width: 70%;
-        }
-        
-        .declaration-intro {
-            font-size: 10pt;
-            color: #555;
-            margin-bottom: 2mm;
-        }
-        
-        .declaration-status {
+        .title h1 {
             font-size: 20pt;
             font-weight: bold;
             color: #1a365d;
             text-transform: uppercase;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
+            margin-bottom: 1.5mm;
         }
         
-        /* Validity Table */
-        .validity-table {
-            display: table;
-            width: 75%;
-            margin: 8mm auto;
-            border: 1px solid #e0e0e0;
-            border-radius: 4px;
-            overflow: hidden;
+        .title p {
+            font-size: 10pt;
+            color: #666;
+            font-style: italic;
         }
         
-        .validity-row {
-            display: table-row;
-        }
-        
-        .validity-cell {
-            display: table-cell;
-            width: 50%;
-            padding: 4mm;
-            text-align: center;
-            background: #fafafa;
-        }
-        
-        .validity-cell:first-child {
-            border-right: 1px solid #e0e0e0;
-        }
-        
-        .validity-label {
+        /* BODY */
+        .intro {
             font-size: 9pt;
-            color: #888;
+            color: #555;
+            margin-bottom: 3mm;
+        }
+        
+        .name {
+            font-size: 16pt;
+            font-weight: bold;
+            color: #1a365d;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            margin: 4mm 0;
+            padding: 3.5mm 11mm;
+            border-bottom: 2px solid #c9a24d;
+            display: inline-block;
+        }
+        
+        .info-section {
+            margin: 4mm 0;
+        }
+        
+        .info-label {
+            font-size: 8pt;
+            color: #777;
+            margin-top: 1mm;
+        }
+        
+        .info-value {
+            font-size: 11pt;
+            font-weight: bold;
+            color: #1a365d;
+            margin: 2mm 0;
+            line-height: 1.3;
+        }
+        
+        .info-code {
+            font-size: 7pt;
+            color: #999;
+            font-family: 'DejaVu Sans Mono', monospace;
+        }
+        
+        /* DECLARATION */
+        .declaration {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 4.5mm;
+            margin: 3.5mm auto;
+            display: inline-block;
+        }
+        
+        .declaration-intro {
+            font-size: 8pt;
+            color: #666;
             margin-bottom: 1mm;
         }
         
+        .declaration-status {
+            font-size: 13pt;
+            font-weight: bold;
+            color: #1a365d;
+            text-transform: uppercase;
+        }
+        
+        /* VALIDITY */
+        .validity {
+            width: 65%;
+            margin: 3.5mm auto;
+        }
+        
+        .validity table {
+            width: 100%;
+            border: 1px solid #ddd;
+            border-collapse: collapse;
+        }
+        
+        .validity td {
+            width: 50%;
+            padding: 4mm;
+            text-align: center;
+            border: 1px solid #ddd;
+            background: #fafafa;
+        }
+        
+        .validity-label {
+            font-size: 7pt;
+            color: #999;
+            text-transform: uppercase;
+            display: block;
+        }
+        
         .validity-value {
+            font-size: 10pt;
+            font-weight: bold;
+            color: #1a365d;
+            display: block;
+            margin-top: 1mm;
+        }
+        
+        /* FOOTER */
+        .footer {
+            margin-top: 7mm;
+            padding-top: 3mm;
+            border-top: 1px solid #ddd;
+        }
+        
+        .footer table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .footer td {
+            vertical-align: top;
+            padding: 2.5mm;
+        }
+        
+        .qr-section {
+            text-align: center;
+        }
+        
+        .qr-code {
+            width: 80px;
+            height: 80px;
+            border: 1px solid #ddd;
+        }
+        
+        .qr-text {
+            font-size: 6pt;
+            color: #999;
+            margin-top: 1mm;
+        }
+        
+        .sig-section {
+            text-align: center;
+        }
+        
+        .sig-location {
+            font-size: 9pt;
+            color: #555;
+            margin-bottom: 16mm;
+        }
+        
+        .sig-line {
+            width: 130px;
+            border-bottom: 1px solid #333;
+            margin: 0 auto 1.5mm auto;
+        }
+        
+        .sig-name {
             font-size: 11pt;
             font-weight: bold;
             color: #1a365d;
         }
         
-        /* ================================================================
-           FOOTER SECTION
-           ================================================================ */
-        
-        .footer-section {
-            position: absolute;
-            bottom: 22mm;
-            left: 18mm;
-            right: 18mm;
-        }
-        
-        .footer-grid {
-            display: table;
-            width: 100%;
-        }
-        
-        .footer-cell {
-            display: table-cell;
-            vertical-align: bottom;
-        }
-        
-        .footer-qr {
-            width: 28%;
-            text-align: center;
-        }
-        
-        .footer-signature {
-            width: 44%;
-            text-align: center;
-        }
-        
-        .footer-info {
-            width: 28%;
-            text-align: center;
-        }
-        
-        /* QR Code */
-        .qr-wrapper {
-            text-align: center;
-        }
-        
-        .qr-code-img {
-            width: 28mm;
-            height: 28mm;
-            margin-bottom: 2mm;
-        }
-        
-        .qr-text {
-            font-size: 7pt;
-            color: #888;
-            line-height: 1.3;
-        }
-        
-        /* Signature Block */
-        .signature-wrapper {
-            text-align: center;
-        }
-        
-        .signature-location {
-            font-size: 10pt;
-            color: #444;
-            margin-bottom: 18mm;
-        }
-        
-        .signature-line {
-            width: 60mm;
-            border-bottom: 1.5px solid #333;
-            margin: 0 auto 2mm auto;
-        }
-        
-        .signature-name {
-            font-size: 12pt;
-            font-weight: bold;
-            color: #1a365d;
-            margin-bottom: 1mm;
-        }
-        
-        .signature-title {
-            font-size: 9pt;
+        .sig-title {
+            font-size: 8pt;
             color: #666;
         }
         
-        /* Info Block */
-        .info-wrapper {
-            text-align: right;
-            padding-right: 5mm;
+        .secure-section {
+            text-align: center;
         }
         
         .secure-label {
-            font-size: 7pt;
-            color: #aaa;
+            font-size: 6pt;
+            color: #bbb;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
         
         .secure-id {
-            font-size: 6pt;
-            color: #999;
+            font-size: 5pt;
+            color: #ccc;
             font-family: 'DejaVu Sans Mono', monospace;
             word-break: break-all;
-            line-height: 1.4;
+            line-height: 1.2;
+            margin-top: 1mm;
         }
         
         .doc-id {
             font-size: 5pt;
-            color: #bbb;
+            color: #ddd;
             margin-top: 2mm;
         }
         
-        /* ================================================================
-           SECURITY FEATURES
-           ================================================================ */
-        
-        /* Watermark */
-        .watermark {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-40deg);
-            font-size: 60pt;
-            color: rgba(26, 54, 93, 0.025);
-            font-weight: bold;
-            letter-spacing: 15px;
-            white-space: nowrap;
-            pointer-events: none;
-            z-index: 1;
-            font-family: 'DejaVu Sans', Arial, sans-serif;
-        }
-        
-        /* Secure Footer */
         .secure-footer {
-            position: absolute;
-            bottom: 10mm;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 6pt;
-            color: #ccc;
-            letter-spacing: 0.5px;
+            font-size: 5pt;
+            color: #e0e0e0;
             font-family: 'DejaVu Sans Mono', monospace;
+            margin-top: 3mm;
+            padding-top: 2mm;
+            border-top: 1px solid #f5f5f5;
             text-align: center;
         }
-        
-        /* ================================================================
-           UTILITY CLASSES
-           ================================================================ */
-        
-        .text-center { text-align: center; }
-        .text-left { text-align: left; }
-        .text-right { text-align: right; }
-        .text-uppercase { text-transform: uppercase; }
-        .font-bold { font-weight: bold; }
     </style>
 </head>
 <body>
     @php
         $logoInfo = systemLogoInfo();
         $logoBase64 = systemLogoBase64();
+        $nomorLisensi = config('certipro.nomor_lisensi');
+        $isBnspLicensed = config('certipro.is_bnsp_licensed', false);
+        $logoBnspPath = public_path('images/logo-bnsp.png');
+        $ketuaLsp = config('certipro.ketua_lsp', 'Ketua LSP');
+        $kotaTerbit = config('certipro.kota_terbit', 'Jakarta');
     @endphp
-    <!-- Watermark Background -->
-    @if($logoInfo['nama_perusahaan'])
-        <div class="watermark">{{ strtoupper($logoInfo['nama_perusahaan']) }}</div>
-    @endif
     
-    <div class="certificate-page">
-        <!-- Decorative Borders -->
-        <div class="border-outer"></div>
-        <div class="border-inner"></div>
-        <div class="corner-decoration corner-tl"></div>
-        <div class="corner-decoration corner-tr"></div>
-        <div class="corner-decoration corner-bl"></div>
-        <div class="corner-decoration corner-br"></div>
-        
-        <!-- Secure Footer -->
-        <div class="secure-footer">
-            SECURE-ID: {{ $sertifikat->uuid }} | HASH: {{ substr($sertifikat->security_hash, 0, 12) }}
-        </div>
-        
-        <!-- Main Content -->
-        <div class="content-wrapper">
+    <div class="page">
+        <div class="certificate">
             
-            <!-- ============ HEADER - LOGOS ============ -->
-            <div class="header-logos">
-                <div class="logo-cell logo-left">
-                    @if($logoBase64)
-                        <img src="{{ $logoBase64 }}" class="logo-img" alt="Logo LSP">
-                    @else
-                        <div class="logo-placeholder">LOGO LSP</div>
-                    @endif
-                    <div class="lsp-info">
-                        @if($logoInfo['nama_perusahaan'])
-                            <div class="lsp-name">{{ $logoInfo['nama_perusahaan'] }}</div>
-                        @endif
-                        @if(config('certipro.nomor_lisensi'))
-                            <div class="lsp-lisensi">Lisensi: {{ config('certipro.nomor_lisensi') }}</div>
-                        @endif
-                    </div>
-                </div>
-                <div class="logo-cell logo-center">
-                    {{-- Reserved for additional emblems --}}
-                </div>
-                <div class="logo-cell logo-right">
-                    @if(file_exists(public_path('images/logo-bnsp.png')))
-                        <img src="{{ public_path('images/logo-bnsp.png') }}" class="logo-img" alt="Logo BNSP">
-                    @else
-                        <div class="logo-placeholder">LOGO BNSP</div>
-                    @endif
-                </div>
+            <!-- WATERMARK -->
+            @if($logoBase64)
+            <div class="watermark">
+                <img src="{{ $logoBase64 }}" width="120" height="120" alt="">
             </div>
+            @endif
             
-            <!-- ============ TITLE ============ -->
-            <div class="title-section">
-                <h1 class="title-main">Sertifikat Kompetensi</h1>
-                <p class="title-sub">Certificate of Competency</p>
-            </div>
-            
-            <!-- ============ BODY CONTENT ============ -->
-            <div class="body-content">
+            <div class="content">
                 
-                <!-- Recipient -->
-                <p class="intro-text">Diberikan kepada:</p>
-                <h2 class="recipient-name">{{ strtoupper($sertifikat->nama_peserta) }}</h2>
+                <!-- HEADER LOGO -->
+                <div class="header-logos">
+                    <table cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td width="35%" align="left">
+                                @if($logoBase64)
+                                    <img src="{{ $logoBase64 }}" class="logo-img" alt="Logo LSP">
+                                @endif
+                                @if($logoInfo['nama_perusahaan'])
+                                    <div class="lsp-name">{{ $logoInfo['nama_perusahaan'] }}</div>
+                                @endif
+                                @if($nomorLisensi)
+                                    <div class="lsp-lisensi">Lisensi: {{ $nomorLisensi }}</div>
+                                @endif
+                            </td>
+                            <td width="30%" align="center"></td>
+                            <td width="35%" align="right">
+                                @if($isBnspLicensed && file_exists($logoBnspPath))
+                                    <img src="{{ $logoBnspPath }}" class="logo-img" alt="Logo BNSP">
+                                @endif
+                            </td>
+                        </tr>
+                    </table>
+                </div>
                 
-                <!-- Certificate Number -->
-                <div class="info-row">
+                <!-- TITLE -->
+                <div class="title">
+                    <h1>Sertifikat Kompetensi</h1>
+                    <p>Certificate of Competency</p>
+                </div>
+                
+                <!-- BODY -->
+                <div class="intro">Diberikan kepada:</div>
+                
+                <div class="name">{{ strtoupper($sertifikat->nama_peserta) }}</div>
+                
+                <div class="info-section">
                     <div class="info-label">Nomor Sertifikat:</div>
                     <div class="info-value">{{ $sertifikat->nomor_sertifikat }}</div>
                 </div>
                 
-                <!-- Scheme -->
-                <div class="info-row">
+                <div class="info-section">
                     <div class="info-label">Skema Sertifikasi:</div>
-                    <div class="info-value-large">{{ $sertifikat->skema_sertifikasi }}</div>
+                    <div class="info-value">{{ $sertifikat->skema_sertifikasi }}</div>
                     @if(isset($pendaftaran) && $pendaftaran->skemaSertifikasi)
                         <div class="info-code">({{ $pendaftaran->skemaSertifikasi->kode_skema ?? '' }})</div>
                     @endif
                 </div>
                 
-                <!-- Declaration -->
-                <div class="declaration-box">
+                <!-- DECLARATION -->
+                <div class="declaration">
                     <div class="declaration-intro">Menyatakan bahwa yang bersangkutan</div>
                     <div class="declaration-status">Telah Dinyatakan Kompeten</div>
                 </div>
                 
-                <!-- Validity Period -->
-                <div class="validity-table">
-                    <div class="validity-row">
-                        <div class="validity-cell">
-                            <div class="validity-label">Tanggal Terbit</div>
-                            <div class="validity-value">{{ $sertifikat->tanggal_terbit->translatedFormat('d F Y') }}</div>
-                        </div>
-                        <div class="validity-cell">
-                            <div class="validity-label">Berlaku Sampai</div>
-                            <div class="validity-value">{{ $sertifikat->tanggal_berlaku_sampai->translatedFormat('d F Y') }}</div>
-                        </div>
+                <!-- VALIDITY -->
+                <div class="validity">
+                    <table cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td>
+                                <span class="validity-label">Tanggal Terbit</span>
+                                <span class="validity-value">{{ $sertifikat->tanggal_terbit->translatedFormat('d F Y') }}</span>
+                            </td>
+                            <td>
+                                <span class="validity-label">Berlaku Sampai</span>
+                                <span class="validity-value">{{ $sertifikat->tanggal_berlaku_sampai->translatedFormat('d F Y') }}</span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <!-- FOOTER -->
+                <div class="footer">
+                    <table cellpadding="0" cellspacing="0">
+                        <tr>
+                            <!-- QR CODE -->
+                            <td width="28%" class="qr-section">
+                                <img src="data:image/svg+xml;base64,{{ $qrCodeBase64 }}" 
+                                     class="qr-code"
+                                     width="80" 
+                                     height="80" 
+                                     alt="QR">
+                                <div class="qr-text">Scan untuk verifikasi</div>
+                            </td>
+                            
+                            <!-- SIGNATURE -->
+                            <td width="44%" class="sig-section">
+                                <div class="sig-location">
+                                    {{ $kotaTerbit }}, {{ $sertifikat->tanggal_terbit->translatedFormat('d F Y') }}
+                                </div>
+                                <div class="sig-line"></div>
+                                <div class="sig-name">{{ $ketuaLsp }}</div>
+                                @if($logoInfo['nama_perusahaan'])
+                                    <div class="sig-title">Ketua {{ $logoInfo['nama_perusahaan'] }}</div>
+                                @else
+                                    <div class="sig-title">Ketua LSP</div>
+                                @endif
+                            </td>
+                            
+                            <!-- SECURE ID -->
+                            <td width="28%" class="secure-section">
+                                <div class="secure-label">Secure ID</div>
+                                <div class="secure-id">
+                                    {{ substr($sertifikat->uuid, 0, 18) }}<br>
+                                    {{ substr($sertifikat->uuid, 18) }}
+                                </div>
+                                <div class="doc-id">
+                                    DOC-{{ $sertifikat->id }}-{{ $sertifikat->created_at->format('Ymd') }}
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    <!-- SECURE FOOTER -->
+                    <div class="secure-footer">
+                        SECURE: {{ $sertifikat->uuid }} | HASH: {{ substr($sertifikat->security_hash ?? '', 0, 12) }}
                     </div>
                 </div>
                 
             </div>
-            
-            <!-- ============ FOOTER ============ -->
-            <div class="footer-section">
-                <div class="footer-grid">
-                    
-                    <!-- QR Code -->
-                    <div class="footer-cell footer-qr">
-                        <div class="qr-wrapper">
-                            <img src="data:image/svg+xml;base64,{{ $qrCodeBase64 }}" class="qr-code-img" alt="QR Verification">
-                            <div class="qr-text">
-                                Scan untuk verifikasi<br>
-                                keaslian sertifikat
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Signature -->
-                    <div class="footer-cell footer-signature">
-                        <div class="signature-wrapper">
-                            <div class="signature-location">
-                                {{ config('certipro.kota_terbit', 'Jakarta') }}, {{ $sertifikat->tanggal_terbit->translatedFormat('d F Y') }}
-                            </div>
-                            <div class="signature-line"></div>
-                            <div class="signature-name">{{ $ketuaLsp }}</div>
-                            @if($logoInfo['nama_perusahaan'])
-                                <div class="signature-title">Ketua {{ $logoInfo['nama_perusahaan'] }}</div>
-                            @else
-                                <div class="signature-title">Ketua LSP</div>
-                            @endif
-                        </div>
-                    </div>
-                    
-                    <!-- Secure Info -->
-                    <div class="footer-cell footer-info">
-                        <div class="info-wrapper">
-                            <div class="secure-label">Secure ID</div>
-                            <div class="secure-id">
-                                {{ substr($sertifikat->uuid, 0, 18) }}<br>
-                                {{ substr($sertifikat->uuid, 18) }}
-                            </div>
-                            <div class="doc-id">
-                                DOC-{{ $sertifikat->id }}-{{ $sertifikat->created_at->format('Ymd') }}
-                            </div>
-                        </div>
-                    </div>
-                    
-                </div>
-            </div>
-            
         </div>
     </div>
 </body>

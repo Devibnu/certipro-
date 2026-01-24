@@ -138,46 +138,267 @@
         </div>
     </div>
     
-    <!-- Info Item Bagian (jika tipe daftar/faq) -->
-    @if(in_array($bagianHalaman->tipe, ['daftar', 'faq']))
+    <!-- Info Item Bagian (jika tipe daftar/faq/hero) -->
+    @if(in_array($bagianHalaman->tipe, ['daftar', 'faq', 'hero']))
     <div class="row mt-4">
         <div class="col-12">
             <div class="card">
                 <div class="card-header pb-0 d-flex justify-content-between align-items-center">
-                    <h6>Item Bagian ({{ $bagianHalaman->itemBagianHalaman()->count() }})</h6>
-                    <small class="text-muted">Kelola item untuk tipe {{ $bagianHalaman->tipe }}</small>
+                    <h6>
+                        @if($bagianHalaman->tipe == 'hero')
+                            Slide Hero ({{ $bagianHalaman->itemBagianHalaman()->count() }})
+                        @else
+                            Item Bagian ({{ $bagianHalaman->itemBagianHalaman()->count() }})
+                        @endif
+                    </h6>
+                    <div>
+                        <small class="text-muted me-3">Kelola item untuk tipe {{ $bagianHalaman->tipe }}</small>
+                        <button type="button" class="btn btn-sm bg-gradient-primary" data-bs-toggle="modal" data-bs-target="#addItemModal">
+                            <i class="fas fa-plus me-1"></i> Tambah {{ $bagianHalaman->tipe == 'hero' ? 'Slide' : 'Item' }}
+                        </button>
+                    </div>
                 </div>
                 <div class="card-body">
                     @if($bagianHalaman->itemBagianHalaman()->count() > 0)
-                        <ul class="list-group">
-                            @foreach($bagianHalaman->itemBagianHalaman()->orderBy('urutan')->get() as $item)
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
-                                        @if($item->ikon)
-                                            <i class="{{ $item->ikon }} me-2"></i>
+                        @if($bagianHalaman->tipe == 'hero')
+                            {{-- Layout khusus untuk Hero Slides --}}
+                            <div class="row">
+                                @foreach($bagianHalaman->itemBagianHalaman()->orderBy('urutan')->get() as $item)
+                                <div class="col-md-6 mb-3">
+                                    <div class="card shadow-sm {{ $item->aktif ? '' : 'opacity-50' }}">
+                                        @if($item->gambar)
+                                            <img src="{{ asset('storage/' . $item->gambar) }}" class="card-img-top" alt="{{ $item->judul }}" style="height: 150px; object-fit: cover;">
+                                        @else
+                                            <div class="bg-gradient-secondary text-white text-center py-5">
+                                                <i class="fas fa-image fa-3x opacity-5"></i>
+                                                <p class="mb-0 mt-2">Belum ada gambar</p>
+                                            </div>
                                         @endif
-                                        <strong>{{ $item->judul }}</strong>
-                                        @if($item->deskripsi)
-                                            <br><small class="text-muted">{{ Str::limit($item->deskripsi, 100) }}</small>
-                                        @endif
+                                        <div class="card-body p-3">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h6 class="mb-1">{{ $item->judul }}</h6>
+                                                    @if($item->subjudul)
+                                                        <small class="text-primary">{{ $item->subjudul }}</small>
+                                                    @endif
+                                                </div>
+                                                <span class="badge bg-{{ $item->aktif ? 'success' : 'secondary' }}">
+                                                    {{ $item->aktif ? 'Aktif' : 'Nonaktif' }}
+                                                </span>
+                                            </div>
+                                            @if($item->deskripsi)
+                                                <p class="text-sm text-muted mb-2">{{ Str::limit($item->deskripsi, 80) }}</p>
+                                            @endif
+                                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                                <span class="badge bg-secondary">Urutan: {{ $item->urutan }}</span>
+                                                <div>
+                                                    <button type="button" class="btn btn-sm btn-link text-info p-1" 
+                                                            onclick="editItem({{ $item->id }})" title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <form action="{{ route('adminui.bagian-halaman.delete-item', $item->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus slide ini?')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-sm btn-link text-danger p-1" title="Hapus">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <span class="badge bg-secondary">Urutan: {{ $item->urutan }}</span>
-                                </li>
-                            @endforeach
-                        </ul>
+                                </div>
+                                @endforeach
+                            </div>
+                        @else
+                            {{-- Layout untuk daftar/faq --}}
+                            <ul class="list-group">
+                                @foreach($bagianHalaman->itemBagianHalaman()->orderBy('urutan')->get() as $item)
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            @if($item->ikon)
+                                                <i class="{{ $item->ikon }} me-2"></i>
+                                            @endif
+                                            <strong>{{ $item->judul }}</strong>
+                                            @if($item->deskripsi)
+                                                <br><small class="text-muted">{{ Str::limit($item->deskripsi, 100) }}</small>
+                                            @endif
+                                        </div>
+                                        <div>
+                                            <span class="badge bg-secondary me-2">Urutan: {{ $item->urutan }}</span>
+                                            <button type="button" class="btn btn-sm btn-link text-info p-1" onclick="editItem({{ $item->id }})" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <form action="{{ route('adminui.bagian-halaman.delete-item', $item->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus item ini?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-link text-danger p-1" title="Hapus">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
                     @else
-                        <p class="text-muted mb-0">Belum ada item untuk bagian ini.</p>
+                        <div class="text-center py-4">
+                            <i class="fas fa-{{ $bagianHalaman->tipe == 'hero' ? 'images' : 'list' }} fa-3x text-muted mb-3"></i>
+                            <p class="text-muted mb-0">Belum ada {{ $bagianHalaman->tipe == 'hero' ? 'slide' : 'item' }} untuk bagian ini.</p>
+                            <button type="button" class="btn btn-sm bg-gradient-primary mt-3" data-bs-toggle="modal" data-bs-target="#addItemModal">
+                                <i class="fas fa-plus me-1"></i> Tambah {{ $bagianHalaman->tipe == 'hero' ? 'Slide Pertama' : 'Item Pertama' }}
+                            </button>
+                        </div>
                     @endif
-                    <div class="mt-3">
-                        <small class="text-info">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Fitur kelola item bagian akan tersedia di pembaruan berikutnya.
-                        </small>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
     @endif
 </div>
+
+{{-- Modal Tambah Item --}}
+<div class="modal fade" id="addItemModal" tabindex="-1" aria-labelledby="addItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form action="{{ route('adminui.bagian-halaman.store-item', $bagianHalaman->id) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addItemModalLabel">
+                        Tambah {{ $bagianHalaman->tipe == 'hero' ? 'Slide Hero' : 'Item Bagian' }}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="judul" class="form-label">Judul <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="judul" name="judul" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="subjudul" class="form-label">Subjudul</label>
+                                <input type="text" class="form-control" id="subjudul" name="subjudul" placeholder="Teks kecil di atas judul">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="deskripsi" class="form-label">Deskripsi</label>
+                        <textarea class="form-control" id="deskripsi" name="deskripsi" rows="3"></textarea>
+                    </div>
+
+                    @if($bagianHalaman->tipe == 'hero')
+                    <div class="mb-3">
+                        <label for="gambar" class="form-label">Gambar Background <span class="text-danger">*</span></label>
+                        <input type="file" class="form-control" id="gambar" name="gambar" accept="image/*" required>
+                        <small class="text-muted">Ukuran rekomendasi: 1920x800 pixel. Format: JPG, PNG</small>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="tombol_text" class="form-label">Teks Tombol 1</label>
+                                <input type="text" class="form-control" id="tombol_text" name="tombol_text" placeholder="Contoh: Pelajari Lebih Lanjut">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="tombol_link" class="form-label">Link Tombol 1</label>
+                                <input type="text" class="form-control" id="tombol_link" name="tombol_link" placeholder="Contoh: /tentang">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="tombol_text_2" class="form-label">Teks Tombol 2</label>
+                                <input type="text" class="form-control" id="tombol_text_2" name="tombol_text_2" placeholder="Contoh: Daftar Sekarang">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="tombol_link_2" class="form-label">Link Tombol 2</label>
+                                <input type="text" class="form-control" id="tombol_link_2" name="tombol_link_2" placeholder="Contoh: /daftar">
+                            </div>
+                        </div>
+                    </div>
+                    @else
+                    <div class="mb-3">
+                        <label for="ikon" class="form-label">Ikon (Font Awesome)</label>
+                        <input type="text" class="form-control" id="ikon" name="ikon" placeholder="Contoh: fas fa-check">
+                    </div>
+                    @endif
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="urutan" class="form-label">Urutan</label>
+                                <input type="number" class="form-control" id="urutan" name="urutan" value="{{ $bagianHalaman->itemBagianHalaman()->count() + 1 }}" min="1">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Status</label>
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" id="aktif" name="aktif" value="1" checked>
+                                    <label class="form-check-label" for="aktif">Aktif</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn bg-gradient-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{{-- Modal Edit Item --}}
+<div class="modal fade" id="editItemModal" tabindex="-1" aria-labelledby="editItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form id="editItemForm" method="POST" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editItemModalLabel">Edit {{ $bagianHalaman->tipe == 'hero' ? 'Slide Hero' : 'Item Bagian' }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="editItemModalBody">
+                    {{-- Content loaded via JS --}}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn bg-gradient-primary">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @endsection
+
+@push('scripts')
+<script>
+function editItem(itemId) {
+    fetch(`{{ url('adminui/bagian-halaman/item') }}/${itemId}/edit`)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('editItemModalBody').innerHTML = html;
+            document.getElementById('editItemForm').action = `{{ url('adminui/bagian-halaman/item') }}/${itemId}`;
+            new bootstrap.Modal(document.getElementById('editItemModal')).show();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Gagal memuat data item');
+        });
+}
+</script>
+@endpush

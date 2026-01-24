@@ -557,4 +557,175 @@ class EmailNotificationService
             ];
         })->toArray();
     }
+
+    // ============================================================================
+    // EVENT-DRIVEN EMAIL SENDING (NEW)
+    // For Listener classes - idempotent, retry-safe
+    // ============================================================================
+
+    /**
+     * Send Pra-Pendaftaran Diterima email (dari Event)
+     * Idempotent: Checks if already sent based on status_email field
+     */
+    public function sendPraDiterimaFromEvent(PraPendaftaran $praPendaftaran): bool
+    {
+        // Idempotent check: Apakah sudah pernah kirim?
+        if ($praPendaftaran->status_email === 'sent') {
+            Log::warning('[EmailService] Email PraDiterima already sent, skipping', [
+                'pra_id' => $praPendaftaran->id,
+                'status_email' => $praPendaftaran->status_email,
+            ]);
+            return false;
+        }
+
+        try {
+            Mail::to($praPendaftaran->email)->send(new PraPendaftaranDiterimaMail($praPendaftaran));
+
+            // Update status email
+            $praPendaftaran->update(['status_email' => 'sent']);
+
+            $this->logAction('email_sent_from_event', $praPendaftaran, 'pra-diterima', $praPendaftaran->email, [
+                'notes' => 'Email sent via Event-Listener (PraPendaftaranDiterimaEvent)',
+            ]);
+
+            Log::info('[EmailService] PraDiterima email sent successfully', [
+                'pra_id' => $praPendaftaran->id,
+                'email' => $praPendaftaran->email,
+            ]);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('[EmailService] Failed to send PraDiterima email', [
+                'pra_id' => $praPendaftaran->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e; // Re-throw untuk retry mechanism
+        }
+    }
+
+    /**
+     * Send Pra-Pendaftaran Ditolak email (dari Event)
+     */
+    public function sendPraDitolakFromEvent(PraPendaftaran $praPendaftaran): bool
+    {
+        // Idempotent check
+        if ($praPendaftaran->status_email === 'sent') {
+            Log::warning('[EmailService] Email PraDitolak already sent, skipping', [
+                'pra_id' => $praPendaftaran->id,
+            ]);
+            return false;
+        }
+
+        try {
+            Mail::to($praPendaftaran->email)->send(new PraPendaftaranDitolakMail($praPendaftaran));
+
+            $praPendaftaran->update(['status_email' => 'sent']);
+
+            $this->logAction('email_sent_from_event', $praPendaftaran, 'pra-ditolak', $praPendaftaran->email, [
+                'notes' => 'Email sent via Event-Listener (PraPendaftaranDitolakEvent)',
+            ]);
+
+            Log::info('[EmailService] PraDitolak email sent successfully', [
+                'pra_id' => $praPendaftaran->id,
+                'email' => $praPendaftaran->email,
+            ]);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('[EmailService] Failed to send PraDitolak email', [
+                'pra_id' => $praPendaftaran->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Send Keputusan Kompeten email (dari Event)
+     */
+    public function sendKompetenFromEvent(KeputusanSertifikasi $keputusan): bool
+    {
+        // Load pendaftaran relation
+        $keputusan->load('pendaftaran');
+
+        // Idempotent check
+        if ($keputusan->status_email === 'sent') {
+            Log::warning('[EmailService] Email Kompeten already sent, skipping', [
+                'keputusan_id' => $keputusan->id,
+            ]);
+            return false;
+        }
+
+        try {
+            Mail::to($keputusan->pendaftaran->email)->send(new KompetenMail($keputusan));
+
+            $keputusan->update(['status_email' => 'sent']);
+
+            $this->logAction('email_sent_from_event', $keputusan, 'kompeten', $keputusan->pendaftaran->email, [
+                'notes' => 'Email sent via Event-Listener (KeputusanKompetenEvent)',
+            ]);
+
+            Log::info('[EmailService] Kompeten email sent successfully', [
+                'keputusan_id' => $keputusan->id,
+                'email' => $keputusan->pendaftaran->email,
+            ]);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('[EmailService] Failed to send Kompeten email', [
+                'keputusan_id' => $keputusan->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Send Keputusan Belum Kompeten email (dari Event)
+     */
+    public function sendBelumKompetenFromEvent(KeputusanSertifikasi $keputusan): bool
+    {
+        // Load pendaftaran relation
+        $keputusan->load('pendaftaran');
+
+        // Idempotent check
+        if ($keputusan->status_email === 'sent') {
+            Log::warning('[EmailService] Email BelumKompeten already sent, skipping', [
+                'keputusan_id' => $keputusan->id,
+            ]);
+            return false;
+        }
+
+        try {
+            Mail::to($keputusan->pendaftaran->email)->send(new BelumKompetenMail($keputusan));
+
+            $keputusan->update(['status_email' => 'sent']);
+
+            $this->logAction('email_sent_from_event', $keputusan, 'belum-kompeten', $keputusan->pendaftaran->email, [
+                'notes' => 'Email sent via Event-Listener (KeputusanBelumKompetenEvent)',
+            ]);
+
+            Log::info('[EmailService] BelumKompeten email sent successfully', [
+                'keputusan_id' => $keputusan->id,
+                'email' => $keputusan->pendaftaran->email,
+            ]);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('[EmailService] Failed to send BelumKompeten email', [
+                'keputusan_id' => $keputusan->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Note: SertifikatTerbitEvent belum diimplementasikan di flow saat ini
+     * Method ini reserved untuk future implementation
+     */
 }

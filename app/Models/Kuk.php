@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Kuk extends Model
 {
@@ -38,6 +39,14 @@ class Kuk extends Model
     public function unitKompetensi(): BelongsTo
     {
         return $this->belongsTo(UnitKompetensi::class, 'unit_kompetensi_id');
+    }
+
+    /**
+     * Get evidence files/links for this KUK.
+     */
+    public function evidences(): HasMany
+    {
+        return $this->hasMany(EvidenceKuk::class, 'kuk_id');
     }
 
     /**

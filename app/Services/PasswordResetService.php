@@ -109,6 +109,21 @@ class PasswordResetService
                 ]
             );
 
+            // Audit log - email sent confirmation
+            $this->logAudit(
+                AuditLog::ACTION_PASSWORD_RESET_EMAIL_SENT,
+                $targetUser,
+                "Email reset password dikirim ke '{$targetUser->email}' oleh admin '{$admin->name}'",
+                [
+                    'admin_id' => $admin->id,
+                    'target_user_id' => $targetUser->id,
+                    'target_user_email' => $targetUser->email,
+                    'expires_in_minutes' => self::TOKEN_EXPIRY_MINUTES,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ]
+            );
+
             return [
                 'success' => true,
                 'message' => 'Link reset password telah dikirim ke email ' . $this->maskEmail($targetUser->email)
@@ -169,14 +184,28 @@ class PasswordResetService
                     expiresInMinutes: self::TOKEN_EXPIRY_MINUTES
                 ));
 
-                // Audit log
+                // Audit log - password_reset_requested
                 $this->logAudit(
-                    'password_reset_requested',
+                    AuditLog::ACTION_PASSWORD_RESET_REQUESTED,
                     $user,
                     "User '{$user->name}' meminta reset password",
                     [
                         'user_id' => $user->id,
                         'user_email' => $user->email,
+                        'ip_address' => $request->ip(),
+                        'user_agent' => $request->userAgent(),
+                    ]
+                );
+
+                // Audit log - password_reset_email_sent
+                $this->logAudit(
+                    AuditLog::ACTION_PASSWORD_RESET_EMAIL_SENT,
+                    $user,
+                    "Email reset password dikirim ke '{$user->email}'",
+                    [
+                        'user_id' => $user->id,
+                        'user_email' => $user->email,
+                        'expires_in_minutes' => self::TOKEN_EXPIRY_MINUTES,
                         'ip_address' => $request->ip(),
                         'user_agent' => $request->userAgent(),
                     ]
@@ -255,8 +284,8 @@ class PasswordResetService
      */
     private function isAdminRole(User $user): bool
     {
-        $role = strtolower($user->role ?? '');
-        return in_array($role, ['super admin', 'admin']);
+        // Use RBAC methods instead of legacy role column
+        return $user->isSuperAdmin() || $user->isAdmin();
     }
 
     /**
