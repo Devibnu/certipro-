@@ -111,6 +111,20 @@ Route::post('/status-sertifikasi', [App\Http\Controllers\StatusPendaftaranContro
 Route::get('/api/status-sertifikasi', [App\Http\Controllers\StatusPendaftaranController::class, 'apiCheck'])->name('status-pendaftaran.api');
 
 // ============================================
+// LANJUT PENDAFTARAN (PUBLIC - SIGNED URL)
+// Routes untuk "Resume Pendaftaran" dari email
+// SECURITY: Menggunakan signed URL (30 hari expiry)
+// IDEMPOTENT: 1 Pra-Pendaftaran = 1 Pendaftaran (max)
+// ============================================
+Route::get('/pendaftaran/lanjut/{praPendaftaranId}', [App\Http\Controllers\ResumePendaftaranController::class, 'lanjutPendaftaran'])
+    ->name('pendaftaran.lanjut')
+    ->middleware('signed'); // CRITICAL: Validasi signed URL
+
+Route::get('/pendaftaran-sertifikasi/{id}/detail', [App\Http\Controllers\ResumePendaftaranController::class, 'showPendaftaran'])
+    ->name('pendaftaran-sertifikasi.public-detail')
+    ->middleware('signed'); // CRITICAL: Public access dengan signed URL
+
+// ============================================
 // PENDAFTARAN SERTIFIKASI (ASESI)
 // Routes untuk user login (asesi)
 // ============================================
@@ -363,7 +377,13 @@ Route::prefix('adminui')->name('adminui.')->group(function () {
     Route::get('pra-pendaftaran', [App\Http\Controllers\AdminUI\PraPendaftaranAdminController::class, 'index'])->name('pra-pendaftaran.index')->middleware('permission:pra_pendaftaran.view');
     Route::get('pra-pendaftaran/{id}', [App\Http\Controllers\AdminUI\PraPendaftaranAdminController::class, 'show'])->name('pra-pendaftaran.show')->middleware('permission:pra_pendaftaran.view');
     Route::patch('pra-pendaftaran/{id}/status', [App\Http\Controllers\AdminUI\PraPendaftaranAdminController::class, 'updateStatus'])->name('pra-pendaftaran.update-status')->middleware('permission:pra_pendaftaran.process');
-    Route::post('pra-pendaftaran/{id}/buat-pendaftaran', [App\Http\Controllers\AdminUI\PraPendaftaranAdminController::class, 'buatPendaftaranSertifikasi'])->name('pra-pendaftaran.buat-pendaftaran')->middleware('permission:pra_pendaftaran.process');
+    // ========================================================================
+    // ROUTE REMOVED: pra-pendaftaran/{id}/buat-pendaftaran
+    // ========================================================================
+    // Reason: Violates clean architecture - creation of Pendaftaran Sertifikasi
+    // should ONLY happen in PendaftaranSertifikasiAdminController
+    // Admin must explicitly go to Pendaftaran Sertifikasi module to assign skema
+    // ========================================================================
     
     // =====================================================
     // SKEMA SERTIFIKASI ROUTES - Permission-Based
@@ -387,6 +407,12 @@ Route::prefix('adminui')->name('adminui.')->group(function () {
     Route::get('pendaftaran-sertifikasi', [App\Http\Controllers\AdminUI\PendaftaranSertifikasiAdminController::class, 'index'])->name('pendaftaran-sertifikasi.index')->middleware('permission:pendaftaran_sertifikasi.view');
     Route::get('pendaftaran-sertifikasi/{id}', [App\Http\Controllers\AdminUI\PendaftaranSertifikasiAdminController::class, 'show'])->name('pendaftaran-sertifikasi.show')->middleware('permission:pendaftaran_sertifikasi.view');
     Route::get('pendaftaran-sertifikasi/{id}/audit-pdf', [App\Http\Controllers\AdminUI\PendaftaranSertifikasiAdminController::class, 'exportAuditEvidence'])->name('pendaftaran-sertifikasi.audit-pdf')->middleware('permission:pendaftaran_sertifikasi.view');
+    
+    // NEW: Create Pendaftaran from Pra-Pendaftaran with Skema Assignment
+    Route::post('pendaftaran-sertifikasi/create-from-pra/{praPendaftaranId}', [App\Http\Controllers\AdminUI\PendaftaranSertifikasiAdminController::class, 'createFromPraPendaftaran'])
+        ->name('pendaftaran-sertifikasi.create-from-pra')
+        ->middleware('permission:pendaftaran_sertifikasi.create');
+    
     Route::post('pendaftaran-sertifikasi/{id}/assign-skema', [App\Http\Controllers\AdminUI\PendaftaranSertifikasiAdminController::class, 'assignSkema'])->name('pendaftaran-sertifikasi.assign-skema')->middleware('permission:pendaftaran_sertifikasi.assign_skema');
     Route::patch('pendaftaran-sertifikasi/{id}/verifikasi', [App\Http\Controllers\AdminUI\PendaftaranSertifikasiAdminController::class, 'verifikasi'])->name('pendaftaran-sertifikasi.verifikasi')->middleware('permission:pendaftaran_sertifikasi.verify');
     Route::patch('pendaftaran-sertifikasi/{id}/tolak', [App\Http\Controllers\AdminUI\PendaftaranSertifikasiAdminController::class, 'tolak'])->name('pendaftaran-sertifikasi.tolak')->middleware('permission:pendaftaran_sertifikasi.verify');

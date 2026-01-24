@@ -45,11 +45,20 @@ class PraPendaftaranAdminController extends Controller
         
         $statusLabels = PraPendaftaran::statusLabels();
         $tipePesertaLabels = PraPendaftaran::tipePesertaLabels();
+        
+        // ========================================================================
+        // NO SKEMA LIST - Pra-Pendaftaran is NOT about skema assignment
+        // ========================================================================
+        // Removed: $skemaList = SkemaSertifikasi::orderBy('nama_skema')->get();
+        // Reason: Violates single responsibility principle
+        // Skema assignment happens in Pendaftaran Sertifikasi module ONLY
+        // ========================================================================
 
         return view('adminui.pra-pendaftaran.index', compact(
             'pendaftaran', 
             'statusLabels', 
             'tipePesertaLabels'
+            // Removed: 'skemaList' - NO skema logic in pra-pendaftaran
         ));
     }
 
@@ -80,20 +89,54 @@ class PraPendaftaranAdminController extends Controller
     }
 
     /**
-     * Update status pra-pendaftaran
+     * ========================================================================
+     * UPDATE STATUS - ONLY 3 VALID TRANSITIONS (GUARD CONDITIONS)
+     * ========================================================================
+     * Valid transitions:
+     * 1. MENUNGGU_VERIFIKASI → DITERIMA (Admin approves)
+     * 2. MENUNGGU_VERIFIKASI → DITOLAK (Admin rejects)
+     * 
+     * TIDAK BOLEH:
+     * ❌ Auto-create pendaftaran sertifikasi
+     * ❌ Pilih skema di sini
+     * ❌ Ubah ke status SIAP_ASESMEN
+     * ❌ Ada status DIPROSES (ambiguous)
+     * ========================================================================
      */
     public function updateStatus(Request $request, $id)
     {
+        // ========================================================================
+        // VALIDATION: ONLY 3 VALID STATUSES
+        // ========================================================================
         $request->validate([
-            'status' => 'required|in:baru,diproses,diterima,ditolak',
+            'status' => 'required|in:menunggu_verifikasi,diterima,ditolak',
             'alasan_penolakan' => 'required_if:status,ditolak|nullable|string|max:1000',
         ], [
+            'status.required' => 'Status wajib dipilih',
+            'status.in' => 'Status tidak valid. Hanya boleh: MENUNGGU_VERIFIKASI, DITERIMA, atau DITOLAK',
             'alasan_penolakan.required_if' => 'Alasan penolakan wajib diisi jika status DITOLAK.',
         ]);
 
         $data = PraPendaftaran::findOrFail($id);
         $oldStatus = $data->status;
         $newStatus = $request->status;
+        
+        // ========================================================================
+        // GUARD 1: Prevent invalid status transitions
+        // ========================================================================
+        if ($data->status === PraPendaftaran::STATUS_DITERIMA && $newStatus !== PraPendaftaran::STATUS_DITERIMA) {
+            return redirect()->back()->with('error', 
+                '❌ Pra-pendaftaran yang sudah DITERIMA tidak dapat diubah statusnya. '
+                . 'Jika ingin membatalkan, lakukan di modul Pendaftaran Sertifikasi.'
+            );
+        }
+        
+        if ($data->status === PraPendaftaran::STATUS_DITOLAK && $newStatus !== PraPendaftaran::STATUS_DITOLAK) {
+            return redirect()->back()->with('error', 
+                '❌ Pra-pendaftaran yang sudah DITOLAK tidak dapat diubah statusnya. '
+                . 'Peserta harus submit ulang pra-pendaftaran baru.'
+            );
+        }
         
         // Prepare update data
         $updateData = [
@@ -110,112 +153,74 @@ class PraPendaftaranAdminController extends Controller
             AuditLog::log(
                 AuditLog::ACTION_REJECT,
                 AuditLog::MODULE_PRA_PENDAFTARAN,
-                "Admin memberikan alasan penolakan untuk pra-pendaftaran: {$data->nama_lengkap}",
+                "Admin TOLAK pra-pendaftaran: {$data->nama_lengkap}. Alasan: {$request->alasan_penolakan}",
                 $data,
                 ['alasan_penolakan' => $data->alasan_penolakan],
                 ['alasan_penolakan' => $request->alasan_penolakan],
                 [
-                    'event' => 'admin_rejection_reason',
+                    'event' => 'admin_rejection',
                     'nomor_pra_pendaftaran' => $data->nomor_pra_pendaftaran,
                     'alasan_penolakan' => $request->alasan_penolakan,
                 ]
             );
         }
         
-        // Update the record (this will trigger Observer for status change notification)
+        // Update the record (this will trigger Observer for email notification)
         $data->update($updateData);
 
-        // Jika status berubah menjadi DITERIMA, otomatis buat pendaftaran sertifikasi
-        if ($newStatus === PraPendaftaran::STATUS_DITERIMA && $oldStatus !== PraPendaftaran::STATUS_DITERIMA) {
-            if (!$data->hasPendaftaranSertifikasi()) {
-                return $this->buatPendaftaranSertifikasi($id);
-            }
-        }
-
-        return redirect()->back()->with('success', 'Status berhasil diperbarui menjadi ' . strtoupper($newStatus));
-    }
-
-    /**
-     * Buat pendaftaran sertifikasi dari pra-pendaftaran
-     */
-    public function buatPendaftaranSertifikasi($id)
-    {
-        $praPendaftaran = PraPendaftaran::findOrFail($id);
-
-        // Validasi status harus DITERIMA
-        if ($praPendaftaran->status !== PraPendaftaran::STATUS_DITERIMA) {
-            return redirect()->back()->with('error', 'Hanya pra-pendaftaran dengan status DITERIMA yang dapat dibuatkan pendaftaran sertifikasi.');
-        }
-
-        // Cek apakah sudah ada pendaftaran sertifikasi
-        if ($praPendaftaran->hasPendaftaranSertifikasi()) {
-            return redirect()->back()->with('error', 'Pendaftaran sertifikasi sudah dibuat untuk pra-pendaftaran ini.');
-        }
-
-        try {
-            DB::beginTransaction();
-
-            // Generate nomor pendaftaran: REG + YYYY + XXXX
-            $year = date('Y');
-            $lastNumber = PendaftaranSertifikasi::whereYear('created_at', $year)
-                ->count() + 1;
-            $nomorPendaftaran = 'REG' . $year . str_pad($lastNumber, 4, '0', STR_PAD_LEFT);
-
-            // Buat record pendaftaran sertifikasi
-            $pendaftaran = PendaftaranSertifikasi::create([
-                'pra_pendaftaran_id' => $praPendaftaran->id,
-                'nama_lengkap' => $praPendaftaran->nama_lengkap,
-                'email' => $praPendaftaran->email,
-                'no_hp' => $praPendaftaran->no_hp,
-                'tipe_peserta' => $praPendaftaran->tipe_peserta,
-                'nik' => $praPendaftaran->nik,
-                'nim' => $praPendaftaran->nim,
-                'institusi' => $praPendaftaran->institusi,
-                'nomor_pendaftaran' => $nomorPendaftaran,
-                'tanggal_daftar' => now(),
-                'status' => 'draft',
-            ]);
-
-            // Log the creation of pendaftaran sertifikasi
-            AuditLog::log(
-                AuditLog::ACTION_CREATE,
-                AuditLog::MODULE_PENDAFTARAN,
-                "Pendaftaran sertifikasi dibuat dari pra-pendaftaran: {$praPendaftaran->nomor_pra_pendaftaran}",
-                $pendaftaran,
-                null,
-                $pendaftaran->toArray(),
-                [
-                    'event' => 'pendaftaran_created_from_pra',
-                    'nomor_pra_pendaftaran' => $praPendaftaran->nomor_pra_pendaftaran,
-                    'nomor_pendaftaran' => $nomorPendaftaran,
-                ]
+        // ========================================================================
+        // GUARD 2: NO AUTO-CREATE pendaftaran sertifikasi
+        // ========================================================================
+        // Prinsip: Pra-Pendaftaran ≠ Pendaftaran Sertifikasi
+        // Jika status DITERIMA:
+        //   - STOP process di sini
+        //   - Email: "Menunggu penetapan skema"
+        //   - Admin harus ke modul Pendaftaran Sertifikasi untuk assign skema
+        // ========================================================================
+        
+        if ($newStatus === PraPendaftaran::STATUS_DITERIMA) {
+            return redirect()->back()->with('success', 
+                '✅ Pra-Pendaftaran DITERIMA. '
+                . 'Langkah selanjutnya: Buka modul "Pendaftaran Sertifikasi" untuk menetapkan skema sertifikasi. '
+                . 'Email pemberitahuan telah dikirim ke peserta.'
             );
-
-            DB::commit();
-
-            return redirect()
-                ->route('adminui.pendaftaran-sertifikasi.show', $pendaftaran->id)
-                ->with('success', 'Pendaftaran sertifikasi berhasil dibuat dengan nomor: ' . $nomorPendaftaran);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            
-            // Log the error
-            AuditLog::log(
-                AuditLog::ACTION_CREATE,
-                AuditLog::MODULE_PENDAFTARAN,
-                "Gagal membuat pendaftaran sertifikasi dari pra-pendaftaran: {$praPendaftaran->nomor_pra_pendaftaran}",
-                $praPendaftaran,
-                null,
-                null,
-                [
-                    'event' => 'pendaftaran_creation_failed',
-                    'nomor_pra_pendaftaran' => $praPendaftaran->nomor_pra_pendaftaran,
-                    'error' => $e->getMessage(),
-                ]
-            );
-            
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
+        
+        if ($newStatus === PraPendaftaran::STATUS_DITOLAK) {
+            return redirect()->back()->with('success', 
+                '❌ Pra-Pendaftaran DITOLAK. Email pemberitahuan dengan alasan penolakan telah dikirim ke peserta.'
+            );
+        }
+
+        return redirect()->back()->with('success', 'Status berhasil diperbarui.');
     }
+    
+    // ========================================================================
+    // METHOD buatPendaftaranSertifikasi() REMOVED
+    // ========================================================================
+    // Reason: Violates clean architecture (separation of concerns)
+    // 
+    // Pra-Pendaftaran module responsibility:
+    //   - Verify documents only
+    //   - Update status (DITERIMA/DITOLAK)
+    //   - Send email notification
+    // 
+    // Pendaftaran Sertifikasi module responsibility:
+    //   - Create pendaftaran record from approved Pra-Pendaftaran
+    //   - Assign skema sertifikasi
+    //   - Generate nomor pendaftaran
+    //   - Create user account if needed
+    // 
+    // Admin workflow:
+    //   1. Verify Pra-Pendaftaran (this module)
+    //   2. Go to Pendaftaran Sertifikasi module
+    //   3. Click "Buat dari Pra-Pendaftaran"
+    //   4. Select skema
+    //   5. Submit
+    // 
+    // This enforces explicit skema assignment and prevents:
+    //   ❌ Auto-create without skema
+    //   ❌ Ambiguous redirect flows
+    //   ❌ Admin confusion about "where to assign skema?"
+    // ========================================================================
 }
