@@ -41,13 +41,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role_id',       // NEW: FK to roles table (primary)
-        'role',          // Legacy field - kept for backward compatibility
-        'permissions',   // Legacy field - kept for backward compatibility
-        'photo',
+        'role_id',       // FK to roles table (primary RBAC)
         'phone',
         'location',
         'about_me',
+        'avatar',
     ];
 
     /**
@@ -67,7 +65,6 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'permissions' => 'array',
         'role_id' => 'integer',
     ];
 
@@ -78,6 +75,10 @@ class User extends Authenticatable
     /**
      * Get the user's role (ONE-TO-ONE via role_id FK)
      * PRIMARY relationship for RBAC
+     * 
+     * Note: Method name is 'userRole()' instead of 'role()' because
+     * there's a legacy 'role' column (string) in the users table.
+     * Using 'role()' would conflict with the column accessor.
      */
     public function userRole(): BelongsTo
     {
@@ -99,14 +100,26 @@ class User extends Authenticatable
     // =========================================================================
 
     /**
-     * Check if user has a specific role
+     * Check if user has a specific role (or any of given roles if array)
      * Priority: role_id FK > user_role pivot > legacy role column
+     * 
+     * @param string|array $roleName Single role name or array of role names
      */
-    public function hasRole(string $roleName): bool
+    public function hasRole(string|array $roleName): bool
     {
+        // Handle array input - delegate to hasAnyRole
+        if (is_array($roleName)) {
+            return $this->hasAnyRole($roleName);
+        }
+
         // 1. PRIMARY: Check role_id FK (new system)
-        if ($this->role_id && $this->userRole) {
-            if ($this->userRole->name === $roleName) {
+        if ($this->role_id) {
+            // Load relationship if not already loaded
+            if (!$this->relationLoaded('userRole')) {
+                $this->load('userRole');
+            }
+            
+            if ($this->userRole && $this->userRole->name === $roleName) {
                 return true;
             }
         }
