@@ -68,8 +68,8 @@
       </li>
       @endif
 
-      {{-- CMS LANDING PAGE - Only for users with cms.view permission --}}
-      @if(auth()->user()->hasPermission('cms.view'))
+      {{-- CMS LANDING PAGE - Only for Super Admin --}}
+      @if(auth()->user()->isSuperAdmin())
       <li class="nav-item">
         <a data-bs-toggle="collapse" href="#cmsLandingSubmenu" class="nav-link {{ (Request::is('adminui/halaman*') || Request::is('adminui/bagian-halaman*') ? '' : 'collapsed') }}" aria-controls="cmsLandingSubmenu" role="button" aria-expanded="{{ (Request::is('adminui/halaman*') || Request::is('adminui/bagian-halaman*') ? 'true' : 'false') }}">
           <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
@@ -96,15 +96,13 @@
       </li>
       @endif
 
-      {{-- MASTER DATA SECTION --}}
-      @if(auth()->user()->hasPermission('pra_pendaftaran.view') || auth()->user()->hasPermission('pendaftaran_sertifikasi.view') || auth()->user()->hasPermission('skema_sertifikasi.view') || auth()->user()->hasPermission('unit_kompetensi.view') || auth()->user()->hasPermission('kuk.view') || auth()->user()->hasPermission('asesmen.view') || auth()->user()->hasPermission('keputusan.view') || auth()->user()->hasPermission('sertifikat.view'))
+      {{-- MASTER DATA SECTION - Show for Super Admin and Admin --}}
+      @if(auth()->user()->isSuperAdmin() || auth()->user()->isAdmin())
       <li class="nav-item mt-3">
         <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Master Data</h6>
       </li>
-      @endif
-
-      {{-- PRA-PENDAFTARAN - Only for users with pra_pendaftaran.view permission --}}
-      @if(auth()->user()->hasPermission('pra_pendaftaran.view'))
+      
+      {{-- PRA-PENDAFTARAN - All Admins --}}
       <li class="nav-item">
         <a class="nav-link {{ (Request::is('adminui/pra-pendaftaran*') ? 'active' : '') }}" href="{{ route('adminui.pra-pendaftaran.index') }}">
           <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
@@ -113,10 +111,8 @@
           <span class="nav-link-text ms-1">Pra-Pendaftaran</span>
         </a>
       </li>
-      @endif
 
-      {{-- PENDAFTARAN SERTIFIKASI - For users with pendaftaran_sertifikasi.view --}}
-      @if(auth()->user()->hasPermission('pendaftaran_sertifikasi.view'))
+      {{-- PENDAFTARAN SERTIFIKASI - All Admins --}}
       <li class="nav-item">
         <a class="nav-link {{ (Request::is('adminui/pendaftaran-sertifikasi*') ? 'active' : '') }}" href="{{ route('adminui.pendaftaran-sertifikasi.index') }}">
           <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
@@ -125,10 +121,8 @@
           <span class="nav-link-text ms-1">Pendaftaran Sertifikasi</span>
         </a>
       </li>
-      @endif
 
-      {{-- SKEMA SERTIFIKASI - For users with skema_sertifikasi.view --}}
-      @if(auth()->user()->hasPermission('skema_sertifikasi.view'))
+      {{-- SKEMA SERTIFIKASI - All Admins --}}
       <li class="nav-item">
         <a class="nav-link {{ (Request::is('adminui/skema-sertifikasi*') ? 'active' : '') }}" href="{{ route('adminui.skema-sertifikasi.index') }}">
           <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
@@ -137,10 +131,8 @@
           <span class="nav-link-text ms-1">Skema Sertifikasi</span>
         </a>
       </li>
-      @endif
 
-      {{-- UNIT KOMPETENSI - For users with unit_kompetensi.view --}}
-      @if(auth()->user()->hasPermission('unit_kompetensi.view'))
+      {{-- UNIT KOMPETENSI - All Admins --}}
       <li class="nav-item">
         <a class="nav-link {{ (Request::is('adminui/unit-kompetensi*') ? 'active' : '') }}" href="{{ route('adminui.unit-kompetensi.index') }}">
           <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
@@ -149,10 +141,8 @@
           <span class="nav-link-text ms-1">Unit Kompetensi</span>
         </a>
       </li>
-      @endif
 
-      {{-- KUK (KRITERIA UNJUK KERJA) - For users with kuk.view --}}
-      @if(auth()->user()->hasPermission('kuk.view'))
+      {{-- KUK (KRITERIA UNJUK KERJA) - All Admins --}}
       <li class="nav-item">
         <a class="nav-link {{ (Request::is('adminui/kuk*') ? 'active' : '') }}" href="{{ route('adminui.kuk.index') }}">
           <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
@@ -161,10 +151,8 @@
           <span class="nav-link-text ms-1">KUK</span>
         </a>
       </li>
-      @endif
 
-      {{-- ASESMEN - For users with asesmen.view permission --}}
-      @if(auth()->user()->hasPermission('asesmen.view'))
+      {{-- ASESMEN - All Admins --}}
       <li class="nav-item">
         <a class="nav-link {{ (Request::is('adminui/asesmen*') ? 'active' : '') }}" href="{{ route('adminui.asesmen.index') }}">
           <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
@@ -173,10 +161,8 @@
           <span class="nav-link-text ms-1">Asesmen</span>
         </a>
       </li>
-      @endif
 
-      {{-- KEPUTUSAN SERTIFIKASI - For users with keputusan_sertifikasi.view permission --}}
-      @if(auth()->user()->hasPermission('keputusan_sertifikasi.view'))
+      {{-- KEPUTUSAN SERTIFIKASI - All Admins --}}
       <li class="nav-item">
         <a class="nav-link {{ (Request::is('adminui/keputusan*') ? 'active' : '') }}" href="{{ route('adminui.keputusan.index') }}">
           <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
@@ -185,10 +171,8 @@
           <span class="nav-link-text ms-1">Keputusan Sertifikasi</span>
         </a>
       </li>
-      @endif
 
-      {{-- SERTIFIKAT - For users with sertifikat.view permission --}}
-      @if(auth()->user()->hasPermission('sertifikat.view'))
+      {{-- SERTIFIKAT - All Admins --}}
       <li class="nav-item">
         <a class="nav-link {{ (Request::is('adminui/sertifikat*') ? 'active' : '') }}" href="{{ route('adminui.sertifikat.index') }}">
           <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
