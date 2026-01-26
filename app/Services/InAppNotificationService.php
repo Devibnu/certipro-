@@ -122,10 +122,13 @@ class InAppNotificationService
      */
     public function notifyPraPendaftaranBaru(int $praPendaftaranId, string $asesiName): void
     {
+        // Decode HTML entities to prevent &quot; display issues
+        $cleanName = html_entity_decode($asesiName, ENT_QUOTES, 'UTF-8');
+        
         $this->sendToAllAdmins(
             InAppNotification::TYPE_PENDAFTARAN_BARU,
             'Pra-Pendaftaran Baru',
-            "Asesi baru: {$asesiName}",
+            "Asesi baru: {$cleanName}",
             'fas fa-clipboard-list',
             'warning',
             'adminui.pra-pendaftaran.show',

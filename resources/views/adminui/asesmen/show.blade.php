@@ -3,14 +3,39 @@
 @section('title', 'Detail Asesmen' . (systemCompanyName() ? ' - ' . systemCompanyName() . ' Admin' : ' - Admin'))
 
 @php
-    // Check permissions for evidence
-    $canUploadEvidence = auth()->user()->can('evidence.upload');
-    $canViewEvidence = auth()->user()->can('evidence.view');
-    $canDeleteEvidence = auth()->user()->can('evidence.delete');
-    $isLocked = $asesmen->isLocked();
+    // ============================================================
+    // DEFENSIVE MODE: Validate all required data before rendering
+    // ============================================================
     
-    // Preload evidence per KUK
-    $evidenceByKuk = $asesmen->evidences->groupBy('kuk_id');
+    // Check permissions for evidence (with fallback)
+    try {
+        $canUploadEvidence = auth()->check() && auth()->user()->can('evidence.upload');
+        $canViewEvidence = auth()->check() && auth()->user()->can('evidence.view');
+        $canDeleteEvidence = auth()->check() && auth()->user()->can('evidence.delete');
+    } catch (\Throwable $e) {
+        $canUploadEvidence = false;
+        $canViewEvidence = false;
+        $canDeleteEvidence = false;
+        \Log::error('[BLADE ERROR] Permission check failed', ['error' => $e->getMessage()]);
+    }
+    
+    // Safe access to isLocked method
+    try {
+        $isLocked = $asesmen && method_exists($asesmen, 'isLocked') ? $asesmen->isLocked() : false;
+    } catch (\Throwable $e) {
+        $isLocked = false;
+        \Log::error('[BLADE ERROR] isLocked check failed', ['error' => $e->getMessage()]);
+    }
+    
+    // Preload evidence per KUK with error handling
+    try {
+        $evidenceByKuk = ($asesmen && $asesmen->evidences) 
+            ? $asesmen->evidences->groupBy('kuk_id') 
+            : collect();
+    } catch (\Throwable $e) {
+        $evidenceByKuk = collect();
+        \Log::error('[BLADE ERROR] Evidence grouping failed', ['error' => $e->getMessage()]);
+    }
 @endphp
 
 @section('content')
@@ -49,65 +74,102 @@
                     <div class="row">
                         <div class="col-md-6">
                             <h6 class="text-uppercase text-secondary text-xs font-weight-bolder mb-3">Informasi Pendaftaran</h6>
+                            @if($asesmen->pendaftaran)
                             <table class="table table-sm table-borderless">
                                 <tr>
                                     <td class="text-secondary" width="150">No. Pendaftaran</td>
-                                    <td><strong>{{ $asesmen->pendaftaran->nomor_pendaftaran }}</strong></td>
+                                    <td><strong>{{ $asesmen->pendaftaran->nomor_pendaftaran ?? '-' }}</strong></td>
                                 </tr>
                                 <tr>
                                     <td class="text-secondary">Nama Asesi</td>
-                                    <td><strong>{{ $asesmen->pendaftaran->asesi_name }}</strong></td>
+                                    <td><strong>{{ $asesmen->pendaftaran->asesi_name ?? '-' }}</strong></td>
                                 </tr>
                                 <tr>
                                     <td class="text-secondary">Email</td>
-                                    <td>{{ $asesmen->pendaftaran->asesi_email }}</td>
+                                    <td>{{ $asesmen->pendaftaran->asesi_email ?? '-' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="text-secondary">Skema</td>
                                     <td>
-                                        <span class="badge bg-gradient-info">{{ $asesmen->pendaftaran->skemaSertifikasi->kode_skema ?? '-' }}</span>
-                                        {{ $asesmen->pendaftaran->skemaSertifikasi->nama_skema ?? '-' }}
+                                        @if(optional($asesmen->pendaftaran)->skemaSertifikasi)
+                                            <span class="badge bg-gradient-info">{{ $asesmen->pendaftaran->skemaSertifikasi->kode_skema ?? '-' }}</span>
+                                            {{ $asesmen->pendaftaran->skemaSertifikasi->nama_skema ?? '-' }}
+                                        @else
+                                            <span class="text-muted">Skema belum ditentukan</span>
+                                        @endif
                                     </td>
                                 </tr>
                                 <tr>
                                     <td class="text-secondary">Status Pendaftaran</td>
                                     <td>
-                                        <span class="badge badge-sm {{ $asesmen->pendaftaran->status_badge }}">
-                                            {{ $asesmen->pendaftaran->status_label }}
+                                        <span class="badge badge-sm {{ $asesmen->pendaftaran->status_badge ?? 'bg-gradient-secondary' }}">
+                                            {{ $asesmen->pendaftaran->status_label ?? 'N/A' }}
                                         </span>
                                     </td>
                                 </tr>
                             </table>
+                            @else
+                            <div class="alert alert-warning" role="alert">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Data pendaftaran tidak tersedia.
+                            </div>
+                            @endif
                         </div>
                         <div class="col-md-6">
                             <h6 class="text-uppercase text-secondary text-xs font-weight-bolder mb-3">Informasi Asesmen</h6>
                             <table class="table table-sm table-borderless">
                                 <tr>
                                     <td class="text-secondary" width="150">Asesor</td>
-                                    <td><strong>{{ $asesmen->asesor->name ?? '-' }}</strong></td>
+                                    <td><strong>{{ optional($asesmen->asesor)->name ?? '-' }}</strong></td>
                                 </tr>
                                 <tr>
                                     <td class="text-secondary">Tanggal Asesmen</td>
-                                    <td>{{ $asesmen->tanggal_asesmen->format('d F Y') }}</td>
+                                    <td>{{ optional($asesmen->tanggal_asesmen)->format('d F Y') ?? '-' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="text-secondary">Metode Asesmen</td>
                                     <td>
-                                        <span class="badge bg-gradient-secondary">{{ $asesmen->metode_label }}</span>
+                                        @php
+                                            try {
+                                                $metodeLabel = $asesmen->metode_label ?? 'N/A';
+                                            } catch (\Throwable $e) {
+                                                $metodeLabel = 'N/A';
+                                            }
+                                        @endphp
+                                        <span class="badge bg-gradient-secondary">{{ $metodeLabel }}</span>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td class="text-secondary">Status Asesmen</td>
                                     <td>
-                                        <span class="badge badge-sm {{ $asesmen->isSelesai() ? 'bg-gradient-success' : 'bg-gradient-warning' }}">
-                                            {{ $asesmen->status_label }}
+                                        @php
+                                            try {
+                                                $isSelesai = method_exists($asesmen, 'isSelesai') && $asesmen->isSelesai();
+                                                $statusLabel = $asesmen->status_label ?? 'N/A';
+                                                $badgeClass = $isSelesai ? 'bg-gradient-success' : 'bg-gradient-warning';
+                                            } catch (\Throwable $e) {
+                                                $isSelesai = false;
+                                                $statusLabel = 'N/A';
+                                                $badgeClass = 'bg-gradient-secondary';
+                                            }
+                                        @endphp
+                                        <span class="badge badge-sm {{ $badgeClass }}">
+                                            {{ $statusLabel }}
                                         </span>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td class="text-secondary">Hasil</td>
                                     <td>
-                                        @if($asesmen->isAllKompeten())
+                                        @php
+                                            try {
+                                                $isAllKompeten = method_exists($asesmen, 'isAllKompeten') && $asesmen->isAllKompeten();
+                                            } catch (\Throwable $e) {
+                                                $isAllKompeten = false;
+                                                \Log::error('[BLADE ERROR] isAllKompeten check failed', ['error' => $e->getMessage()]);
+                                            }
+                                        @endphp
+                                        @if($isAllKompeten)
                                             <span class="badge badge-lg bg-gradient-success">
                                                 <i class="fas fa-check-circle me-1"></i> KOMPETEN
                                             </span>
@@ -140,13 +202,36 @@
                     <p class="text-sm text-secondary mb-0">Detail penilaian untuk setiap Kriteria Unjuk Kerja (KUK)</p>
                 </div>
                 <div class="card-body">
+                    @if($detailsByUnit && $detailsByUnit->count() > 0)
                     <div class="accordion" id="accordionUnits">
                         @php $unitIndex = 0; @endphp
                         @foreach($detailsByUnit as $unitId => $details)
                         @php 
-                            $unit = $details->first()->unitKompetensi;
-                            $allKompeten = $details->every(fn($d) => $d->isKompeten());
+                            try {
+                                $unit = optional($details->first())->unitKompetensi;
+                                
+                                // Safe check for allKompeten
+                                $allKompeten = false;
+                                try {
+                                    $allKompeten = $details->every(function($d) {
+                                        return method_exists($d, 'isKompeten') && $d->isKompeten();
+                                    });
+                                } catch (\Throwable $e) {
+                                    \Log::error('[BLADE ERROR] Failed to check kompeten status', [
+                                        'unit_id' => $unitId,
+                                        'error' => $e->getMessage()
+                                    ]);
+                                }
+                            } catch (\Throwable $e) {
+                                $unit = null;
+                                $allKompeten = false;
+                                \Log::error('[BLADE ERROR] Failed to process unit', [
+                                    'unit_id' => $unitId,
+                                    'error' => $e->getMessage()
+                                ]);
+                            }
                         @endphp
+                        @if($unit)
                         <div class="accordion-item border mb-3 rounded">
                             <h2 class="accordion-header" id="heading{{ $unitId }}">
                                 <button class="accordion-button {{ $unitIndex > 0 ? 'collapsed' : '' }}" type="button" 
@@ -154,8 +239,8 @@
                                         aria-expanded="{{ $unitIndex == 0 ? 'true' : 'false' }}" aria-controls="collapse{{ $unitId }}">
                                     <div class="d-flex align-items-center w-100">
                                         <div>
-                                            <span class="badge bg-gradient-primary me-2">{{ $unit->kode_unit }}</span>
-                                            <strong>{{ $unit->judul_unit }}</strong>
+                                            <span class="badge bg-gradient-primary me-2">{{ $unit->kode_unit ?? 'N/A' }}</span>
+                                            <strong>{{ $unit->judul_unit ?? 'Unit Kompetensi' }}</strong>
                                         </div>
                                         <div class="ms-auto me-3">
                                             @if($allKompeten)
@@ -196,23 +281,55 @@
                                             <tbody>
                                                 @foreach($details as $detail)
                                                 @php
-                                                    $kukEvidence = $evidenceByKuk->get($detail->kuk_id, collect());
+                                                    try {
+                                                        $kuk = $detail->kuk ?? null;
+                                                        $kukEvidence = $evidenceByKuk->get($detail->kuk_id ?? 0, collect());
+                                                        
+                                                        // Safe badge access
+                                                        $hasilBadge = 'bg-gradient-secondary';
+                                                        $hasilLabel = 'N/A';
+                                                        $isKompetenCheck = false;
+                                                        
+                                                        try {
+                                                            if (isset($detail->hasil_badge)) {
+                                                                $hasilBadge = $detail->hasil_badge;
+                                                            }
+                                                            if (isset($detail->hasil_label)) {
+                                                                $hasilLabel = $detail->hasil_label;
+                                                            }
+                                                            if (method_exists($detail, 'isKompeten')) {
+                                                                $isKompetenCheck = $detail->isKompeten();
+                                                            }
+                                                        } catch (\Throwable $e) {
+                                                            \Log::error('[BLADE ERROR] Detail badge access failed', [
+                                                                'detail_id' => $detail->id ?? 'unknown',
+                                                                'error' => $e->getMessage()
+                                                            ]);
+                                                        }
+                                                    } catch (\Throwable $e) {
+                                                        $kuk = null;
+                                                        $kukEvidence = collect();
+                                                        \Log::error('[BLADE ERROR] Detail processing failed', [
+                                                            'error' => $e->getMessage()
+                                                        ]);
+                                                    }
                                                 @endphp
+                                                @if($kuk)
                                                 <tr>
                                                     <td class="align-middle">
-                                                        <span class="text-sm font-weight-bold">{{ $detail->kuk->kode_kuk }}</span>
+                                                        <span class="text-sm font-weight-bold">{{ $kuk->kode_kuk ?? 'N/A' }}</span>
                                                     </td>
                                                     <td class="align-middle">
-                                                        <p class="text-sm mb-0">{{ $detail->kuk->deskripsi }}</p>
+                                                        <p class="text-sm mb-0">{{ $kuk->deskripsi ?? 'Deskripsi tidak tersedia' }}</p>
                                                     </td>
                                                     <td class="align-middle text-center">
-                                                        <span class="badge {{ $detail->hasil_badge }}">
-                                                            @if($detail->isKompeten())
+                                                        <span class="badge {{ $hasilBadge }}">
+                                                            @if($isKompetenCheck)
                                                                 <i class="fas fa-check me-1"></i>
                                                             @else
                                                                 <i class="fas fa-times me-1"></i>
                                                             @endif
-                                                            {{ $detail->hasil_label }}
+                                                            {{ $hasilLabel }}
                                                         </span>
                                                     </td>
                                                     <td class="align-middle">
@@ -220,18 +337,36 @@
                                                     </td>
                                                     @if($canViewEvidence)
                                                     <td class="align-middle">
-                                                        @include('adminui.asesmen.partials.evidence-kuk', [
-                                                            'asesmenId' => $asesmen->id,
-                                                            'kukId' => $detail->kuk_id,
-                                                            'kukKode' => $detail->kuk->kode_kuk,
-                                                            'evidences' => $kukEvidence,
-                                                            'isLocked' => $isLocked,
-                                                            'canUpload' => $canUploadEvidence,
-                                                            'canDelete' => $canDeleteEvidence,
-                                                        ])
+                                                        @php
+                                                            try {
+                                                                $includeData = [
+                                                                    'asesmenId' => $asesmen->id ?? 0,
+                                                                    'kukId' => $detail->kuk_id ?? 0,
+                                                                    'kukKode' => optional($kuk)->kode_kuk ?? 'N/A',
+                                                                    'evidences' => $kukEvidence,
+                                                                    'isLocked' => $isLocked,
+                                                                    'canUpload' => $canUploadEvidence,
+                                                                    'canDelete' => $canDeleteEvidence,
+                                                                ];
+                                                            } catch (\Throwable $e) {
+                                                                $includeData = [];
+                                                            }
+                                                        @endphp
+                                                        @if(!empty($includeData))
+                                                            @include('adminui.asesmen.partials.evidence-kuk', $includeData)
+                                                        @else
+                                                            <span class="text-muted">-</span>
+                                                        @endif
                                                     </td>
                                                     @endif
                                                 </tr>
+                                                @else
+                                                <tr>
+                                                    <td colspan="{{ $canViewEvidence ? 5 : 4 }}" class="text-center text-muted py-2">
+                                                        <small><i class="fas fa-exclamation-circle me-1"></i> Data KUK tidak tersedia</small>
+                                                    </td>
+                                                </tr>
+                                                @endif
                                                 @endforeach
                                             </tbody>
                                         </table>
@@ -240,13 +375,22 @@
                             </div>
                         </div>
                         @php $unitIndex++; @endphp
+                        @else
+                        <div class="alert alert-warning mb-3" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Data unit kompetensi tidak tersedia untuk detail penilaian ini.
+                        </div>
+                        @endif
                         @endforeach
                     </div>
-
-                    @if($detailsByUnit->isEmpty())
-                    <div class="text-center py-4">
-                        <i class="fas fa-exclamation-triangle text-warning fa-3x mb-3"></i>
-                        <p class="text-sm">Tidak ada detail penilaian.</p>
+                    @else
+                    {{-- Empty state jika tidak ada details --}}
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox text-secondary fa-4x mb-3"></i>
+                        <h5 class="text-secondary">Belum Ada Detail Penilaian</h5>
+                        <p class="text-sm text-muted">
+                            Detail penilaian KUK belum tersedia atau belum lengkap untuk asesmen ini.
+                        </p>
                     </div>
                     @endif
                 </div>

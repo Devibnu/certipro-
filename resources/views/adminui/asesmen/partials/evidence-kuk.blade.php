@@ -19,7 +19,7 @@ Variables: $asesmenId, $kukId, $kukKode, $isLocked
         <span class="text-xs text-uppercase text-secondary font-weight-bold">
             <i class="fas fa-paperclip me-1"></i> Evidence / Bukti
         </span>
-        @if(!$isLocked && auth()->user()->hasPermission('evidence.upload'))
+        @if(!$isLocked && auth()->check() && auth()->user()->hasPermission('evidence.upload'))
         <div class="btn-group btn-group-sm">
             <button type="button" class="btn btn-outline-primary btn-xs" 
                     onclick="showUploadModal({{ $asesmenId }}, {{ $kukId }}, '{{ $kukKode }}')"
@@ -67,7 +67,7 @@ Variables: $asesmenId, $kukId, $kukKode, $isLocked
                     Oleh {{ $evidence->uploader?->name ?? 'Unknown' }} • {{ $evidence->created_at->format('d M Y H:i') }}
                 </span>
             </div>
-            @if(!$isLocked && auth()->user()->hasPermission('evidence.delete'))
+            @if(!$isLocked && auth()->check() && auth()->user()->hasPermission('evidence.delete'))
             <div class="evidence-actions ms-2">
                 <button type="button" class="btn btn-link text-danger btn-sm p-0" 
                         onclick="deleteEvidence({{ $evidence->id }}, '{{ $evidence->display_name }}')"

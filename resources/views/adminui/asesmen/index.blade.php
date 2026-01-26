@@ -96,22 +96,22 @@
                                             <td>
                                                 <div class="d-flex px-3 py-1">
                                                     <div class="d-flex flex-column justify-content-center">
-                                                        <h6 class="mb-0 text-sm font-weight-bold">{{ $item->nomor_pendaftaran }}</h6>
+                                                        <h6 class="mb-0 text-sm font-weight-bold">{{ $item->nomor_pendaftaran ?? '-' }}</h6>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td>
-                                                <p class="text-sm font-weight-bold mb-0">{{ $item->asesi_name }}</p>
-                                                <p class="text-xs text-secondary mb-0">{{ $item->asesi_email }}</p>
+                                                <p class="text-sm font-weight-bold mb-0">{{ $item->asesi_name ?? '-' }}</p>
+                                                <p class="text-xs text-secondary mb-0">{{ $item->asesi_email ?? '-' }}</p>
                                             </td>
                                             <td>
                                                 <span class="badge badge-sm bg-gradient-info">
-                                                    {{ $item->skemaSertifikasi->kode_skema ?? '-' }}
+                                                    {{ optional($item->skemaSertifikasi)->kode_skema ?? '-' }}
                                                 </span>
-                                                <p class="text-xs text-secondary mb-0 mt-1">{{ $item->skemaSertifikasi->nama_skema ?? '-' }}</p>
+                                                <p class="text-xs text-secondary mb-0 mt-1">{{ optional($item->skemaSertifikasi)->nama_skema ?? '-' }}</p>
                                             </td>
                                             <td class="align-middle text-center">
-                                                <span class="text-sm">{{ $item->tanggal_daftar->format('d M Y') }}</span>
+                                                <span class="text-sm">{{ optional($item->tanggal_daftar)->format('d M Y') ?? '-' }}</span>
                                             </td>
                                             <td class="align-middle text-center">
                                                 <a href="{{ route('adminui.asesmen.mulai', $item->id) }}" 
@@ -195,24 +195,35 @@
                                             <td>
                                                 <div class="d-flex px-3 py-1">
                                                     <div class="d-flex flex-column justify-content-center">
-                                                        <h6 class="mb-0 text-sm font-weight-bold">{{ $asesmen->pendaftaran->nomor_pendaftaran ?? '-' }}</h6>
+                                                        <h6 class="mb-0 text-sm font-weight-bold">{{ optional($asesmen->pendaftaran)->nomor_pendaftaran ?? '-' }}</h6>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td>
-                                                <p class="text-sm font-weight-bold mb-0">{{ $asesmen->pendaftaran->asesi_name ?? '-' }}</p>
-                                                <p class="text-xs text-secondary mb-0">{{ $asesmen->pendaftaran->asesi_email ?? '-' }}</p>
+                                                <p class="text-sm font-weight-bold mb-0">{{ optional($asesmen->pendaftaran)->asesi_name ?? '-' }}</p>
+                                                <p class="text-xs text-secondary mb-0">{{ optional($asesmen->pendaftaran)->asesi_email ?? '-' }}</p>
                                             </td>
                                             <td>
                                                 <span class="badge badge-sm bg-gradient-info">
-                                                    {{ $asesmen->pendaftaran->skemaSertifikasi->kode_skema ?? '-' }}
+                                                    {{ optional(optional($asesmen->pendaftaran)->skemaSertifikasi)->kode_skema ?? '-' }}
                                                 </span>
                                             </td>
                                             <td class="align-middle text-center">
-                                                <span class="text-sm">{{ $asesmen->tanggal_asesmen->format('d M Y') }}</span>
+                                                <span class="text-sm">{{ optional($asesmen->tanggal_asesmen)->format('d M Y') ?? '-' }}</span>
                                             </td>
                                             <td class="align-middle text-center">
-                                                @if($asesmen->isAllKompeten())
+                                                @php
+                                                    try {
+                                                        $isAllKompeten = method_exists($asesmen, 'isAllKompeten') && $asesmen->isAllKompeten();
+                                                    } catch (\Throwable $e) {
+                                                        \Log::error('[INDEX BLADE ERROR] isAllKompeten failed', [
+                                                            'asesmen_id' => $asesmen->id ?? 'unknown',
+                                                            'error' => $e->getMessage()
+                                                        ]);
+                                                        $isAllKompeten = false;
+                                                    }
+                                                @endphp
+                                                @if($isAllKompeten)
                                                     <span class="badge badge-sm bg-gradient-success">
                                                         <i class="fas fa-check me-1"></i> KOMPETEN
                                                     </span>
@@ -224,8 +235,19 @@
                                             </td>
                                             @can('sampling.view')
                                             <td class="align-middle text-center">
-                                                @if($asesmen->isSampled())
-                                                    <span class="badge badge-sm bg-gradient-info" title="Ditandai: {{ $asesmen->sampled_at?->format('d M Y') }}">
+                                                @php
+                                                    try {
+                                                        $isSampled = method_exists($asesmen, 'isSampled') && $asesmen->isSampled();
+                                                    } catch (\Throwable $e) {
+                                                        \Log::error('[INDEX BLADE ERROR] isSampled failed', [
+                                                            'asesmen_id' => $asesmen->id ?? 'unknown',
+                                                            'error' => $e->getMessage()
+                                                        ]);
+                                                        $isSampled = false;
+                                                    }
+                                                @endphp
+                                                @if($isSampled)
+                                                    <span class="badge badge-sm bg-gradient-info" title="Ditandai: {{ optional($asesmen->sampled_at)->format('d M Y') ?? '' }}">
                                                         <i class="fas fa-clipboard-check me-1"></i> SAMPLING
                                                     </span>
                                                 @else
@@ -234,7 +256,7 @@
                                             </td>
                                             @endcan
                                             <td class="align-middle text-center">
-                                                <span class="text-sm">{{ $asesmen->asesor->name ?? '-' }}</span>
+                                                <span class="text-sm">{{ optional($asesmen->asesor)->name ?? '-' }}</span>
                                             </td>
                                             <td class="align-middle text-center">
                                                 <a href="{{ route('adminui.asesmen.show', $asesmen->id) }}" 
@@ -245,7 +267,7 @@
                                         </tr>
                                         @empty
                                         <tr>
-                                            <td colspan="{{ auth()->user()->can('sampling.view') ? 8 : 7 }}" class="text-center py-4">
+                                            <td colspan="{{ (auth()->check() && auth()->user()->can('sampling.view')) ? 8 : 7 }}" class="text-center py-4">
                                                 <i class="fas fa-inbox text-secondary fa-3x mb-3"></i>
                                                 <p class="text-sm mb-0">
                                                     @if(request('sampling'))

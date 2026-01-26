@@ -9,10 +9,32 @@ Variables: $asesmen
 --}}
 
 @php
-    $canMark = auth()->user()->can('sampling.mark');
-    $canView = auth()->user()->can('sampling.view');
-    $isSampled = $asesmen->isSampled();
-    $canModify = $asesmen->canModifySampling();
+    // DEFENSIVE: Wrap all method calls with try-catch and permission checks
+    try {
+        $canMark = auth()->check() && auth()->user()->can('sampling.mark');
+        $canView = auth()->check() && auth()->user()->can('sampling.view');
+    } catch (\Throwable $e) {
+        $canMark = false;
+        $canView = false;
+        \Log::error('[BLADE ERROR] Permission check failed in sampling-section', [
+            'error' => $e->getMessage()
+        ]);
+    }
+    
+    // Safe method calls with fallback
+    try {
+        $isSampled = method_exists($asesmen, 'isSampled') && $asesmen->isSampled();
+    } catch (\Throwable $e) {
+        $isSampled = false;
+        \Log::error('[BLADE ERROR] isSampled failed', ['error' => $e->getMessage()]);
+    }
+    
+    try {
+        $canModify = method_exists($asesmen, 'canModifySampling') && $asesmen->canModifySampling();
+    } catch (\Throwable $e) {
+        $canModify = false;
+        \Log::error('[BLADE ERROR] canModifySampling failed', ['error' => $e->getMessage()]);
+    }
 @endphp
 
 @if($canView)
@@ -52,7 +74,16 @@ Variables: $asesmen
             </span>
         </div>
 
-        @if(!$asesmen->isSelesai())
+        @php
+            // Safe check for isSelesai
+            try {
+                $isSelesai = method_exists($asesmen, 'isSelesai') && $asesmen->isSelesai();
+            } catch (\Throwable $e) {
+                $isSelesai = false;
+            }
+        @endphp
+
+        @if(!$isSelesai)
             {{-- Asesmen belum selesai --}}
             <div class="alert alert-warning" role="alert">
                 <i class="fas fa-exclamation-triangle me-2"></i>

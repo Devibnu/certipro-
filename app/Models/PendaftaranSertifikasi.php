@@ -26,6 +26,7 @@ class PendaftaranSertifikasi extends Model
     /**
      * Status constants
      */
+    const STATUS_BELUM_PILIH_SKEMA = 'BELUM_PILIH_SKEMA'; // Auto-created from Pra-Pendaftaran DITERIMA
     const STATUS_DRAFT = 'draft';
     const STATUS_DIAJUKAN = 'diajukan';
     const STATUS_DIVERIFIKASI = 'diverifikasi';
@@ -202,6 +203,7 @@ class PendaftaranSertifikasi extends Model
     public static function statusLabels(): array
     {
         return [
+            self::STATUS_BELUM_PILIH_SKEMA => 'Belum Pilih Skema',
             self::STATUS_DRAFT => 'Draft',
             self::STATUS_DIAJUKAN => 'Diajukan',
             self::STATUS_DIVERIFIKASI => 'Diverifikasi',
@@ -228,6 +230,7 @@ class PendaftaranSertifikasi extends Model
     public function getStatusBadgeAttribute(): string
     {
         return match($this->status) {
+            self::STATUS_BELUM_PILIH_SKEMA => 'bg-gradient-warning',
             self::STATUS_DRAFT => 'bg-gradient-secondary',
             self::STATUS_DIAJUKAN => 'bg-gradient-warning',
             self::STATUS_DIVERIFIKASI => 'bg-gradient-info',

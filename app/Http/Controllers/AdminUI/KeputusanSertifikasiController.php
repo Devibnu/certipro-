@@ -147,33 +147,45 @@ class KeputusanSertifikasiController extends Controller
             DB::commit();
             
             // ======================================================
-            // EVENT 3: FIRE EVENT - KEPUTUSAN (KOMPETEN / BELUM KOMPETEN)
-            // Refactored to Event-Driven Architecture
+            // EMAIL: KIRIM LANGSUNG - KEPUTUSAN (KOMPETEN / BELUM KOMPETEN)
+            // Direct Mail::to()->send() - NO EVENTS/LISTENERS
             // ======================================================
             try {
+                // Load asesmen relation for email
+                $keputusan->load('asesmen.pendaftaran.skemaSertifikasi');
+                
                 if ($request->keputusan === KeputusanSertifikasi::KEPUTUSAN_KOMPETEN) {
-                    event(new \App\Events\KeputusanKompetenEvent($keputusan));
-                    \Log::info('[KeputusanController] KeputusanKompetenEvent dispatched', [
+                    \Mail::to($pendaftaran->email)->send(
+                        new \App\Mail\KeputusanKompeten($keputusan->asesmen)
+                    );
+                    \Log::info('[EMAIL SENT] Keputusan KOMPETEN', [
                         'keputusan_id' => $keputusan->id,
                         'pendaftaran_id' => $pendaftaran->id,
+                        'email' => $pendaftaran->email,
                     ]);
                 } else {
-                    event(new \App\Events\KeputusanBelumKompetenEvent($keputusan));
-                    \Log::info('[KeputusanController] KeputusanBelumKompetenEvent dispatched', [
+                    \Mail::to($pendaftaran->email)->send(
+                        new \App\Mail\KeputusanBelumKompeten($keputusan->asesmen)
+                    );
+                    \Log::info('[EMAIL SENT] Keputusan BELUM KOMPETEN', [
                         'keputusan_id' => $keputusan->id,
                         'pendaftaran_id' => $pendaftaran->id,
+                        'email' => $pendaftaran->email,
                     ]);
                 }
-            } catch (\Exception $e) {
-                \Log::error('[KeputusanController] Failed to dispatch Keputusan event', [
+            } catch (\Throwable $e) {
+                // ⚠️ EMAIL GAGAL TIDAK BOLEH MEMBATALKAN PROSES
+                \Log::error('[EMAIL FAILED] Keputusan', [
                     'keputusan_id' => $keputusan->id,
                     'keputusan' => $request->keputusan,
+                    'email' => $pendaftaran->email,
                     'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
                 ]);
             }
             
             return redirect()->route('adminui.keputusan.show', $pendaftaran->id)
-                ->with('success', 'Keputusan sertifikasi berhasil disimpan dan dikunci.');
+                ->with('success', 'Keputusan sertifikasi berhasil disimpan dan dikunci. Email telah dikirim ke peserta.');
                 
         } catch (\Exception $e) {
             DB::rollBack();

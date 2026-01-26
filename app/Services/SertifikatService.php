@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use App\Jobs\SendEmailSertifikatJob;
-use App\Jobs\SendWhatsAppSertifikatJob;
 use App\Models\PendaftaranSertifikasi;
 use App\Models\Sertifikat;
 use Illuminate\Support\Facades\Auth;
@@ -261,8 +259,8 @@ class SertifikatService
     }
     
     /**
-     * Dispatch notification jobs after certificate issuance.
-     * Jobs are queued and will NOT block the main request.
+     * Send notifications after certificate issuance.
+     * CRITICAL FIX: Direct Mail::send() - NO QUEUE
      */
     private function dispatchNotifications(Sertifikat $sertifikat): void
     {
@@ -274,25 +272,42 @@ class SertifikatService
                 'pendaftaran.keputusan'
             ]);
             
-            // Dispatch Email notification (high priority)
-            SendEmailSertifikatJob::dispatch($sertifikat)
-                ->onQueue('notifications')
-                ->delay(now()->addSeconds(5)); // Small delay to ensure file is ready
+            // ======================================================
+            // GUARANTEED DELIVERY: Direct Mail::to()->send()
+            // No Job, No Queue - SYNC ONLY
+            // ======================================================
+            $pesertaEmail = $sertifikat->pendaftaran->email 
+                ?? $sertifikat->pendaftaran->user?->email;
             
-            // Dispatch WhatsApp notification (lower priority)
-            SendWhatsAppSertifikatJob::dispatch($sertifikat)
-                ->onQueue('notifications')
-                ->delay(now()->addSeconds(10));
-            
-            Log::info('Notification jobs dispatched', [
-                'sertifikat_id' => $sertifikat->id,
-                'email_job' => SendEmailSertifikatJob::class,
-                'whatsapp_job' => SendWhatsAppSertifikatJob::class,
-            ]);
+            if ($pesertaEmail) {
+                try {
+                    \Mail::to($pesertaEmail)->send(
+                        new \App\Mail\SertifikatTerbitMail($sertifikat)
+                    );
+                    
+                    Log::info('[EMAIL SENT] Sertifikat Diterbitkan', [
+                        'sertifikat_id' => $sertifikat->id,
+                        'nomor_sertifikat' => $sertifikat->nomor_sertifikat,
+                        'email' => $pesertaEmail,
+                    ]);
+                } catch (\Throwable $e) {
+                    Log::error('[EMAIL FAILED] Sertifikat Diterbitkan', [
+                        'sertifikat_id' => $sertifikat->id,
+                        'email' => $pesertaEmail,
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString(),
+                    ]);
+                }
+            } else {
+                Log::warning('[EMAIL SKIPPED] No email address found', [
+                    'sertifikat_id' => $sertifikat->id,
+                    'pendaftaran_id' => $sertifikat->pendaftaran_id,
+                ]);
+            }
             
         } catch (\Exception $e) {
             // Log error but DON'T throw - notifications are non-critical
-            Log::error('Failed to dispatch notification jobs', [
+            Log::error('[NOTIFICATION ERROR] Failed to send sertifikat email', [
                 'sertifikat_id' => $sertifikat->id,
                 'error' => $e->getMessage(),
             ]);

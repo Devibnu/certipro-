@@ -55,20 +55,34 @@ class PraPendaftaranNotificationService
 
     /**
      * Send notification when pra-pendaftaran is accepted.
-     * REFACTORED: Using Event-Driven Architecture
+     * CRITICAL FIX: Direct Mail::send() - NO EVENTS/QUEUE
      */
     public static function sendAcceptedNotification(PraPendaftaran $praPendaftaran): void
     {
         // ======================================================
-        // NEW: Fire Event instead of direct Mail::send()
-        // Event → Listener (queue-based) → EmailNotificationService
+        // GUARANTEED DELIVERY: Direct Mail::to()->send()
+        // No Event, No Listener, No Queue - SYNC ONLY
         // ======================================================
-        event(new \App\Events\PraPendaftaranDiterimaEvent($praPendaftaran));
-        
-        Log::info('[PraPendaftaranNotif] PraPendaftaranDiterimaEvent dispatched', [
-            'pra_id' => $praPendaftaran->id,
-            'email' => $praPendaftaran->email,
-        ]);
+        try {
+            Mail::to($praPendaftaran->email)
+                ->send(new PraPendaftaranDiterima($praPendaftaran));
+
+            Log::info('[EMAIL SENT] Pra-Pendaftaran DITERIMA', [
+                'pra_id' => $praPendaftaran->id,
+                'email' => $praPendaftaran->email,
+            ]);
+
+            self::logNotification($praPendaftaran, 'email', 'diterima', true);
+        } catch (\Throwable $e) {
+            Log::error('[EMAIL FAILED] Pra-Pendaftaran DITERIMA', [
+                'pra_id' => $praPendaftaran->id,
+                'email' => $praPendaftaran->email,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            self::logNotification($praPendaftaran, 'email', 'diterima', false, $e->getMessage());
+        }
 
         // Send WhatsApp (optional)
         if (config('services.whatsapp.enabled', false)) {
@@ -78,20 +92,34 @@ class PraPendaftaranNotificationService
 
     /**
      * Send notification when pra-pendaftaran is rejected.
-     * REFACTORED: Using Event-Driven Architecture
+     * CRITICAL FIX: Direct Mail::send() - NO EVENTS/QUEUE
      */
     public static function sendRejectedNotification(PraPendaftaran $praPendaftaran): void
     {
         // ======================================================
-        // NEW: Fire Event instead of direct Mail::send()
-        // Event → Listener (queue-based) → EmailNotificationService
+        // GUARANTEED DELIVERY: Direct Mail::to()->send()
+        // No Event, No Listener, No Queue - SYNC ONLY
         // ======================================================
-        event(new \App\Events\PraPendaftaranDitolakEvent($praPendaftaran));
-        
-        Log::info('[PraPendaftaranNotif] PraPendaftaranDitolakEvent dispatched', [
-            'pra_id' => $praPendaftaran->id,
-            'email' => $praPendaftaran->email,
-        ]);
+        try {
+            Mail::to($praPendaftaran->email)
+                ->send(new PraPendaftaranDitolak($praPendaftaran));
+
+            Log::info('[EMAIL SENT] Pra-Pendaftaran DITOLAK', [
+                'pra_id' => $praPendaftaran->id,
+                'email' => $praPendaftaran->email,
+            ]);
+
+            self::logNotification($praPendaftaran, 'email', 'ditolak', true);
+        } catch (\Throwable $e) {
+            Log::error('[EMAIL FAILED] Pra-Pendaftaran DITOLAK', [
+                'pra_id' => $praPendaftaran->id,
+                'email' => $praPendaftaran->email,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            self::logNotification($praPendaftaran, 'email', 'ditolak', false, $e->getMessage());
+        }
 
         // Send WhatsApp (optional)
         if (config('services.whatsapp.enabled', false)) {

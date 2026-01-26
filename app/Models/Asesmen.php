@@ -184,10 +184,29 @@ class Asesmen extends Model
 
     /**
      * Check if all KUK are kompeten.
+     * 
+     * DEFENSIVE: Uses loaded collection to avoid database query errors.
+     * Falls back to safe check if details not loaded.
      */
     public function isAllKompeten(): bool
     {
-        return $this->details()->where('hasil', 'belum_kompeten')->count() === 0;
+        try {
+            // Use loaded relation if available to avoid fresh query
+            if ($this->relationLoaded('details')) {
+                return $this->details->where('hasil', 'belum_kompeten')->count() === 0;
+            }
+            
+            // Fallback: safe database query with error handling
+            return $this->details()->where('hasil', 'belum_kompeten')->count() === 0;
+            
+        } catch (\Throwable $e) {
+            // Log error and return false (conservative approach)
+            \Log::error('[MODEL ERROR] isAllKompeten failed', [
+                'asesmen_id' => $this->id,
+                'error' => $e->getMessage(),
+            ]);
+            return false;
+        }
     }
 
     /**
@@ -230,18 +249,27 @@ class Asesmen extends Model
      */
     public function canModifySampling(): bool
     {
-        // Must be completed first
-        if (!$this->isSelesai()) {
+        try {
+            // Must be completed first
+            if (!$this->isSelesai()) {
+                return false;
+            }
+
+            // Check if keputusan is locked
+            $keputusan = $this->pendaftaran?->keputusanSertifikasi;
+            if ($keputusan && method_exists($keputusan, 'isLocked') && $keputusan->isLocked()) {
+                return false;
+            }
+
+            return true;
+            
+        } catch (\Throwable $e) {
+            \Log::error('[MODEL ERROR] canModifySampling failed', [
+                'asesmen_id' => $this->id,
+                'error' => $e->getMessage(),
+            ]);
             return false;
         }
-
-        // Check if keputusan is locked
-        $keputusan = $this->pendaftaran?->keputusanSertifikasi;
-        if ($keputusan && $keputusan->isLocked()) {
-            return false;
-        }
-
-        return true;
     }
 
     /**

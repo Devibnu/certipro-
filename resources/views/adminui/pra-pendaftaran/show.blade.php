@@ -250,12 +250,11 @@
                                 </a>
                             </div>
                         @else
-                            <form action="{{ route('adminui.pra-pendaftaran.buat-pendaftaran', $data->id) }}" method="POST" class="mt-3">
-                                @csrf
-                                <button type="submit" class="btn bg-gradient-success w-100" onclick="return confirm('Apakah Anda yakin ingin membuat pendaftaran sertifikasi dari data pra-pendaftaran ini?')">
-                                    <i class="fas fa-file-signature me-2"></i> Buat Pendaftaran Sertifikasi
-                                </button>
-                            </form>
+                            {{-- FEATURE REMOVED: Automatic pendaftaran creation from pra-pendaftaran --}}
+                            <div class="alert alert-warning mt-3 mb-0" role="alert">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <span>Pendaftaran sertifikasi belum dibuat. Silakan buat pendaftaran manual dari menu Pendaftaran Sertifikasi.</span>
+                            </div>
                         @endif
                     @endif
                 </div>
