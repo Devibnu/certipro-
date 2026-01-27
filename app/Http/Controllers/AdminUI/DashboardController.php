@@ -13,6 +13,7 @@ use App\Models\SkemaSertifikasi;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -398,5 +399,65 @@ class DashboardController extends Controller
             'asesmen_bulan_ini' => $asesmenBulanIni,
             'pendaftaran_bulan_ini' => $pendaftaranBulanIni,
         ];
+    }
+
+    /**
+     * ========================================================================
+     * API: Get Dashboard Statistics (Realtime Polling)
+     * ========================================================================
+     * Endpoint untuk AJAX polling dashboard realtime.
+     * Data di-cache selama 30 detik untuk mengurangi beban database.
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function stats()
+    {
+        // Ensure user is authenticated
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        // Cache key unique per user role (optional: per user)
+        $cacheKey = 'dashboard_stats_' . (Auth::user()->role ?? 'default');
+        $cacheTtl = 30; // seconds
+
+        $data = Cache::remember($cacheKey, $cacheTtl, function () {
+            return [
+                'pra_pendaftaran' => $this->getPraPendaftaranStats(),
+                'pendaftaran' => $this->getPendaftaranStats(),
+                'asesmen' => $this->getAsesmenStats(),
+                'sertifikat' => $this->getSertifikatStats(),
+                'flow' => $this->getCertificationFlowStats(),
+                'additional' => $this->getAdditionalStats(),
+                'alerts' => $this->getAlerts(),
+            ];
+        });
+
+        // Add metadata (not cached - always fresh)
+        $data['meta'] = [
+            'updated_at' => now()->format('Y-m-d H:i:s'),
+            'updated_at_human' => now()->format('d M Y, H:i:s'),
+            'timezone' => 'WIB',
+            'cache_ttl' => $cacheTtl,
+        ];
+
+        return response()->json($data);
+    }
+
+    /**
+     * API: Force refresh dashboard stats (clears cache)
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function refreshStats()
+    {
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $cacheKey = 'dashboard_stats_' . (Auth::user()->role ?? 'default');
+        Cache::forget($cacheKey);
+
+        return $this->stats();
     }
 }

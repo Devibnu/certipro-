@@ -32,12 +32,18 @@ Semua data diambil langsung dari database (bukan data dummy).
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h4 class="mb-1 font-weight-bolder">Dashboard Operasional LSP</h4>
-                    <p class="text-sm text-secondary mb-0">
-                        <i class="fas fa-sync-alt me-1"></i>
-                        Data terakhir diperbarui: {{ now()->format('d M Y, H:i') }} WIB
+                    <p class="text-sm text-secondary mb-0" id="last-updated-container">
+                        <i class="fas fa-sync-alt me-1" id="sync-icon"></i>
+                        <span id="last-updated-text">Data terakhir diperbarui: {{ now()->format('d M Y, H:i:s') }} WIB</span>
+                        <span id="realtime-status" class="badge bg-gradient-success ms-2" style="font-size: 0.65rem;">
+                            <i class="fas fa-circle me-1" style="font-size: 0.5rem;"></i>LIVE
+                        </span>
                     </p>
                 </div>
-                <div>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-primary mb-0" id="btn-refresh-stats" title="Refresh Data">
+                        <i class="fas fa-sync-alt me-1"></i> Refresh
+                    </button>
                     <span class="badge bg-gradient-success">
                         <i class="fas fa-shield-alt me-1"></i> ISO 17024 Compliant
                     </span>
@@ -60,10 +66,15 @@ Semua data diambil langsung dari database (bukan data dummy).
                         <div class="col-8">
                             <div class="numbers">
                                 <p class="text-sm mb-0 text-uppercase font-weight-bold text-secondary">Pra-Pendaftaran</p>
-                                <h4 class="font-weight-bolder mb-0">{{ number_format($praPendaftaranStats['total']) }}</h4>
+                                <h4 class="font-weight-bolder mb-0" data-stat="pra_pendaftaran.total">{{ number_format($praPendaftaranStats['total']) }}</h4>
                                 @if($praPendaftaranStats['new_7_days'] > 0)
                                 <p class="mb-0 text-sm">
-                                    <span class="text-success font-weight-bolder">+{{ $praPendaftaranStats['new_7_days'] }}</span>
+                                    <span class="text-success font-weight-bolder" data-stat="pra_pendaftaran.new_7_days_formatted">+{{ $praPendaftaranStats['new_7_days'] }}</span>
+                                    <span class="text-secondary">7 hari terakhir</span>
+                                </p>
+                                @else
+                                <p class="mb-0 text-sm" id="pra-pendaftaran-trend" style="display:none;">
+                                    <span class="text-success font-weight-bolder" data-stat="pra_pendaftaran.new_7_days_formatted"></span>
                                     <span class="text-secondary">7 hari terakhir</span>
                                 </p>
                                 @endif
@@ -79,11 +90,11 @@ Semua data diambil langsung dari database (bukan data dummy).
                     <div class="d-flex justify-content-between text-xs">
                         <span>
                             <i class="fas fa-clock text-warning me-1"></i>
-                            Menunggu: <strong>{{ $praPendaftaranStats['menunggu_verifikasi'] }}</strong>
+                            Menunggu: <strong data-stat="pra_pendaftaran.menunggu_verifikasi">{{ $praPendaftaranStats['menunggu_verifikasi'] }}</strong>
                         </span>
                         <span>
                             <i class="fas fa-check text-success me-1"></i>
-                            Diterima: <strong>{{ $praPendaftaranStats['diterima'] }}</strong>
+                            Diterima: <strong data-stat="pra_pendaftaran.diterima">{{ $praPendaftaranStats['diterima'] }}</strong>
                         </span>
                     </div>
                 </div>
@@ -98,10 +109,15 @@ Semua data diambil langsung dari database (bukan data dummy).
                         <div class="col-8">
                             <div class="numbers">
                                 <p class="text-sm mb-0 text-uppercase font-weight-bold text-secondary">Pendaftaran</p>
-                                <h4 class="font-weight-bolder mb-0">{{ number_format($pendaftaranStats['total']) }}</h4>
+                                <h4 class="font-weight-bolder mb-0" data-stat="pendaftaran.total">{{ number_format($pendaftaranStats['total']) }}</h4>
                                 @if($pendaftaranStats['new_7_days'] > 0)
                                 <p class="mb-0 text-sm">
-                                    <span class="text-success font-weight-bolder">+{{ $pendaftaranStats['new_7_days'] }}</span>
+                                    <span class="text-success font-weight-bolder" data-stat="pendaftaran.new_7_days_formatted">+{{ $pendaftaranStats['new_7_days'] }}</span>
+                                    <span class="text-secondary">7 hari terakhir</span>
+                                </p>
+                                @else
+                                <p class="mb-0 text-sm" id="pendaftaran-trend" style="display:none;">
+                                    <span class="text-success font-weight-bolder" data-stat="pendaftaran.new_7_days_formatted"></span>
                                     <span class="text-secondary">7 hari terakhir</span>
                                 </p>
                                 @endif
@@ -117,11 +133,11 @@ Semua data diambil langsung dari database (bukan data dummy).
                     <div class="d-flex justify-content-between text-xs">
                         <span>
                             <i class="fas fa-clipboard-check text-info me-1"></i>
-                            Siap Asesmen: <strong>{{ $pendaftaranStats['siap_asesmen'] }}</strong>
+                            Siap Asesmen: <strong data-stat="pendaftaran.siap_asesmen">{{ $pendaftaranStats['siap_asesmen'] }}</strong>
                         </span>
                         <span>
                             <i class="fas fa-hourglass-half text-warning me-1"></i>
-                            Menunggu: <strong>{{ $pendaftaranStats['menunggu_keputusan'] }}</strong>
+                            Menunggu: <strong data-stat="pendaftaran.menunggu_keputusan">{{ $pendaftaranStats['menunggu_keputusan'] }}</strong>
                         </span>
                     </div>
                 </div>
@@ -136,10 +152,15 @@ Semua data diambil langsung dari database (bukan data dummy).
                         <div class="col-8">
                             <div class="numbers">
                                 <p class="text-sm mb-0 text-uppercase font-weight-bold text-secondary">Asesmen</p>
-                                <h4 class="font-weight-bolder mb-0">{{ number_format($asesmenStats['total']) }}</h4>
+                                <h4 class="font-weight-bolder mb-0" data-stat="asesmen.total">{{ number_format($asesmenStats['total']) }}</h4>
                                 @if($asesmenStats['new_7_days'] > 0)
                                 <p class="mb-0 text-sm">
-                                    <span class="text-success font-weight-bolder">+{{ $asesmenStats['new_7_days'] }}</span>
+                                    <span class="text-success font-weight-bolder" data-stat="asesmen.new_7_days_formatted">+{{ $asesmenStats['new_7_days'] }}</span>
+                                    <span class="text-secondary">7 hari terakhir</span>
+                                </p>
+                                @else
+                                <p class="mb-0 text-sm" id="asesmen-trend" style="display:none;">
+                                    <span class="text-success font-weight-bolder" data-stat="asesmen.new_7_days_formatted"></span>
                                     <span class="text-secondary">7 hari terakhir</span>
                                 </p>
                                 @endif
@@ -155,11 +176,11 @@ Semua data diambil langsung dari database (bukan data dummy).
                     <div class="d-flex justify-content-between text-xs">
                         <span>
                             <i class="fas fa-check-circle text-success me-1"></i>
-                            Selesai: <strong>{{ $asesmenStats['selesai'] }}</strong>
+                            Selesai: <strong data-stat="asesmen.selesai">{{ $asesmenStats['selesai'] }}</strong>
                         </span>
                         <span>
                             <i class="fas fa-search text-primary me-1"></i>
-                            Sampling: <strong>{{ $asesmenStats['sampled'] }}</strong>
+                            Sampling: <strong data-stat="asesmen.sampled">{{ $asesmenStats['sampled'] }}</strong>
                         </span>
                     </div>
                 </div>
@@ -174,10 +195,15 @@ Semua data diambil langsung dari database (bukan data dummy).
                         <div class="col-8">
                             <div class="numbers">
                                 <p class="text-sm mb-0 text-uppercase font-weight-bold text-secondary">Sertifikat</p>
-                                <h4 class="font-weight-bolder mb-0">{{ number_format($sertifikatStats['total']) }}</h4>
+                                <h4 class="font-weight-bolder mb-0" data-stat="sertifikat.total">{{ number_format($sertifikatStats['total']) }}</h4>
                                 @if($sertifikatStats['terbit_bulan_ini'] > 0)
                                 <p class="mb-0 text-sm">
-                                    <span class="text-success font-weight-bolder">+{{ $sertifikatStats['terbit_bulan_ini'] }}</span>
+                                    <span class="text-success font-weight-bolder" data-stat="sertifikat.terbit_bulan_ini_formatted">+{{ $sertifikatStats['terbit_bulan_ini'] }}</span>
+                                    <span class="text-secondary">bulan ini</span>
+                                </p>
+                                @else
+                                <p class="mb-0 text-sm" id="sertifikat-trend" style="display:none;">
+                                    <span class="text-success font-weight-bolder" data-stat="sertifikat.terbit_bulan_ini_formatted"></span>
                                     <span class="text-secondary">bulan ini</span>
                                 </p>
                                 @endif
@@ -193,11 +219,11 @@ Semua data diambil langsung dari database (bukan data dummy).
                     <div class="d-flex justify-content-between text-xs">
                         <span>
                             <i class="fas fa-check text-success me-1"></i>
-                            Aktif: <strong>{{ $sertifikatStats['aktif'] }}</strong>
+                            Aktif: <strong data-stat="sertifikat.aktif">{{ $sertifikatStats['aktif'] }}</strong>
                         </span>
                         <span>
                             <i class="fas fa-times text-danger me-1"></i>
-                            Kadaluarsa: <strong>{{ $sertifikatStats['kadaluarsa'] }}</strong>
+                            Kadaluarsa: <strong data-stat="sertifikat.kadaluarsa">{{ $sertifikatStats['kadaluarsa'] }}</strong>
                         </span>
                     </div>
                 </div>
@@ -609,5 +635,293 @@ Semua data diambil langsung dari database (bukan data dummy).
     .alert-info {
         background: linear-gradient(310deg, #11cdef 0%, #1171ef 100%);
     }
+    /* Realtime update animations */
+    .stat-updated {
+        animation: pulse-green 0.5s ease-in-out;
+    }
+    @keyframes pulse-green {
+        0% { background-color: transparent; }
+        50% { background-color: rgba(45, 206, 137, 0.2); }
+        100% { background-color: transparent; }
+    }
+    #sync-icon.syncing {
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    #realtime-status.offline {
+        background: linear-gradient(310deg, #f5365c 0%, #f56036 100%) !important;
+    }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+/**
+ * ============================================================================
+ * Dashboard Realtime Polling - CertiPro LSP
+ * ============================================================================
+ * Auto-refresh dashboard statistics every 30 seconds
+ * Compliant with ISO 17024:2012 operational monitoring requirements
+ */
+(function() {
+    'use strict';
+    
+    // Configuration
+    const CONFIG = {
+        pollInterval: 30000, // 30 seconds
+        statsUrl: '{{ route("adminui.dashboard.stats") }}',
+        refreshUrl: '{{ route("adminui.dashboard.refresh") }}',
+        csrfToken: '{{ csrf_token() }}'
+    };
+    
+    // State
+    let pollTimer = null;
+    let isPolling = false;
+    let consecutiveErrors = 0;
+    const MAX_ERRORS = 3;
+    
+    /**
+     * Format number with thousand separator
+     */
+    function formatNumber(num) {
+        return new Intl.NumberFormat('id-ID').format(num);
+    }
+    
+    /**
+     * Update DOM element with animation
+     */
+    function updateStat(selector, value, animate = true) {
+        const elements = document.querySelectorAll(`[data-stat="${selector}"]`);
+        elements.forEach(el => {
+            const currentValue = el.textContent.trim();
+            const newValue = String(value);
+            
+            if (currentValue !== newValue) {
+                el.textContent = newValue;
+                if (animate) {
+                    el.classList.add('stat-updated');
+                    setTimeout(() => el.classList.remove('stat-updated'), 500);
+                }
+            }
+        });
+    }
+    
+    /**
+     * Update timestamp display
+     */
+    function updateTimestamp(meta) {
+        const textEl = document.getElementById('last-updated-text');
+        if (textEl && meta.updated_at_human) {
+            textEl.textContent = `Data terakhir diperbarui: ${meta.updated_at_human} ${meta.timezone}`;
+        }
+    }
+    
+    /**
+     * Set loading state
+     */
+    function setLoadingState(loading) {
+        const syncIcon = document.getElementById('sync-icon');
+        const refreshBtn = document.getElementById('btn-refresh-stats');
+        
+        if (syncIcon) {
+            syncIcon.classList.toggle('syncing', loading);
+        }
+        if (refreshBtn) {
+            refreshBtn.disabled = loading;
+        }
+    }
+    
+    /**
+     * Set connection status
+     */
+    function setConnectionStatus(online) {
+        const statusEl = document.getElementById('realtime-status');
+        if (statusEl) {
+            if (online) {
+                statusEl.classList.remove('offline');
+                statusEl.innerHTML = '<i class="fas fa-circle me-1" style="font-size: 0.5rem;"></i>LIVE';
+            } else {
+                statusEl.classList.add('offline');
+                statusEl.innerHTML = '<i class="fas fa-exclamation-triangle me-1" style="font-size: 0.5rem;"></i>OFFLINE';
+            }
+        }
+    }
+    
+    /**
+     * Process stats response and update DOM
+     */
+    function processStats(data) {
+        // Pra-Pendaftaran
+        if (data.pra_pendaftaran) {
+            updateStat('pra_pendaftaran.total', formatNumber(data.pra_pendaftaran.total));
+            updateStat('pra_pendaftaran.menunggu_verifikasi', data.pra_pendaftaran.menunggu_verifikasi);
+            updateStat('pra_pendaftaran.diterima', data.pra_pendaftaran.diterima);
+            if (data.pra_pendaftaran.new_7_days > 0) {
+                updateStat('pra_pendaftaran.new_7_days_formatted', '+' + data.pra_pendaftaran.new_7_days);
+            }
+        }
+        
+        // Pendaftaran
+        if (data.pendaftaran) {
+            updateStat('pendaftaran.total', formatNumber(data.pendaftaran.total));
+            updateStat('pendaftaran.siap_asesmen', data.pendaftaran.siap_asesmen);
+            updateStat('pendaftaran.menunggu_keputusan', data.pendaftaran.menunggu_keputusan);
+            if (data.pendaftaran.new_7_days > 0) {
+                updateStat('pendaftaran.new_7_days_formatted', '+' + data.pendaftaran.new_7_days);
+            }
+        }
+        
+        // Asesmen
+        if (data.asesmen) {
+            updateStat('asesmen.total', formatNumber(data.asesmen.total));
+            updateStat('asesmen.selesai', data.asesmen.selesai);
+            updateStat('asesmen.sampled', data.asesmen.sampled);
+            if (data.asesmen.new_7_days > 0) {
+                updateStat('asesmen.new_7_days_formatted', '+' + data.asesmen.new_7_days);
+            }
+        }
+        
+        // Sertifikat
+        if (data.sertifikat) {
+            updateStat('sertifikat.total', formatNumber(data.sertifikat.total));
+            updateStat('sertifikat.aktif', data.sertifikat.aktif);
+            updateStat('sertifikat.kadaluarsa', data.sertifikat.kadaluarsa);
+            if (data.sertifikat.terbit_bulan_ini > 0) {
+                updateStat('sertifikat.terbit_bulan_ini_formatted', '+' + data.sertifikat.terbit_bulan_ini);
+            }
+        }
+        
+        // Flow stats
+        if (data.flow) {
+            updateStat('flow.pra_pendaftaran', data.flow.pra_pendaftaran);
+            updateStat('flow.verifikasi_admin', data.flow.verifikasi_admin);
+            updateStat('flow.asesmen_asesor', data.flow.asesmen_asesor);
+            updateStat('flow.keputusan_komite', data.flow.keputusan_komite);
+            updateStat('flow.sertifikat_terbit', data.flow.sertifikat_terbit);
+        }
+        
+        // Additional stats
+        if (data.additional) {
+            updateStat('additional.skema_aktif', data.additional.skema_aktif);
+            updateStat('additional.tingkat_kelulusan', data.additional.tingkat_kelulusan + '%');
+        }
+        
+        // Meta (timestamp)
+        if (data.meta) {
+            updateTimestamp(data.meta);
+        }
+    }
+    
+    /**
+     * Fetch stats from API
+     */
+    async function fetchStats(forceRefresh = false) {
+        if (isPolling) return;
+        isPolling = true;
+        setLoadingState(true);
+        
+        try {
+            const url = forceRefresh ? CONFIG.refreshUrl : CONFIG.statsUrl;
+            const options = {
+                method: forceRefresh ? 'POST' : 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': CONFIG.csrfToken
+                },
+                credentials: 'same-origin'
+            };
+            
+            const response = await fetch(url, options);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            processStats(data);
+            consecutiveErrors = 0;
+            setConnectionStatus(true);
+            
+        } catch (error) {
+            console.error('[Dashboard] Polling error:', error.message);
+            consecutiveErrors++;
+            
+            if (consecutiveErrors >= MAX_ERRORS) {
+                setConnectionStatus(false);
+            }
+        } finally {
+            isPolling = false;
+            setLoadingState(false);
+        }
+    }
+    
+    /**
+     * Start polling
+     */
+    function startPolling() {
+        if (pollTimer) return;
+        
+        // Initial fetch
+        fetchStats();
+        
+        // Set interval
+        pollTimer = setInterval(() => fetchStats(), CONFIG.pollInterval);
+        
+        console.log('[Dashboard] Realtime polling started (interval: ' + (CONFIG.pollInterval/1000) + 's)');
+    }
+    
+    /**
+     * Stop polling
+     */
+    function stopPolling() {
+        if (pollTimer) {
+            clearInterval(pollTimer);
+            pollTimer = null;
+            console.log('[Dashboard] Realtime polling stopped');
+        }
+    }
+    
+    /**
+     * Initialize
+     */
+    function init() {
+        // Start polling when page is visible
+        startPolling();
+        
+        // Handle visibility change (pause when tab is hidden)
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                stopPolling();
+            } else {
+                startPolling();
+            }
+        });
+        
+        // Manual refresh button
+        const refreshBtn = document.getElementById('btn-refresh-stats');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => fetchStats(true));
+        }
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', stopPolling);
+    }
+    
+    // Start when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+</script>
 @endpush

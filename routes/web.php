@@ -193,6 +193,12 @@ Route::prefix('adminui')->name('adminui.')->group(function () {
     Route::group(['middleware' => 'auth'], function () {
         Route::get('dashboard', [App\Http\Controllers\AdminUI\DashboardController::class, 'index'])->name('dashboard');
         
+        // =====================================================
+        // DASHBOARD API - Realtime Stats Polling
+        // =====================================================
+        Route::get('dashboard/stats', [App\Http\Controllers\AdminUI\DashboardController::class, 'stats'])->name('dashboard.stats');
+        Route::post('dashboard/refresh', [App\Http\Controllers\AdminUI\DashboardController::class, 'refreshStats'])->name('dashboard.refresh');
+        
     // =====================================================
     // NOTIFICATION ROUTES - All authenticated users
     // =====================================================
