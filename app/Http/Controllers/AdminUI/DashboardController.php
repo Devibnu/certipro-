@@ -102,8 +102,7 @@ class DashboardController extends Controller
     private function getPraPendaftaranStats(): array
     {
         $total = PraPendaftaran::count();
-        $menungguVerifikasi = PraPendaftaran::where('status', PraPendaftaran::STATUS_BARU)->count();
-        $sedangDiproses = PraPendaftaran::where('status', PraPendaftaran::STATUS_DIPROSES)->count();
+        $menungguVerifikasi = PraPendaftaran::where('status', PraPendaftaran::STATUS_MENUNGGU_VERIFIKASI)->count();
         $diterima = PraPendaftaran::where('status', PraPendaftaran::STATUS_DITERIMA)->count();
         $ditolak = PraPendaftaran::where('status', PraPendaftaran::STATUS_DITOLAK)->count();
 
@@ -113,7 +112,6 @@ class DashboardController extends Controller
         return [
             'total' => $total,
             'menunggu_verifikasi' => $menungguVerifikasi,
-            'sedang_diproses' => $sedangDiproses,
             'diterima' => $diterima,
             'ditolak' => $ditolak,
             'new_7_days' => $newLast7Days,
@@ -215,10 +213,7 @@ class DashboardController extends Controller
     private function getCertificationFlowStats(): array
     {
         // Tahap 1: Pra-Pendaftaran (menunggu verifikasi)
-        $tahap1 = PraPendaftaran::whereIn('status', [
-            PraPendaftaran::STATUS_BARU,
-            PraPendaftaran::STATUS_DIPROSES
-        ])->count();
+        $tahap1 = PraPendaftaran::where('status', PraPendaftaran::STATUS_MENUNGGU_VERIFIKASI)->count();
 
         // Tahap 2: Verifikasi Admin (pendaftaran baru/diajukan)
         $tahap2 = PendaftaranSertifikasi::whereIn('status', [
@@ -299,7 +294,7 @@ class DashboardController extends Controller
         $alerts = [];
 
         // Alert 1: Pra-pendaftaran menunggu verifikasi > 3 hari
-        $praPendaftaranLama = PraPendaftaran::where('status', PraPendaftaran::STATUS_BARU)
+        $praPendaftaranLama = PraPendaftaran::where('status', PraPendaftaran::STATUS_MENUNGGU_VERIFIKASI)
             ->where('created_at', '<', Carbon::now()->subDays(3))
             ->count();
         
